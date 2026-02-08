@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "linear": {
+      "type": "npm",
+      "package": "@anthropic-ai/linear-mcp-server",
+      "env": {
+        "LINEAR_API_KEY": "lin_api_YOUR_KEY_HERE"
+      }
+    }
+  }
+}
