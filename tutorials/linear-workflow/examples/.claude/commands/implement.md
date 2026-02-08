@@ -5,18 +5,47 @@ If the description references a spec file (e.g. `Spec: specs/feature.md`), read 
 
 Then follow this workflow:
 
-1. Set the issue status to **In Progress**.
-2. Create a branch following the convention in CLAUDE.md:
-   - Format: `<prefix>/<issue-id-lowercase>-<slug>`
-   - Determine prefix from issue labels: `feature/`, `fix/`, `cleanup/`, `docs/`
-3. Implement the change described in the ticket.
-4. Run the build command and confirm it passes.
-5. Commit with the issue ID in the message: `<summary> (<ISSUE-ID>)`
-6. Review your own diff (`git diff main`) for bugs, dead code, or issues.
-7. Fix any critical issues found during self-review.
-8. Push and create a PR with `gh pr create`.
-   - PR body: summary, verification section, link to Linear issue.
-9. Set the issue status to **In Review**.
-10. Add a comment on the Linear issue with the PR URL.
+## 1. Start
 
-If anything fails at any step, stop and report the error. Do not attempt workarounds.
+- Set the issue status to **In Progress**.
+- Create a branch following the convention in CLAUDE.md.
+
+## 2. Implement
+
+- Implement the change described in the ticket.
+- Run `bun run build` and confirm it passes.
+- Commit with the issue ID: `<summary> (<ISSUE-ID>)`
+
+## 3. Self-Review
+
+Before pushing, launch a sub-agent with this task:
+
+```
+Review the diff between this branch and main (`git diff main`).
+
+Check for:
+- Bugs, logic errors, or edge cases
+- Unused imports, dead code, or references to things that don't exist
+- Empty catch blocks or swallowed errors
+- Security issues (exposed secrets, unsanitized input)
+- Over-engineering or unnecessary abstractions
+- Missing error handling
+
+For each issue found, classify it as:
+- 🔴 Critical — must fix before pushing
+- 🟡 Warning — should fix, use judgment
+- 🟢 Nit — optional improvement
+
+If no issues found, say "LGTM".
+```
+
+Fix all 🔴 Critical issues. Re-run `bun run build` after any fixes.
+
+## 4. Ship
+
+- Push and create a PR with `gh pr create`.
+  - PR body: summary, verification section, link to Linear issue.
+- Set the issue status to **In Review**.
+- Add a comment on the Linear issue with the PR URL.
+
+If anything fails at any step, stop and report the error.

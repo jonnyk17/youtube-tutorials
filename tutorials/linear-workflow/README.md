@@ -102,24 +102,62 @@ The key insight: **the agent updates Linear as part of its work**, not as an aft
 
 ---
 
-## CLAUDE.md: Teaching the Agent Your Workflow
+## Where to Put What: CLAUDE.md vs /implement
 
-The `CLAUDE.md` file in your repo tells Claude Code how your team works. Here's an example that integrates Linear into the workflow:
+CLAUDE.md is loaded into every session. Every line costs tokens whether you're implementing a ticket or just asking "where's the auth logic?" So it should contain **rules and conventions** — things the agent needs all the time.
+
+`/implement` is loaded only when you invoke it. So it should contain the **procedural workflow** — the step-by-step sequence you only need when picking up a ticket.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLAUDE.md                                │
+│                   (loaded every session)                        │
+│                                                                 │
+│  • Branching format                                             │
+│  • Commit message format                                        │
+│  • "Never force push"                                           │
+│  • "Never commit code that doesn't build"                       │
+│  • "Always read parent issues"                                  │
+│  • Build / dev / test commands                                  │
+│                                                                 │
+│  Rules the agent should always know.                            │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                  /implement PROJ-42                              │
+│               (loaded only when invoked)                        │
+│                                                                 │
+│  1. Read the ticket and parent issue                            │
+│  2. Set status to In Progress                                   │
+│  3. Create branch (following CLAUDE.md convention)              │
+│  4. Implement the change                                        │
+│  5. Build and verify                                            │
+│  6. Self-review (sub-agent reviews git diff)                    │
+│  7. Fix critical issues                                         │
+│  8. Push and create PR                                          │
+│  9. Set status to In Review                                     │
+│                                                                 │
+│  Procedure you run on demand.                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+The slash command references CLAUDE.md for conventions ("create branch following the convention in CLAUDE.md") but owns the procedure. **CLAUDE.md sets the rules. `/implement` runs the playbook.**
+
+### Example CLAUDE.md
 
 ```markdown
 # CLAUDE.md
 
 ## Project
 
-- Runtime: Node / Bun / Python (whatever you use)
-- Build: `npm run build` (or equivalent)
+- Runtime: Bun
+- Build: `bun run build`
 
-## Linear Integration
+## Linear
 
 - Fetch issues using the Linear MCP tool.
-- Always read the parent issue (if one exists) for full context before starting work.
+- Always read the parent issue (if one exists) for full context.
 - If a description references a spec file, read it before implementing.
-- Set issue status to **In Progress** when starting, **In Review** after PR creation.
 - Issue lifecycle: Backlog → Todo → In Progress → In Review → Done
   (Done happens after merge, not by you).
 
@@ -127,35 +165,30 @@ The `CLAUDE.md` file in your repo tells Claude Code how your team works. Here's 
 
 Branch format: `<prefix>/<issue-id-lowercase>-<slug>`
 
-Prefix is determined by issue labels:
-- `feature/` — label: `feature` (or no relevant label)
-- `fix/` — label: `bug`
-- `cleanup/` — label: `cleanup` or `tech-debt`
-- `docs/` — label: `docs`
-
-Example: `feature/proj-12-add-user-auth`
+Prefix by label:
+- `feature/` — `feature` (or no label)
+- `fix/` — `bug`
+- `cleanup/` — `cleanup` or `tech-debt`
+- `docs/` — `docs`
 
 ## Commits
 
-- Message format: `<summary> (<ISSUE-ID>)` — e.g. `Add auth middleware (PROJ-12)`
-- Never amend existing commits. Always create new fixup commits.
-- Never force push.
+- Format: `<summary> (<ISSUE-ID>)` — e.g. `Add auth middleware (PROJ-12)`
+- Never amend. Never force push.
 - Never commit code that doesn't build.
 
 ## Pull Requests
 
-Create with `gh pr create`. PR body must include:
-- Summary of changes
-- Verification section: build result, files changed
-- Link to the Linear issue
+Create with `gh pr create`. Body must include: summary,
+verification (`bun run build` result), Linear issue link.
 
 ## Error Handling
 
-If anything fails — build, git push, PR creation — stop immediately
-and report the error. Do not attempt workarounds silently.
+If anything fails — build, push, PR creation — stop and report.
+No silent workarounds.
 ```
 
-This file is loaded into every Claude Code session. The agent reads it and follows your conventions automatically.
+This is ~25 lines. Lean enough that it doesn't waste tokens, complete enough that the agent always knows your conventions.
 
 ---
 
@@ -229,7 +262,7 @@ Show me issues updated in the last 24 hours
 
 ## Slash Commands
 
-You can encode the full workflow into a slash command so picking up a ticket is a single action.
+Encode the full workflow into a slash command so picking up a ticket is a single action.
 
 Create `.claude/commands/implement.md`:
 
@@ -241,17 +274,32 @@ If the description references a spec file, read it.
 
 Then follow this workflow:
 
-1. Set the issue status to **In Progress**
-2. Create a branch: `<prefix>/<issue-id-lowercase>-<slug>`
-   - Prefix based on labels: feature/, fix/, cleanup/, docs/
-3. Implement the change described in the ticket
-4. Run the build command and confirm it passes
-5. Commit with the issue ID in the message
-6. Push and create a PR with `gh pr create`
-7. Set the issue status to **In Review**
-8. Add a comment on the Linear issue with the PR link
+## 1. Start
+- Set the issue status to **In Progress**.
+- Create a branch following the convention in CLAUDE.md.
 
-If anything fails, stop and report the error.
+## 2. Implement
+- Implement the change described in the ticket.
+- Run `bun run build` and confirm it passes.
+- Commit with the issue ID: `<summary> (<ISSUE-ID>)`
+
+## 3. Self-Review
+Before pushing, launch a sub-agent with this task:
+
+    Review the diff between this branch and main (`git diff main`).
+    Check for: bugs, unused imports, dead code, empty catch blocks,
+    security issues, over-engineering, missing error handling.
+    Classify as: 🔴 Critical, 🟡 Warning, 🟢 Nit.
+    If no issues, say "LGTM".
+
+Fix all 🔴 Critical issues. Re-run build after fixes.
+
+## 4. Ship
+- Push and create a PR with `gh pr create`.
+- Set the issue status to **In Review**.
+- Add a comment on the Linear issue with the PR URL.
+
+If anything fails at any step, stop and report the error.
 ```
 
 Now you can run:
@@ -260,7 +308,9 @@ Now you can run:
 /implement PROJ-42
 ```
 
-And the agent handles the entire lifecycle.
+And the agent handles the entire lifecycle — including self-review before pushing.
+
+Notice that the self-review prompt lives here, not in CLAUDE.md. It's ~100 tokens that only get loaded when you're actually implementing. If it were in CLAUDE.md, you'd pay for it every session.
 
 ---
 
