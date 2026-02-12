@@ -208,7 +208,7 @@ graph TD
 
 ## Demo: building an app with three agents
 
-We build a YouTube topic researcher. You search a topic and it shows you all the videos on that subject with performance data. Three agents work on it in parallel.
+We build a content repurposer. You paste a YouTube URL, pick a mode (tweets or longer-form notes), and it generates social content that matches your writing style. Three agents build it in parallel.
 
 ```mermaid
 graph LR
@@ -217,11 +217,11 @@ graph LR
     end
 
     subgraph Backend Agent
-        BE["FastAPI\nYouTube API integration\nSQLite caching\nData endpoints"]
+        BE["FastAPI\nyt-dlp audio download\nWhisper transcription\nClaude generation"]
     end
 
     subgraph Frontend Agent
-        FE["Next.js\nSearch interface\nResults grid\nPerformance data display"]
+        FE["Next.js\nGenerate page\nStyle examples page\nSSE progress display"]
     end
 
     subgraph Code Review Agent
@@ -249,7 +249,7 @@ How it works:
 5. When both are done, the code review agent reads everything, checks for issues, and sends specific feedback to each agent
 6. The backend and frontend agents act on that feedback and make fixes
 
-The code review agent doesn't fix things itself. It sends notes like "the /search endpoint returns a flat list but the frontend expects nested objects" directly to the backend agent, who fixes it.
+The code review agent doesn't fix things itself. It reports issues back to the team lead, who assigns fixes to the owning agent. The backend agent fixes backend bugs. The frontend agent fixes frontend bugs. Nobody steps on each other's files.
 
 This is the closed-loop feedback that subagents can't do. The reviewer talks to the builders. The builders act on the feedback. No middleman.
 
