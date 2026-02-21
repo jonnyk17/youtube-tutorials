@@ -1,95 +1,72 @@
 """
-Intent-Based Classification Example
+Intent-Based Classification Demo
 
-Run this script to see intent classification in action:
+Run with example queries:
     uv run python example.py
 
-Or run with a specific query:
+Or with a specific query:
     uv run python example.py "How do I reset my API key?"
 """
 
 import sys
+
 from openai import OpenAI
 
-from intent_classifier import classify_intent, classify_intent_simple, Intent
-from retrieval import (
-    semantic_search,
-    hybrid_search,
-    structured_query,
-    multi_source_retrieval,
-    early_exit,
-)
+from intent_classifier import classify_query
+from router import route_query
 
 
-def route_and_retrieve(intent: Intent, query: str):
-    """Route to the appropriate retrieval strategy."""
-    match intent:
-        case Intent.CONCEPTUAL:
-            return semantic_search(query)
-        case Intent.PROCEDURAL:
-            return hybrid_search(query)
-        case Intent.FACTUAL:
-            return structured_query(query)
-        case Intent.COMPARATIVE:
-            return multi_source_retrieval(query)
-        case Intent.OUT_OF_SCOPE:
-            return early_exit(query)
+def demo_classify(query: str, client: OpenAI):
+    """Show classification results for a single query."""
+    print(f"\n{'=' * 60}")
+    print(f"  {query}")
+    print(f"{'=' * 60}")
 
+    result = classify_query(query, client)
 
-def process_query(query: str, client: OpenAI):
-    """Complete pipeline: classify → route → retrieve."""
-    print(f"\n{'='*60}")
-    print(f"QUERY: {query}")
-    print(f"{'='*60}\n")
-
-    # Step 1: Classify
-    print("Step 1: Classifying intent...")
-    result = classify_intent(query, client)
-    print(f"  Intent: {result.intent.value.upper()}")
+    print(f"  Intent:     {result.intent.value}")
     print(f"  Confidence: {result.confidence}")
-    print(f"  Reasoning: {result.reasoning}")
+    print(f"  Reasoning:  {result.reasoning}")
 
-    # Step 2: Route and retrieve
-    print(f"\nStep 2: Routing to retrieval strategy...")
-    retrieval_result = route_and_retrieve(result.intent, query)
-    print(f"  Strategy: {retrieval_result.strategy_used}")
-    print(f"  Metadata: {retrieval_result.metadata}")
 
-    # Step 3: Show retrieved content
-    print(f"\nStep 3: Retrieved content:")
-    for i, chunk in enumerate(retrieval_result.chunks, 1):
-        preview = chunk[:200] + "..." if len(chunk) > 200 else chunk
-        print(f"  [{i}] {preview}")
+def demo_route(query: str, client: OpenAI):
+    """Show the full pipeline for a single query."""
+    print(f"\n{'=' * 60}")
+    print(f"  {query}")
+    print(f"{'=' * 60}")
 
-    return result.intent, retrieval_result
+    result = route_query(query, client)
+
+    print(f"  Intent:     {result.classification.intent.value}")
+    print(f"  Confidence: {result.classification.confidence}")
+    print(f"  Strategy:   {result.retrieval_result.strategy_used}")
+    print(f"  Answer:     {result.answer[:200]}")
 
 
 def main():
     client = OpenAI()
 
     if len(sys.argv) > 1:
-        # Process command-line query
         query = " ".join(sys.argv[1:])
-        process_query(query, client)
-    else:
-        # Run demo with example queries
-        demo_queries = [
-            "What is a JWT?",                        # CONCEPTUAL
-            "How do I reset my API key?",            # PROCEDURAL
-            "What was our Q3 revenue?",              # FACTUAL
-            "Should I use Postgres or MongoDB?",     # COMPARATIVE
-            "What's the weather like today?",        # OUT_OF_SCOPE
-        ]
+        demo_route(query, client)
+        return
 
-        print("\n" + "="*60)
-        print("INTENT-BASED CLASSIFICATION DEMO")
-        print("="*60)
-        print("\nThis demo shows how different queries get routed to")
-        print("different retrieval strategies based on their intent.\n")
+    # Demo queries — one for each intent
+    queries = [
+        "What is a JWT?",
+        "How do I reset my API key?",
+        "What was our Q3 revenue?",
+        "Should I use Postgres or MongoDB?",
+        "What's the weather like today?",
+    ]
 
-        for query in demo_queries:
-            process_query(query, client)
-            print()
+    print("\n  INTENT-BASED CLASSIFICATION DEMO")
+    print("  Each query gets classified and routed to a different strategy.\n")
+
+    for query in queries:
+        demo_classify(query, client)
+
+    print()
 
 
 if __name__ == "__main__":

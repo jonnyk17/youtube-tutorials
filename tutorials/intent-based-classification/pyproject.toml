@@ -1,12 +1,12 @@
 [project]
-name = "intent-classification"
+name = "intent-based-classification"
 version = "0.1.0"
-description = "Add your description here"
+description = "Intent-based query routing for RAG systems"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "openai>=2.16.0",
-    "pydantic>=2.12.5",
+    "pydantic>=2.0",
 ]
 
 [dependency-groups]
