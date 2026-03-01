@@ -3,158 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PostgreSQL RAG Chatbot</title>
+    <title>Nimbus Cloud Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                },
+            },
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .messages-scroll::-webkit-scrollbar { width: 4px; }
+        .messages-scroll::-webkit-scrollbar-track { background: transparent; }
+        .messages-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 999px; }
+        @keyframes pulse-dot {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #0f1117;
-            color: #e4e4e7;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 720px;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        h1 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #f4f4f5;
-        }
-
-        .subtitle {
-            font-size: 0.85rem;
-            color: #71717a;
-            margin-bottom: 1.5rem;
-        }
-
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding-bottom: 1rem;
-        }
-
-        .message {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            white-space: pre-wrap;
-        }
-
-        .message.user {
-            background: #1e3a5f;
-            color: #bfdbfe;
-            align-self: flex-end;
-            max-width: 80%;
-        }
-
-        .message.assistant {
-            background: #1c1c22;
-            color: #d4d4d8;
-            align-self: flex-start;
-            max-width: 90%;
-            border: 1px solid #27272a;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 0.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid #27272a;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            border: 1px solid #27272a;
-            background: #18181b;
-            color: #f4f4f5;
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: #3b82f6;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            border: none;
-            background: #3b82f6;
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #2563eb;
-        }
-
-        button:disabled {
-            background: #27272a;
-            color: #52525b;
-            cursor: not-allowed;
-        }
+        .typing-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>PostgreSQL RAG Chatbot</h1>
-        <p class="subtitle">Ask questions about PostgreSQL, pgvector, and RAG</p>
+<body class="bg-gray-50 font-sans h-screen flex flex-col">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-2xl mx-auto px-6 py-5">
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Nimbus Cloud Support</h1>
+        </div>
+    </div>
 
-        <div class="messages" id="messages"></div>
+    <!-- Messages -->
+    <div id="messages" class="flex-1 overflow-y-auto messages-scroll">
+        <div class="max-w-2xl mx-auto px-6 py-8 flex flex-col gap-6" id="messages-inner"></div>
+    </div>
 
-        <div class="input-row">
-            <input type="text" id="input" placeholder="Ask a question..." autocomplete="off" />
-            <button id="send" onclick="sendMessage()">Send</button>
+    <!-- Input -->
+    <div class="bg-white border-t border-gray-200">
+        <div class="max-w-2xl mx-auto px-6 py-4">
+            <div class="flex gap-3 items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-1 focus-within:border-gray-400 focus-within:bg-white transition-colors">
+                <input
+                    type="text"
+                    id="input"
+                    placeholder="Ask a question..."
+                    autocomplete="off"
+                    class="flex-1 py-3 bg-transparent text-base text-gray-900 placeholder-gray-400 outline-none"
+                />
+                <button
+                    id="send"
+                    onclick="sendMessage()"
+                    class="p-2 rounded-xl bg-gray-900 hover:bg-gray-700 disabled:bg-gray-200 text-white disabled:text-gray-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         const messagesEl = document.getElementById("messages");
+        const messagesInner = document.getElementById("messages-inner");
         const inputEl = document.getElementById("input");
         const sendBtn = document.getElementById("send");
 
         inputEl.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && !sendBtn.disabled) {
-                sendMessage();
-            }
+            if (e.key === "Enter" && !sendBtn.disabled) sendMessage();
         });
+
+        inputEl.focus();
 
         async function sendMessage() {
             const message = inputEl.value.trim();
             if (!message) return;
 
-            // Add user message
             addMessage(message, "user");
             inputEl.value = "";
             sendBtn.disabled = true;
 
-            // Add empty assistant message
-            const assistantEl = addMessage("", "assistant");
+            const { row, content } = addMessage("", "assistant");
+
+            // Show typing indicator
+            const typing = document.createElement("div");
+            typing.className = "flex gap-1 items-center h-5";
+            typing.innerHTML = `
+                <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full"></span>`;
+            content.appendChild(typing);
 
             try {
                 const response = await fetch("/chat", {
@@ -163,17 +102,21 @@
                     body: JSON.stringify({ message }),
                 });
 
+                typing.remove();
+
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    assistantEl.textContent += decoder.decode(value);
+                    content.textContent += decoder.decode(value);
                     messagesEl.scrollTop = messagesEl.scrollHeight;
                 }
             } catch (err) {
-                assistantEl.textContent = "Error: could not reach the server.";
+                typing.remove();
+                content.textContent = "Error: could not reach the server.";
+                content.classList.add("text-red-500");
             }
 
             sendBtn.disabled = false;
@@ -181,12 +124,23 @@
         }
 
         function addMessage(text, role) {
-            const el = document.createElement("div");
-            el.className = `message ${role}`;
-            el.textContent = text;
-            messagesEl.appendChild(el);
+            const row = document.createElement("div");
+
+            if (role === "user") {
+                row.className = "w-full flex justify-end";
+                row.innerHTML = `<div class="max-w-[80%] px-4 py-3 rounded-2xl bg-gray-100 text-base text-gray-800 leading-relaxed"></div>`;
+                row.querySelector("div").textContent = text;
+            } else {
+                row.className = "w-full";
+                row.innerHTML = `<div class="text-base text-gray-800 leading-relaxed whitespace-pre-wrap"></div>`;
+            }
+
+            const content = row.querySelector("div");
+
+            messagesInner.appendChild(row);
             messagesEl.scrollTop = messagesEl.scrollHeight;
-            return el;
+
+            return { row, content };
         }
     </script>
 </body>
