@@ -1,8 +1,17 @@
 -- 02_vector_search.sql
 -- Vector similarity search using cosine distance.
--- $1 is the query embedding (a 1536-dimensional vector).
+--
+-- This file is a reference query — not executed during init.
+-- The query embedding parameter is passed from Python using psycopg's %s placeholder.
+--
+-- Example in Python:
+--   cur.execute(
+--       "SELECT id, content, 1 - (embedding <=> %s::vector) AS similarity "
+--       "FROM documents ORDER BY embedding <=> %s::vector LIMIT 5",
+--       (str(embedding), str(embedding)),
+--   )
 
-SELECT id, content, 1 - (embedding <=> $1) AS similarity
-FROM documents
-ORDER BY embedding <=> $1
-LIMIT 5;
+-- SELECT id, content, 1 - (embedding <=> query_vector) AS similarity
+-- FROM documents
+-- ORDER BY embedding <=> query_vector
+-- LIMIT 5;

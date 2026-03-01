@@ -10,7 +10,7 @@ Every tool has limits. If you only hear "PostgreSQL does everything," you will h
 
 The decision comes down to two questions:
 
-1. **What scale are you operating at?** Hundreds of millions of vectors in PostgreSQL is well-documented territory. Billions with sub-10ms latency at high query throughput is where dedicated systems earn their keep.
+1. **What scale are you operating at?** Tens of millions of vectors on a single PostgreSQL instance is well-documented territory, and hundreds of millions are achievable with appropriate hardware and partitioning. Billions with sub-10ms latency at high query throughput is where dedicated systems earn their keep.
 2. **What capabilities do you need?** If you need multimodal embeddings across different vector dimensions, or cutting-edge approximate nearest neighbor research, dedicated vector databases may have features pgvector does not yet support.
 
 For most AI applications -- RAG systems, knowledge base search, AI assistants with document retrieval -- PostgreSQL is the right choice.
@@ -21,7 +21,7 @@ For most AI applications -- RAG systems, knowledge base search, AI assistants wi
 
 PostgreSQL with pgvector handles these scenarios well:
 
-- **RAG applications** with up to hundreds of millions of documents. HNSW indexes provide fast approximate nearest neighbor search with high recall.
+- **RAG applications** from thousands to tens of millions of documents. HNSW indexes provide fast approximate nearest neighbor search with high recall.
 - **Hybrid search** combining vector similarity with keyword matching and relational filters. This is PostgreSQL's strongest advantage -- running all three in a single query.
 - **Applications that already use PostgreSQL.** Adding pgvector to your existing database eliminates an entire service, its sync problem, and its bill.
 - **Early-stage products** where you are iterating on your retrieval strategy. Changing your search approach in SQL is faster than re-architecting across services.

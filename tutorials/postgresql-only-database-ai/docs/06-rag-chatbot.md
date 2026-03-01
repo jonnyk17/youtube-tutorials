@@ -51,38 +51,44 @@ The complete backend:
 
 ```python
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-import psycopg
+import psycopg_pool
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
-from openai import OpenAI
-from pydantic import BaseModel
+from openai import AsyncOpenAI
+from pydantic import BaseModel, Field
+
+load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
-EMBEDDING_MODEL = "text-embedding-ada-002"
+EMBEDDING_MODEL = "text-embedding-3-small"
 
-client = OpenAI()
-
-app = FastAPI()
-
-
-def get_db():
-    """Return a new database connection."""
-    return psycopg.connect(DATABASE_URL)
+client = AsyncOpenAI()
+pool = None
 
 
-def get_embedding(text: str) -> list[float]:
-    """Generate an embedding vector for the given text."""
-    response = client.embeddings.create(model=EMBEDDING_MODEL, input=text)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global pool
+    pool = psycopg_pool.ConnectionPool(DATABASE_URL, min_size=2, max_size=10)
+    yield
+    pool.close()
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+async def get_embedding(text: str) -> list[float]:
+    response = await client.embeddings.create(model=EMBEDDING_MODEL, input=text)
     return response.data[0].embedding
 
 
-def hybrid_search(conn, query: str, limit: int = 5) -> list[dict]:
-    """Search documents using hybrid search (vector + full-text with RRF)."""
-    embedding = get_embedding(query)
+def hybrid_search(conn, query: str, embedding: list[float], limit: int = 5) -> list[dict]:
     with conn.cursor() as cur:
         cur.execute(
             "SELECT id, content, rrf_score FROM hybrid_search(%s, %s::vector, %s)",
@@ -95,56 +101,59 @@ def hybrid_search(conn, query: str, limit: int = 5) -> list[dict]:
 
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = Field(..., max_length=2000)
 
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    """Serve the chat UI."""
     html_path = Path(__file__).parent / "static" / "index.html"
     return html_path.read_text()
 
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    """Retrieve relevant documents and stream an LLM response."""
-    conn = get_db()
+    embedding = await get_embedding(request.message)
+
+    conn = pool.getconn()
     try:
-        results = hybrid_search(conn, request.message)
-        context = "\n\n".join(
-            f"[Document {r['id']}]: {r['content']}" for r in results
-        )
-
-        def generate():
-            stream = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a helpful assistant. Answer the user's question "
-                            "based on the following documents. If the documents don't "
-                            "contain relevant information, say so.\n\n"
-                            f"Documents:\n{context}"
-                        ),
-                    },
-                    {"role": "user", "content": request.message},
-                ],
-                stream=True,
-            )
-            for chunk in stream:
-                if chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
-
-        return StreamingResponse(generate(), media_type="text/plain")
+        results = hybrid_search(conn, request.message, embedding)
     finally:
-        conn.close()
+        pool.putconn(conn)
+
+    context = "\n\n".join(
+        f"[Document {r['id']}]: {r['content']}" for r in results
+    )
+
+    async def generate():
+        stream = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a helpful assistant. Answer the user's question "
+                        "based on the following documents. If the documents don't "
+                        "contain relevant information, say so.\n\n"
+                        f"Documents:\n{context}"
+                    ),
+                },
+                {"role": "user", "content": request.message},
+            ],
+            stream=True,
+        )
+        async for chunk in stream:
+            if chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+
+    return StreamingResponse(generate(), media_type="text/plain")
 ```
 
 Key details:
 
+- **Connection pool** — `psycopg_pool.ConnectionPool` reuses database connections instead of opening a new one per request. The pool is created on startup and closed on shutdown via the lifespan context manager.
+- **Async throughout** — `AsyncOpenAI` and `await` for embedding and chat calls. The `/chat` endpoint is async and never blocks the event loop, so the server can handle concurrent requests while streaming.
 - **`get_embedding`** calls OpenAI's embeddings API with the same model used to embed the documents.
-- **`hybrid_search`** embeds the query, then calls the SQL function. One database round trip.
+- **`hybrid_search`** takes a pre-computed embedding and calls the SQL function. The embedding is generated before the DB connection is checked out.
 - **`/chat`** retrieves documents, builds a context string, and streams the GPT-4o response.
 - **`/`** serves the static HTML file. No template engine, no build step.
 

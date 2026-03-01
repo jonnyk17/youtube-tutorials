@@ -1,14 +1,18 @@
 """Seed the documents table with sample data and real embeddings."""
 
+import json
 import os
 
 import psycopg
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
-EMBEDDING_MODEL = "text-embedding-ada-002"
+EMBEDDING_MODEL = "text-embedding-3-small"
 
 client = OpenAI()
 
@@ -69,7 +73,7 @@ DOCUMENTS = [
     },
     {
         "content": (
-            "The text-embedding-ada-002 model from OpenAI produces "
+            "The text-embedding-3-small model from OpenAI produces "
             "1536-dimensional vectors. These embeddings capture semantic meaning, "
             "so similar concepts have similar vector representations regardless "
             "of the exact words used."
@@ -88,9 +92,10 @@ DOCUMENTS = [
     {
         "content": (
             "IVFFlat is an older indexing method in pgvector that partitions "
-            "vectors into lists. While it uses less memory than HNSW, it requires "
-            "a separate training step and generally provides lower recall. HNSW "
-            "is recommended for most production use cases."
+            "vectors into lists using k-means clustering at index build time. "
+            "While it uses less memory than HNSW, data must exist in the table "
+            "before the index is created, and it generally provides lower recall. "
+            "HNSW is recommended for most production use cases."
         ),
         "metadata": {"source": "pgvector-docs", "topic": "indexing"},
     },
@@ -132,7 +137,7 @@ def seed():
                 INSERT INTO documents (content, metadata, embedding)
                 VALUES (%s, %s::jsonb, %s::vector)
                 """,
-                (doc["content"], str(doc["metadata"]).replace("'", '"'), str(embedding)),
+                (doc["content"], json.dumps(doc["metadata"]), str(embedding)),
             )
 
         conn.commit()

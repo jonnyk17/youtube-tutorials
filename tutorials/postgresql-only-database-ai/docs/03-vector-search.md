@@ -27,7 +27,7 @@ To get a similarity score where higher is better, compute `1 - distance`. This g
 
 The query flow:
 
-1. Your application embeds the user's question using the same model that produced the document embeddings (e.g., `text-embedding-ada-002`)
+1. Your application embeds the user's question using the same model that produced the document embeddings (e.g., `text-embedding-3-small`)
 2. The embedding vector is passed as a parameter to the SQL query
 3. PostgreSQL uses the HNSW index to find the approximate nearest neighbors without scanning every row
 4. Results come back ordered by distance, with the most similar documents first
@@ -113,7 +113,7 @@ def vector_search(conn, question: str, limit: int = 5) -> list[dict]:
     """Find documents similar to the question using vector search."""
     # Embed the question with the same model used for documents
     response = client.embeddings.create(
-        model="text-embedding-ada-002",
+        model="text-embedding-3-small",
         input=question,
     )
     embedding = response.data[0].embedding
@@ -136,7 +136,7 @@ def vector_search(conn, question: str, limit: int = 5) -> list[dict]:
 
 ## Common Mistakes
 
-**Using different embedding models for documents and queries.** If you embed documents with `text-embedding-ada-002` (1536 dimensions) but query with a different model, the distances are meaningless. Always use the same model for both.
+**Using different embedding models for documents and queries.** If you embed documents with `text-embedding-3-small` (1536 dimensions) but query with a different model, the distances are meaningless. Always use the same model for both.
 
 **Forgetting to cast the parameter to vector.** In psycopg, you need `%s::vector` to tell PostgreSQL to interpret the string as a vector type. Without the cast, you get a type error.
 

@@ -32,25 +32,35 @@ One new column. One new index. Full-text search is live on the same table that a
 
 ## Progressive Examples
 
-### Step 1: Add the generated tsvector column
+### Step 1: The fts column and GIN index
+
+The `fts` column and GIN index are created in `sql/01_setup.sql` alongside the documents table:
+
+```sql
+CREATE TABLE documents (
+    id          BIGSERIAL PRIMARY KEY,
+    content     TEXT NOT NULL,
+    metadata    JSONB,
+    embedding   vector(1536),
+    fts         tsvector GENERATED ALWAYS AS (to_tsvector('english', content)) STORED
+);
+
+CREATE INDEX ON documents USING gin(fts);
+```
+
+The `GENERATED ALWAYS AS ... STORED` column updates automatically whenever `content` changes. Zero application logic required. The GIN index makes lookups fast even on large tables.
+
+If you are adding full-text search to an existing table that does not have the `fts` column, run:
 
 ```sql
 ALTER TABLE documents
 ADD COLUMN fts tsvector
     GENERATED ALWAYS AS (to_tsvector('english', content)) STORED;
-```
 
-This scans the existing rows and populates the column. For future inserts and updates, PostgreSQL maintains it automatically.
-
-### Step 2: Create the GIN index
-
-```sql
 CREATE INDEX ON documents USING gin(fts);
 ```
 
-Without this index, every full-text query scans every row. With GIN, lookups are fast even on large tables.
-
-### Step 3: Run a full-text search query
+### Step 2: Run a full-text search query
 
 ```sql
 SELECT id, content

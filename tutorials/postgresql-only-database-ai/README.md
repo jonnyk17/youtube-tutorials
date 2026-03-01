@@ -60,11 +60,11 @@ Open [http://localhost:8000](http://localhost:8000).
 | File | Description |
 |------|-------------|
 | `docker-compose.yml` | PostgreSQL 18 with pgvector, auto-runs SQL on first boot |
-| `pyproject.toml` | Python project with FastAPI, psycopg, OpenAI dependencies |
+| `pyproject.toml` | Python project with FastAPI, psycopg, psycopg-pool, OpenAI dependencies |
 | `.env-sample` | Template for OpenAI API key and database URL |
-| `sql/01_setup.sql` | CREATE EXTENSION vector, documents table, HNSW index |
-| `sql/02_vector_search.sql` | Vector similarity query with cosine distance |
-| `sql/03_full_text_search.sql` | tsvector column, GIN index, full-text query |
+| `sql/01_setup.sql` | CREATE EXTENSION vector, documents table with fts column, HNSW + GIN indexes |
+| `sql/02_vector_search.sql` | Reference: vector similarity query with cosine distance |
+| `sql/03_full_text_search.sql` | Reference: full-text search query examples |
 | `sql/04_hybrid_search.sql` | hybrid_search function with Reciprocal Rank Fusion |
 | `sql/05_seed_data.sql` | Sample documents (placeholder embeddings -- use seed.py for real ones) |
 | `src/main.py` | FastAPI RAG chatbot -- embed, search, stream |

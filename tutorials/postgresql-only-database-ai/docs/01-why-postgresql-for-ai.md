@@ -16,7 +16,7 @@ PostgreSQL is the most widely used relational database for a reason. Most backen
 
 ### It's production-proven at scale
 
-PostgreSQL has been in production for over 35 years. It handles ACID transactions, connection pooling, replication, point-in-time recovery, and row-level security out of the box. pgvector supports HNSW indexes that handle hundreds of millions of vectors. This is not a toy — it's infrastructure that teams already trust with their most critical data.
+PostgreSQL has been in production for over 35 years. It handles ACID transactions, connection pooling, replication, point-in-time recovery, and row-level security out of the box. pgvector supports HNSW indexes that scale to tens of millions of vectors on a single machine — and into the hundreds of millions with appropriate hardware and partitioning. This is not a toy — it's infrastructure that teams already trust with their most critical data.
 
 ### It handles the full RAG stack
 

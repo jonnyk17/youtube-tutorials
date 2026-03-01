@@ -1,6 +1,9 @@
 -- 05_seed_data.sql
--- Sample documents for testing. These use placeholder zero-vectors.
+-- Sample documents for testing. These have no embeddings.
 -- For real embeddings, run: uv run src/seed.py
+--
+-- Note: rows without embeddings will appear in full-text search results
+-- but not in vector or hybrid search results.
 
 INSERT INTO documents (content, metadata) VALUES
 (
@@ -28,7 +31,7 @@ INSERT INTO documents (content, metadata) VALUES
     '{"source": "ai-engineering", "topic": "hybrid-search"}'
 ),
 (
-    'The text-embedding-ada-002 model from OpenAI produces 1536-dimensional vectors. These embeddings capture semantic meaning, so similar concepts have similar vector representations regardless of the exact words used.',
+    'The text-embedding-3-small model from OpenAI produces 1536-dimensional vectors. These embeddings capture semantic meaning, so similar concepts have similar vector representations regardless of the exact words used.',
     '{"source": "openai-docs", "topic": "embeddings"}'
 ),
 (
@@ -36,7 +39,7 @@ INSERT INTO documents (content, metadata) VALUES
     '{"source": "postgresql-docs", "topic": "overview"}'
 ),
 (
-    'IVFFlat is an older indexing method in pgvector that partitions vectors into lists. While it uses less memory than HNSW, it requires a separate training step and generally provides lower recall. HNSW is recommended for most production use cases.',
+    'IVFFlat is an older indexing method in pgvector that partitions vectors into lists using k-means clustering at index build time. While it uses less memory than HNSW, data must exist in the table before the index is created, and it generally provides lower recall. HNSW is recommended for most production use cases.',
     '{"source": "pgvector-docs", "topic": "indexing"}'
 ),
 (
