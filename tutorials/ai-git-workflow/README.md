@@ -1,30 +1,111 @@
 # AI Git Workflow
 
-> Codify your git conventions in a config file. Let AI enforce them on every commit.
+> Stop memorizing git commands. Codify your conventions once, let AI agents handle the rest.
 
 ---
 
-## The Idea
+## What's In This Repo
 
-Most developers use AI coding agents to write code. But AI agents are just as good — honestly, more consistent — at managing your entire git workflow.
+Two things you can copy straight into your project:
 
-The key is a config file. You write your conventions once — commit format, branch naming, PR template, safety rules — and the agent follows them on every operation. You get consistency you couldn't achieve when humans were doing it from memory.
+1. **`CLAUDE.md`** — A config file that defines your git conventions (branch naming, commit format, PR template, safety rules). The agent reads this and follows it on every operation.
 
-This works with any coding agent that supports a markdown config: Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), Cursor (`.cursorrules`), or similar.
+2. **`commands/`** — Slash commands for the common git operations. Copy these into `.claude/commands/` in your project and use them as `/commit`, `/branch`, `/pr`, etc.
+
+```
+ai-git-workflow/
+├── CLAUDE.md                # Git conventions config
+├── commands/
+│   ├── commit.md            # /commit — stage and commit with a good message
+│   ├── branch.md            # /branch — create a branch following conventions
+│   ├── pr.md                # /pr — push and open a pull request
+│   ├── squash.md            # /squash — squash commits into one
+│   ├── undo.md              # /undo — safely undo a git mistake
+│   ├── cleanup.md           # /cleanup — delete merged branches
+│   └── history.md           # /history — explore what changed and why
+└── README.md
+```
 
 ---
 
 ## Setup
 
-1. Copy the `CLAUDE.md` from this folder into the root of your project
-2. Adjust the conventions to match your team's style
-3. Open your AI coding agent — the config is loaded automatically
+1. Copy `CLAUDE.md` into the root of your project
+2. Copy the `commands/` folder into `.claude/commands/` in your project
+3. Adjust the conventions in `CLAUDE.md` to match your team's style
+4. Open Claude Code — the config loads automatically, and commands are available as `/command-name`
+
+---
+
+## The Commands
+
+### `/commit`
+
+Reads the full diff, matches your repo's existing commit style, and writes a conventional commit with a body that explains WHY. Separates unrelated changes into multiple commits automatically.
+
+```
+/commit
+```
+
+### `/branch`
+
+Creates a branch following your naming convention. No `git checkout -b`, no thinking about prefixes.
+
+```
+/branch password reset flow
+/branch PROJ-42 dark mode toggle
+```
+
+### `/pr`
+
+Pushes the branch and opens a pull request with a title, summary, and testing checklist — all generated from the actual diff and commit history.
+
+```
+/pr
+```
+
+### `/squash`
+
+Combines recent commits into a single clean commit. Writes a new coherent message instead of concatenating the old ones.
+
+```
+/squash 4
+/squash the three login-related commits
+```
+
+### `/undo`
+
+Safely undoes git mistakes. Describes what it's going to do before running anything destructive.
+
+```
+/undo last commit
+/undo I accidentally committed to main
+/undo wrong files got committed
+```
+
+### `/cleanup`
+
+Prunes stale remote references and deletes local branches that have been merged. Shows the list and confirms before deleting.
+
+```
+/cleanup
+```
+
+### `/history`
+
+Explores git history and summarizes it in plain language instead of raw output.
+
+```
+/history what changed in the last 5 commits
+/history who last changed the auth module and why
+/history when was the payment logic introduced
+```
 
 ---
 
 ## The Config
 
-The `CLAUDE.md` in this repo covers:
+The `CLAUDE.md` covers:
 
 - **Branch naming** — `feature/`, `fix/`, `chore/` with kebab-case
 - **Commit messages** — conventional commits, body explains WHY not WHAT
@@ -37,128 +118,40 @@ It's ~30 lines. You're not teaching the agent how git works — you're telling i
 
 ---
 
-## Example Workflows
+## Natural Language Prompts
 
-### Create a branch
-
-```
-create a feature branch for password validation
-```
-
-The agent creates `feature/password-validation` following the naming convention from the config.
-
-### Commit changes
-
-```
-commit the auth changes
-```
-
-The agent reads the diff, stages the relevant files, and writes a conventional commit with a descriptive body. If you made unrelated changes (e.g. a feature + a typo fix), it separates them into multiple commits automatically.
-
-### Open a pull request
-
-```
-push this branch and open a PR against main
-```
-
-The agent pushes the branch, then uses the GitHub CLI to create a PR with a title and description following the template from the config (What / Why / How to test).
-
-### Check CI and merge
-
-```
-what's the CI status on this PR?
-```
-
-```
-squash and merge the PR
-```
-
-The agent checks the status, squashes the commits, merges, and cleans up the branch.
-
-### Resolve a merge conflict
+Beyond the slash commands, you can just talk to the agent. These work because of the conventions in `CLAUDE.md`:
 
 ```
 merge feature-branch into main and resolve any conflicts
 ```
 
-The agent handles the merge. If there's a conflict, it reads both versions, understands the intent of each change, and combines them — rather than just picking one side.
-
-### Rebase onto main
-
 ```
 rebase this branch onto the latest main
 ```
 
-The agent pulls the latest main and rebases your branch, resolving any minor conflicts along the way.
-
-### Squash commits
-
 ```
-squash my last 4 commits into one clean commit
-```
-
-The agent combines the commits and writes a coherent summary message — not just the first commit pasted in.
-
-### Cherry-pick a specific change
-
-```
-cherry-pick just the auth fix from feature-branch and apply it to main
-```
-
-The agent finds the right commit by reading the messages and applies it cleanly. No hunting for commit hashes.
-
-### Undo a mistake
-
-```
-undo my last commit but keep the changes
+cherry-pick just the auth fix from feature-branch and apply it here
 ```
 
 ```
-I accidentally committed to main — move those changes to a new branch
+what's the CI status on this PR? squash and merge if it's passing
 ```
 
-### Check history
-
-```
-what changed in the last 3 commits?
-```
-
-```
-who last changed this function and why?
-```
+The commands handle the common workflows. Natural language handles everything else.
 
 ---
 
-## What AI Does Better
+## Adapt It
 
-The point isn't just convenience. AI raises the quality bar:
+These are starting points. Change whatever doesn't fit:
 
-| Operation | Without AI | With AI |
-|-----------|-----------|---------|
-| Commit messages | "fix stuff", "updates", "WIP" | Descriptive conventional commits with context |
-| Staging | `git add .` — everything in one commit | Separates unrelated changes into atomic commits |
-| Secrets | Accidentally committed `.env` at least once | Catches secrets before they hit the repo |
-| PR descriptions | Empty, or copy-pasted commit messages | Synthesized summary from the full diff |
-| Merge conflicts | Pick one side and hope | Understands intent of both branches |
-| Consistency | Varies by engineer, time of day, mood | Same standard on every commit |
+- Different commit format? Edit `CLAUDE.md` and `commands/commit.md`
+- Trunk-based instead of feature branches? Edit `commands/branch.md`
+- Different PR template? Edit `commands/pr.md`
+- Need a release command? Add `commands/release.md`
 
----
-
-## Sharing With Your Team
-
-Check the config file into your repo. Every engineer's AI agent reads the same file and follows the same conventions automatically.
-
-This replaces the wiki page nobody reads. The conventions are codified and enforced on every commit, by every engineer, without anyone having to remember the rules.
-
----
-
-## Files
-
-```
-ai-git-workflow/
-├── CLAUDE.md    # Git conventions config (copy this into your project)
-└── README.md    # This guide
-```
+The patterns are general. The specifics are yours.
 
 ---
 
