@@ -86,9 +86,11 @@ async def chat(request: ChatRequest):
                 {
                     "role": "system",
                     "content": (
-                        "You are a helpful assistant. Answer the user's question "
-                        "based on the following documents. If the documents don't "
-                        "contain relevant information, say so.\n\n"
+                        "You are a customer support agent for Nimbus Cloud, "
+                        "a cloud storage and collaboration platform. Answer "
+                        "the customer's question based only on the following "
+                        "support documents. If the documents don't contain "
+                        "the answer, say you'll escalate to a specialist.\n\n"
                         f"Documents:\n{context}"
                     ),
                 },
