@@ -1,6 +1,6 @@
-# PostgreSQL Is the Only Database You Need for AI
+# PostgreSQL for RAG
 
-Build a RAG chatbot on PostgreSQL with pgvector -- vector search, full-text search, and hybrid search in a single database. No Pinecone. No Chroma. One connection string.
+Build a production RAG chatbot on PostgreSQL with pgvector — vector search, full-text search, and hybrid search using a database you already know and trust.
 
 ## What You'll Learn
 
@@ -47,7 +47,7 @@ Open [http://localhost:8000](http://localhost:8000).
 
 ## Chapters
 
-1. [Why PostgreSQL for AI](docs/01-why-postgresql-for-ai.md) -- PostgreSQL as a unified data platform replacing three separate services
+1. [Why PostgreSQL for RAG](docs/01-why-postgresql-for-ai.md) -- A database you already know, trust, and run — and it handles the full RAG stack
 2. [Setup](docs/02-setup.md) -- Docker, pgvector extension, documents table, HNSW index
 3. [Vector Search](docs/03-vector-search.md) -- Cosine distance operator, similarity queries, metadata filtering
 4. [Full-Text Search](docs/04-full-text-search.md) -- tsvector generated columns, GIN indexes, websearch_to_tsquery
