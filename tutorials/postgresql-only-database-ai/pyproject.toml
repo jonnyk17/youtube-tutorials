@@ -1,0 +1,18 @@
+[project]
+name = "postgresql-only-database-ai"
+version = "0.1.0"
+description = "A RAG chatbot using PostgreSQL with pgvector for vector search, full-text search, and hybrid search."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.115.0",
+    "psycopg[binary]>=3.2.0",
+    "openai>=1.50.0",
+    "pydantic>=2.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ipykernel",
+]
