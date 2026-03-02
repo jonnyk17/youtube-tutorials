@@ -19,7 +19,6 @@ Usage:
 """
 
 import argparse
-import datetime
 import json
 import logging
 import os
@@ -27,7 +26,6 @@ import signal
 import subprocess
 import sys
 import threading
-import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -35,11 +33,33 @@ from dotenv import load_dotenv
 from todoist_api_python.api import TodoistAPI
 
 REPO_ROOT = Path(__file__).resolve().parent
-DEFAULT_TIMEOUT = 300  # 5 minutes per task
+DEFAULT_TIMEOUT = 600  # 10 minutes per task
 MAX_RETRIES = 3  # give up after this many failures
 
 log = logging.getLogger("agent_worker")
 log.propagate = False  # prevent third-party DEBUG noise via root logger
+
+# Global shutdown machinery — ensures Ctrl+C always works, even during blocking I/O
+_shutdown = threading.Event()
+_child_proc: subprocess.Popen | None = None
+_child_lock = threading.Lock()
+
+
+def _handle_signal(signum, frame):
+    """Kill child process and exit immediately on SIGINT/SIGTERM."""
+    _shutdown.set()
+    with _child_lock:
+        if _child_proc and _child_proc.poll() is None:
+            try:
+                os.killpg(_child_proc.pid, signal.SIGTERM)
+            except OSError:
+                pass
+    log.info("\nStopped.")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, _handle_signal)
+signal.signal(signal.SIGTERM, _handle_signal)
 
 
 def setup_logging(watch: bool = False, verbose: bool = False):
@@ -126,25 +146,25 @@ def _describe_tool_use(name: str, input_data: dict) -> str | None:
         path = input_data.get("file_path", "")
         short = path.replace(str(REPO_ROOT) + "/", "")
         if "skill" in short.lower() or "SKILL" in short:
-            return f"📖 Reading skill: {short}"
+            return f"Reading skill: {short}"
         if "reference" in short.lower():
-            return f"📖 Reading reference: {short}"
-        return f"📖 Reading {short}"
+            return f"Reading reference: {short}"
+        return f"Reading {short}"
     if name == "Write":
         path = input_data.get("file_path", "")
         short = path.replace(str(REPO_ROOT) + "/", "")
-        return f"✍️ Writing {short}"
+        return f"Writing {short}"
     if name == "Bash":
         cmd = input_data.get("command", "")
-        if "airtable" in cmd.lower():
-            return "📤 Pushing to Airtable"
-        if "youtube" in cmd.lower():
-            return "🎬 Fetching YouTube transcript"
-        return "🔧 Running command"
+        if "fetch_transcript" in cmd or "supadata" in cmd.lower():
+            return "Fetching transcript"
+        if "notion" in cmd.lower():
+            return "Pushing to Notion"
+        return "Running command"
     if name == "Glob":
-        return "🔍 Searching files"
+        return "Searching files"
     if name == "Grep":
-        return "🔍 Searching content"
+        return "Searching content"
     return None
 
 
@@ -167,11 +187,14 @@ def dispatch(title: str, description: str | None, *,
     env.pop("CLAUDECODE", None)
     env.pop("ANTHROPIC_API_KEY", None)
 
+    global _child_proc
     try:
         proc = subprocess.Popen(
             cmd, cwd=str(REPO_ROOT), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, env=env, start_new_session=True,
         )
+        with _child_lock:
+            _child_proc = proc
     except FileNotFoundError:
         return False, "'claude' command not found"
 
@@ -235,6 +258,8 @@ def dispatch(title: str, description: str | None, *,
         raise
     finally:
         timer.cancel()
+        with _child_lock:
+            _child_proc = None
 
     if timed_out.is_set():
         return False, f"Timed out after {timeout}s"
@@ -270,16 +295,10 @@ def run_once(queue: TodoistQueue, project_id: str, *, verbose: bool = False,
     for task in tasks:
         labels = task.labels or []
 
-        if "agent-done" in labels or "agent-failed" in labels:
-            continue
+        if "agent" not in labels:
+            continue  # only process tasks labeled @agent
 
-        # Only pick up tasks with a due date of today (or past due).
-        # Tasks with no due date or a future date are skipped.
-        due = getattr(task, "due", None)
-        if not due or not due.date:
-            continue
-        task_date = datetime.date.fromisoformat(due.date)
-        if task_date > datetime.date.today():
+        if "agent-done" in labels or "agent-failed" in labels:
             continue
 
         retries = queue.get_retry_count(labels)
@@ -346,30 +365,24 @@ def main():
     if args.verbose:
         log.info("Verbose mode: streaming agent progress to terminal")
 
-    try:
-        if args.watch:
-            log.info("Polling every %ds. Ctrl+C to stop.\n", args.interval)
-            consecutive_errors = 0
-            while True:
-                try:
-                    run_once(queue, project_id, verbose=args.verbose,
-                             timeout=args.timeout, max_retries=args.max_retries)
-                    consecutive_errors = 0
-                except KeyboardInterrupt:
-                    raise
-                except Exception:
-                    consecutive_errors += 1
-                    backoff = min(args.interval * (2 ** consecutive_errors), 600)
-                    log.exception("Poll failed, retrying in %ds", backoff)
-                    time.sleep(backoff)
-                    continue
-                time.sleep(args.interval)
-        else:
-            run_once(queue, project_id, verbose=args.verbose,
-                     timeout=args.timeout, max_retries=args.max_retries)
-    except KeyboardInterrupt:
-        log.info("\nStopped.")
-        sys.exit(0)
+    if args.watch:
+        log.info("Polling every %ds. Ctrl+C to stop.\n", args.interval)
+        consecutive_errors = 0
+        while not _shutdown.is_set():
+            try:
+                run_once(queue, project_id, verbose=args.verbose,
+                         timeout=args.timeout, max_retries=args.max_retries)
+                consecutive_errors = 0
+            except Exception:
+                consecutive_errors += 1
+                backoff = min(args.interval * (2 ** consecutive_errors), 600)
+                log.exception("Poll failed, retrying in %ds", backoff)
+                _shutdown.wait(backoff)
+                continue
+            _shutdown.wait(args.interval)
+    else:
+        run_once(queue, project_id, verbose=args.verbose,
+                 timeout=args.timeout, max_retries=args.max_retries)
 
 
 if __name__ == "__main__":
