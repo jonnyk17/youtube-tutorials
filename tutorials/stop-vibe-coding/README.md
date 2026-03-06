@@ -108,6 +108,13 @@ Common things caught on review:
 
 Get your code to production. AI can help you set up deployment pipelines, CI/CD, and infrastructure if you're not familiar with them.
 
+**Example prompt:**
+
+```
+Commit and save these changes with a clear commit message.
+Then push the latest version to GCP Cloud Run.
+```
+
 ### 7. Monitor — Know when things break
 
 Set up monitoring before your users tell you something is broken.
