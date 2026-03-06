@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stop Vibe Coding — AI Development Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --surface: #141416;
+    --surface2: #1c1c1f;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --text-dim: rgba(240,237,232,0.45);
+    --text-mid: rgba(240,237,232,0.7);
+    --accent: #e85a3c;
+    --accent-dim: rgba(232,90,60,0.12);
+    --accent-mid: rgba(232,90,60,0.35);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.1);
+    --mono: 'DM Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    z-index: 999;
+  }
+
+  /* ── SLIDES ── */
+  .deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 64px 80px 80px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* ── HEADER ROW ── */
+  .slide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: auto;
+    flex-shrink: 0;
+  }
+
+  .stage-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .stage-label span {
+    color: var(--accent);
+    margin-right: 10px;
+  }
+
+  /* ── MAIN CONTENT AREA ── */
+  .slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* ── FOOTER ── */
+  .slide-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .footer-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    font-weight: 400;
+  }
+
+  .slide-num {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .display {
+    font-family: var(--serif);
+    font-size: clamp(52px, 6vw, 82px);
+    line-height: 1.05;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .display em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .display .dim { color: var(--text-mid); }
+
+  .heading {
+    font-family: var(--serif);
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.1;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .heading em { font-style: italic; color: var(--accent); }
+
+  .subheading {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-mid);
+    font-weight: 300;
+    max-width: 560px;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  /* ── DIVIDER ── */
+  .rule {
+    width: 32px; height: 1px;
+    background: var(--accent);
+    margin: 24px 0;
+  }
+
+  /* ── LIFECYCLE DIAGRAM ── */
+  .lifecycle {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .phase {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .phase-box {
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    padding: 14px 8px;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .phase-box.lit {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .phase-box .num {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .phase-box .name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .phase-box .sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+    display: none;
+  }
+
+  .phase-box.lit .sub { display: block; color: var(--text-mid); }
+
+  .ai-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: absolute;
+    top: -3px; right: -3px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .phase-box.lit .ai-dot,
+  .phase-box.has-ai .ai-dot { opacity: 1; }
+
+  .connector {
+    width: 20px;
+    height: 1px;
+    background: var(--border-strong);
+    flex-shrink: 0;
+  }
+
+  .connector.lit { background: var(--accent); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    padding: 20px 24px;
+  }
+
+  .card.accent-left {
+    border-left: 2px solid var(--accent);
+  }
+
+  .card.green-left {
+    border-left: 2px solid var(--green);
+    background: var(--green-dim);
+  }
+
+  .card.accent-bg {
+    background: var(--accent-dim);
+    border-color: var(--accent-mid);
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .card-label.accent { color: var(--accent); }
+  .card-label.green { color: var(--green); }
+
+  .card-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .card-body {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .cols { display: flex; gap: 20px; }
+  .col { flex: 1; }
+
+  /* ── TAG LIST ── */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border: 1px solid var(--border-strong);
+    padding: 4px 10px;
+    font-weight: 500;
+  }
+
+  .tag.accent {
+    color: var(--accent);
+    border-color: var(--accent-mid);
+    background: var(--accent-dim);
+  }
+
+  /* ── FLOW DIAGRAM (review loop) ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .flow-item:last-child { border-bottom: none; }
+
+  .flow-num {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    flex-shrink: 0;
+    padding-top: 2px;
+    width: 24px;
+  }
+
+  .flow-content { flex: 1; }
+
+  .flow-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .flow-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  /* ── SCALE BAR ── */
+  .scale-wrap { width: 100%; }
+
+  .scale-track {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green) 0%, #facc15 40%, var(--accent) 100%);
+    margin: 12px 0;
+    position: relative;
+  }
+
+  .scale-track::before,
+  .scale-track::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    width: 1px; height: 10px;
+    background: var(--border-strong);
+  }
+
+  .scale-track::before { left: 0; }
+  .scale-track::after { right: 0; }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── LIST ── */
+  .clean-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .clean-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .clean-list li:last-child { border-bottom: none; }
+
+  .clean-list li .li-marker {
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  /* ── QUOTE ── */
+  .pull-quote {
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.8vw, 34px);
+    line-height: 1.35;
+    color: var(--text);
+    font-style: italic;
+    padding-left: 24px;
+    border-left: 2px solid var(--accent);
+    max-width: 680px;
+  }
+
+  /* ── MONITOR ROWS ── */
+  .monitor-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .monitor-row:last-child { border-bottom: none; }
+
+  .monitor-icon {
+    width: 32px; height: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .monitor-name { font-weight: 500; color: var(--text); }
+  .monitor-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-weight: 300; }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed;
+    bottom: 28px; right: 32px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .nav button {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 400;
+  }
+
+  .nav button:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* ── TASK ITEMS ── */
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--text-mid);
+    font-weight: 300;
+  }
+
+  .task-id {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  /* ── INTRO ANIMATION ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide.active .a1 { animation: slideUp 0.5s ease 0.05s both; }
+  .slide.active .a2 { animation: slideUp 0.5s ease 0.12s both; }
+  .slide.active .a3 { animation: slideUp 0.5s ease 0.19s both; }
+  .slide.active .a4 { animation: slideUp 0.5s ease 0.26s both; }
+  .slide.active .a5 { animation: slideUp 0.5s ease 0.33s both; }
+  .slide.active .a6 { animation: slideUp 0.5s ease 0.40s both; }
+  .slide.active .a7 { animation: slideUp 0.5s ease 0.47s both; }
+
+  /* ── VERSUS LAYOUT ── */
+  .versus {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    align-items: center;
+    gap: 0;
+  }
+
+  .vs-label {
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 01 · TITLE -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide active" id="s1">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> Stop Vibe Coding</span>
+    </div>
+    <div class="slide-body" style="justify-content:flex-end; padding-bottom: 40px;">
+      <p class="label a1" style="margin-bottom: 28px;">The Mental Model</p>
+      <h1 class="display a2">Stop Vibe Coding.</h1>
+      <h1 class="display a3">Build Software With AI</h1>
+      <h1 class="display a4"><em>Better Than 99%</em> <span class="dim">of People.</span></h1>
+      <div class="rule a5"></div>
+      <p class="subheading a6">The workflow that makes every AI coding tool, framework, and approach suddenly make sense.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">01 / 15</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 02 · THE PROBLEM -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s2">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Problem</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Why Developers Get Lost</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px;">There is so much noise.</h2>
+      <div class="grid-2 a3" style="max-width: 680px; margin-bottom: 32px;">
+        <div class="card accent-left">
+          <div class="card-label accent">Tooling</div>
+          <div class="card-body">Claude Code. Codex. OpenCode. Kiro from Amazon. Cursor. Everyone has a system.</div>
+        </div>
+        <div class="card accent-left">
+          <div class="card-label accent">Process</div>
+          <div class="card-body">Spec-driven dev. RALF loops. Agentic workflows. YOLO mode. SpecKit. Kiro's spec mode.</div>
+        </div>
+        <div class="card accent-left">
+          <div class="card-label accent">Files, Rules &amp; Plugins</div>
+          <div class="card-body">claude.md. Claude Code plugins. Cursor rules. CONVENTIONS.md. Context engineering.</div>
+        </div>
+        <div class="card accent-left">
+          <div class="card-label accent">The Gap</div>
+          <div class="card-body">Nobody is stepping back and showing you how it all fits together.</div>
+        </div>
+      </div>
+      <p class="pull-quote a4" style="font-size: 20px; font-style:normal; font-family: var(--mono); font-weight:300;">This video gives you the one mental model that makes all of it make sense.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">02 / 15</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 03 · THE REFRAME -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s3">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Reframe</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">20 years. Hundreds of developers. The same pattern.</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 36px; max-width: 620px;">The way software gets built <em>has not changed.</em></h2>
+      <div class="cols a3" style="gap: 16px; max-width: 760px; margin-bottom: 28px;">
+        <div class="card" style="flex:1;">
+          <div class="card-label">What changed</div>
+          <div class="card-title">The tools</div>
+          <div class="card-body">Claude Code. AI agents. LLMs writing code at scale. The development environment has been transformed.</div>
+        </div>
+        <div class="card accent-bg" style="flex:1;">
+          <div class="card-label accent">What didn't change</div>
+          <div class="card-title">The lifecycle</div>
+          <div class="card-body">Requirements → Design → Plan → Build → Review → Deploy → Monitor. This is how great software has always been built.</div>
+        </div>
+      </div>
+      <p class="pull-quote a4">AI is an accelerant for the SDLC. Not a replacement for it.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">03 / 15</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 04 · BANGER 1 — JUST A PROMPT -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s4">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Truth About Every Framework</span>
+    </div>
+    <div class="slide-body" style="justify-content:center; align-items:center;">
+      <p class="label a1" style="text-align:center; margin-bottom: 32px;">No matter the tool. No matter the spec framework.</p>
+      <p class="pull-quote a2" style="border:none; padding: 0; text-align:center; font-size: clamp(32px, 4vw, 58px); font-style:italic; max-width:820px; line-height:1.15;">
+        Everything you send<br>to an LLM is <span style="color:var(--accent)">just a prompt.</span>
+      </p>
+      <div class="rule a3" style="margin: 32px auto;"></div>
+      <p class="subheading a4" style="text-align:center; max-width:560px;">The framework doesn't change that. What changes it is the quality of your thinking before you write the prompt.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">04 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 05 · BANGER 2 — TOOLS ARE ALL THE SAME -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s5">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> On Tools</span>
+    </div>
+    <div class="slide-body" style="justify-content:center;">
+      <p class="label a1" style="margin-bottom: 16px;">Claude Code. Codex. OpenCode. Kiro. Cursor.</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px; max-width: 640px;">They all fundamentally<br>do <em>the same thing.</em></h2>
+      <div class="cols a3" style="gap:16px; max-width:740px; margin-bottom: 28px;">
+        <div class="card" style="flex:1; text-align:center;">
+          <div class="card-label" style="margin-bottom:8px;">Claude Code</div>
+          <div class="card-body" style="font-size:11px;">Anthropic model</div>
+        </div>
+        <div class="card" style="flex:1; text-align:center;">
+          <div class="card-label" style="margin-bottom:8px;">Codex</div>
+          <div class="card-body" style="font-size:11px;">OpenAI model</div>
+        </div>
+        <div class="card" style="flex:1; text-align:center;">
+          <div class="card-label" style="margin-bottom:8px;">OpenCode</div>
+          <div class="card-body" style="font-size:11px;">Open source</div>
+        </div>
+        <div class="card" style="flex:1; text-align:center;">
+          <div class="card-label" style="margin-bottom:8px;">Kiro</div>
+          <div class="card-body" style="font-size:11px;">Amazon / Claude</div>
+        </div>
+      </div>
+      <div class="card accent-bg a4" style="max-width:640px; text-align:left; padding: 20px 28px;">
+        <div class="card-label accent" style="margin-bottom:8px;">The real difference</div>
+        <div class="card-body" style="font-size:14px; color: var(--text-mid);">Different models. Different interfaces. Same underlying mechanic. Don't chase tools. Don't get lost in frameworks that promise a magical workflow. <span style="color:var(--text);">There is no magical workflow.</span></div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">05 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 06 · FULL LIFECYCLE -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s6">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Framework</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">The Software Development Lifecycle</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 40px;">Seven stages. Every serious team. For decades.</h2>
+      <div class="lifecycle a3" style="margin-bottom: 32px;">
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">01</span><span class="name">Requirements</span></div></div>
+        <div class="connector"></div>
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">02</span><span class="name">Design</span></div></div>
+        <div class="connector"></div>
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">03</span><span class="name">Plan</span></div></div>
+        <div class="connector"></div>
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">04</span><span class="name">Build</span></div></div>
+        <div class="connector"></div>
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">05</span><span class="name">Review</span></div></div>
+        <div class="connector"></div>
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">06</span><span class="name">Deploy</span></div></div>
+        <div class="connector"></div>
+        <div class="phase"><div class="phase-box"><div class="ai-dot"></div><span class="num">07</span><span class="name">Monitor</span></div></div>
+      </div>
+      <p class="subheading a4">Used at Google. Amazon. Every serious engineering team in the world. The tools change. The frameworks change. <strong style="color:var(--text)">The lifecycle doesn't.</strong></p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">06 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 05 · AI AT EVERY STAGE -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s7">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Key Insight</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">The unlock most people miss</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 40px;">AI plugs into <em>every</em> stage. Not just the coding.</h2>
+      <div class="lifecycle a3" style="margin-bottom: 28px;">
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">01</span><span class="name">Requirements</span><span class="sub">Research, PRD, prototype</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">02</span><span class="name">Design</span><span class="sub">Architecture decisions</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">03</span><span class="name">Plan</span><span class="sub">Task breakdown</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">04</span><span class="name">Build</span><span class="sub">Code generation</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">05</span><span class="name">Review</span><span class="sub">Self-review loop</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">06</span><span class="name">Deploy</span><span class="sub">CI/CD setup</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box has-ai lit"><div class="ai-dot"></div><span class="num">07</span><span class="name">Monitor</span><span class="sub">Error tracking</span></div></div>
+      </div>
+      <div class="cols a4" style="gap:16px; max-width: 680px;">
+        <div class="card" style="flex:1;">
+          <div class="card-label">Most developers</div>
+          <div class="card-body">Use AI for one stage — code generation. Leave enormous value on the table everywhere else.</div>
+        </div>
+        <div class="card accent-bg" style="flex:1;">
+          <div class="card-label accent">Best engineers</div>
+          <div class="card-body">Use AI at every single step. Planning, designing, breaking down, building, reviewing, shipping.</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">07 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 06 · RIGOR SCALE -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s8">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> Important Nuance</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Tailor the rigor to the task</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 36px;">Not every task needs every step.</h2>
+      <div class="scale-wrap a3" style="max-width: 680px; margin-bottom: 36px;">
+        <div class="scale-track"></div>
+        <div class="scale-labels">
+          <span>Bug fix</span>
+          <span>Small feature</span>
+          <span>Complex feature</span>
+          <span>New product</span>
+        </div>
+      </div>
+      <div class="grid-2 a4" style="max-width: 680px; margin-bottom: 24px;">
+        <div class="card green-left">
+          <div class="card-label green">Low ceremony</div>
+          <div class="card-title" style="font-size:18px;">Bug fix</div>
+          <div class="card-body">No PRD. No design doc. Clear prompt → agent → review → done.</div>
+        </div>
+        <div class="card accent-left">
+          <div class="card-label accent">Full rigour</div>
+          <div class="card-title" style="font-size:18px;">Auth system</div>
+          <div class="card-body">Security. User data. Think carefully. Plan properly. Review thoroughly.</div>
+        </div>
+      </div>
+      <p class="subheading a5" style="font-size:13px; color:var(--text-dim);">One rule that always applies regardless of task size — <span style="color:var(--text)">clearer instructions always produce better output.</span></p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">06 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 07 · STAGE 1 — REQUIREMENTS -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s9">
+    <div class="slide-header">
+      <span class="stage-label"><span>01 /</span> Requirements & Planning</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">What are we building?</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px; max-width:560px;">Think before you code. Then use AI to think faster.</h2>
+      <div class="cols a3" style="gap:16px; align-items:flex-start;">
+        <div class="col">
+          <div class="card accent-bg" style="margin-bottom:12px;">
+            <div class="card-label accent">Real example</div>
+            <div class="card-body" style="font-size:13px; line-height:1.7;">On a recent freelance project I spent <strong style="color:var(--text)">3 days on research, planning and design</strong> before writing a single line of code. The project went smoothly because of it.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">PRD — Product Requirements Doc</div>
+            <ul class="clean-list" style="margin-top:4px;">
+              <li><span class="li-marker">→</span>What are we building?</li>
+              <li><span class="li-marker">→</span>Why are we building it?</li>
+              <li><span class="li-marker">→</span>Who is it for?</li>
+              <li><span class="li-marker">→</span>In scope / out of scope</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" style="margin-bottom:12px;">
+            <div class="card-label">Research phase</div>
+            <div class="card-body">Using an external API or unfamiliar library? Have Claude research it first and cache the output into a <code style="color:var(--accent); font-size:11px;">research.md</code> file. Prevents wrong turns mid-build.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Prototyping as planning</div>
+            <div class="card-body">Build 2–3 throwaway versions to figure out what you're building. AI makes building cheap enough to use as a thinking tool. This is still planning — you're figuring out what to build.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tags a4">
+        <span class="tag accent">PRD</span>
+        <span class="tag accent">Spec</span>
+        <span class="tag">research.md</span>
+        <span class="tag">Context files</span>
+        <span class="tag">RALF research phase</span>
+        <span class="tag">Throwaway prototype</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">07 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 08 · STAGE 2 — DESIGN -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s10">
+    <div class="slide-header">
+      <span class="stage-label"><span>02 /</span> Technical Design</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">How are we building it?</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px;">Requirements = what. Design = how.</h2>
+      <div class="cols a3" style="gap:16px; align-items:flex-start;">
+        <div class="col">
+          <div class="grid-2" style="gap:10px; margin-bottom:12px;">
+            <div class="card" style="padding:14px 16px;">
+              <div class="card-label">Database</div>
+              <div class="card-body" style="font-size:11px; margin-top:4px;">Choice, schema, relationships</div>
+            </div>
+            <div class="card" style="padding:14px 16px;">
+              <div class="card-label">Architecture</div>
+              <div class="card-body" style="font-size:11px; margin-top:4px;">Monolith vs microservices</div>
+            </div>
+            <div class="card" style="padding:14px 16px;">
+              <div class="card-label">Auth</div>
+              <div class="card-body" style="font-size:11px; margin-top:4px;">Security model, sessions</div>
+            </div>
+            <div class="card" style="padding:14px 16px;">
+              <div class="card-label">Data model</div>
+              <div class="card-body" style="font-size:11px; margin-top:4px;">Entities, relationships</div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card accent-left" style="margin-bottom:12px;">
+            <div class="card-label accent">These decisions are hard to undo</div>
+            <div class="card-body">Bad schema in production means painful migrations. Bad auth means a security incident. Slow down here. Especially anything touching user data or security.</div>
+          </div>
+          <div class="card green-left">
+            <div class="card-label green">Great use of AI here</div>
+            <div class="card-body">Have a proper conversation with Claude about your architecture. Ask it to challenge your assumptions. But you own the decisions. Don't let the agent make them for you.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tags a4">
+        <span class="tag accent">Technical spec</span>
+        <span class="tag accent">claude.md</span>
+        <span class="tag">CONVENTIONS.md</span>
+        <span class="tag">ADR</span>
+        <span class="tag">Architecture diagram</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">08 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 09 · STAGE 3 — PLAN -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s11">
+    <div class="slide-header">
+      <span class="stage-label"><span>03 /</span> Breaking Down The Work</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Break it into bounded tasks</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px;">One task. One agent. Reviewable increments.</h2>
+      <div class="cols a3" style="gap: 16px; align-items:flex-start;">
+        <div class="col">
+          <div class="card accent-bg" style="margin-bottom:12px;">
+            <div class="card-label accent">The principle</div>
+            <div class="card-body">Don't hand an agent your entire app and say "build this." Give it one specific, bounded task with all the context it needs. The difference in output quality is dramatic.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Task breakdown example</div>
+            <div style="margin-top: 10px;">
+              <div class="task-item"><span class="task-id">01</span>Add email validation to signup form</div>
+              <div class="task-item"><span class="task-id">02</span>Create GET /users/:id endpoint</div>
+              <div class="task-item"><span class="task-id">03</span>Add rate limiting to auth routes</div>
+              <div class="task-item"><span class="task-id">04</span>Write tests for auth flow</div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" style="margin-bottom:12px;">
+            <div class="card-label">Tool options</div>
+            <ul class="clean-list" style="margin-top: 4px;">
+              <li><span class="li-marker">→</span>Linear — proper project management</li>
+              <li><span class="li-marker">→</span>GitHub Issues — kanban built in</li>
+              <li><span class="li-marker">→</span>Notion — flexible, good for solo</li>
+              <li><span class="li-marker">→</span>A plain doc — works fine</li>
+            </ul>
+            <p style="font-size:11px; color:var(--text-dim); margin-top:10px; font-weight:300;">The tool doesn't matter. The discipline of breaking things down does.</p>
+          </div>
+          <div class="card green-left">
+            <div class="card-label green">AI helps here too</div>
+            <div class="card-body">Describe what you're building. Ask Claude to break it into tasks. It's surprisingly good at this — use it.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tags a4">
+        <span class="tag accent">Kanban</span>
+        <span class="tag accent">Linear</span>
+        <span class="tag">GitHub Issues</span>
+        <span class="tag">Parallel agents</span>
+        <span class="tag">Task decomposition</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">09 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 10 · STAGE 4 — BUILD -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s12">
+    <div class="slide-header">
+      <span class="stage-label"><span>04 /</span> Build</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Brief the agent. Don't just prompt.</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px;">Context is everything.</h2>
+      <div class="cols a3" style="gap:16px; align-items:flex-start;">
+        <div class="col">
+          <div class="card accent-left" style="margin-bottom: 12px;">
+            <div class="card-label accent">Without context</div>
+            <div class="card-body">"Build me an auth system" → agent guesses → you get something that almost fits → hours spent fixing misaligned assumptions.</div>
+          </div>
+          <div class="card green-left">
+            <div class="card-label green">With context</div>
+            <div class="card-body">An LLM makes hundreds of small decisions as it writes. Context means good decisions. No context means guessing. The output quality difference is not small.</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-label">What a good brief includes</div>
+            <ul class="clean-list" style="margin-top: 4px;">
+              <li><span class="li-marker">01</span>Background on what you're building</li>
+              <li><span class="li-marker">02</span>Your technical design decisions</li>
+              <li><span class="li-marker">03</span>The specific task clearly stated</li>
+              <li><span class="li-marker">04</span>Patterns and conventions to follow</li>
+              <li><span class="li-marker">05</span>Things to avoid</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tags a4">
+        <span class="tag accent">Claude Code</span>
+        <span class="tag">Cursor</span>
+        <span class="tag">Kiro</span>
+        <span class="tag">OpenCode</span>
+        <span class="tag">Agentic loop</span>
+        <span class="tag">YOLO mode</span>
+        <span class="tag">Context window</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">10 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 11 · STAGE 5 — REVIEW -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s13">
+    <div class="slide-header">
+      <span class="stage-label"><span>05 /</span> Review</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">The most skipped step</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px;">Never accept the first pass.</h2>
+      <div class="cols a3" style="gap:16px; align-items:flex-start;">
+        <div class="col">
+          <div class="flow">
+            <div class="flow-item">
+              <span class="flow-num">01</span>
+              <div class="flow-content">
+                <div class="flow-title">Build</div>
+                <div class="flow-desc">Agent completes the task</div>
+              </div>
+            </div>
+            <div class="flow-item">
+              <span class="flow-num">02</span>
+              <div class="flow-content">
+                <div class="flow-title">Self-review</div>
+                <div class="flow-desc">Ask the LLM to review its own code. Look for bugs, edge cases, security issues. It almost always finds something.</div>
+              </div>
+            </div>
+            <div class="flow-item">
+              <span class="flow-num">03</span>
+              <div class="flow-content">
+                <div class="flow-title">Human review</div>
+                <div class="flow-desc">Understand what was built. Does it match the technical design?</div>
+              </div>
+            </div>
+            <div class="flow-item">
+              <span class="flow-num">04</span>
+              <div class="flow-content">
+                <div class="flow-title">Next task</div>
+                <div class="flow-desc">Repeat the cycle</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card accent-bg" style="margin-bottom:12px;">
+            <div class="card-label accent">Why self-review works</div>
+            <div class="card-body">Generation and review are different cognitive tasks. The LLM catches things on review it missed while building. Consistently. Almost every single time.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Common catches</div>
+            <ul class="clean-list" style="margin-top:4px;">
+              <li><span class="li-marker">→</span>Edge cases & error handling</li>
+              <li><span class="li-marker">→</span>Security vulnerabilities</li>
+              <li><span class="li-marker">→</span>Missing input validation</li>
+              <li><span class="li-marker">→</span>Performance issues</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="tags a4">
+        <span class="tag accent">AI code review</span>
+        <span class="tag">PR review</span>
+        <span class="tag">Static analysis</span>
+        <span class="tag">GitHub Actions</span>
+        <span class="tag">QA plan</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">11 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 12 · STAGES 6+7 — DEPLOY + MONITOR -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s14">
+    <div class="slide-header">
+      <span class="stage-label"><span>06 — 07 /</span> Deploy & Monitor</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Ship it. Then watch it.</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 32px;">Deployment is the beginning, not the end.</h2>
+      <div class="cols a3" style="gap:16px; align-items:flex-start;">
+        <div class="col">
+          <div class="card" style="margin-bottom:12px;">
+            <div class="card-label">Deploy</div>
+            <div class="card-body">CI/CD, pipelines, infrastructure. Claude Code can help you set all of this up if you're not familiar with it. Ask it to walk you through it.</div>
+          </div>
+          <div class="card accent-left">
+            <div class="card-label accent">The hard truth</div>
+            <div class="card-body">Running software in production is harder than building it. Computers fail. All the time. You need to know before your users do.</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-label">Monitoring stack</div>
+            <div style="margin-top: 12px;">
+              <div class="monitor-row">
+                <div class="monitor-icon">⬤</div>
+                <div><div class="monitor-name">Error tracking</div><div class="monitor-desc">Sentry, Datadog — know when things break in real time</div></div>
+              </div>
+              <div class="monitor-row">
+                <div class="monitor-icon">◎</div>
+                <div><div class="monitor-name">Uptime monitoring</div><div class="monitor-desc">Is it responding? Is it healthy?</div></div>
+              </div>
+              <div class="monitor-row">
+                <div class="monitor-icon">△</div>
+                <div><div class="monitor-name">Alerts</div><div class="monitor-desc">Get notified before users complain</div></div>
+              </div>
+              <div class="monitor-row">
+                <div class="monitor-icon">≡</div>
+                <div><div class="monitor-name">Logs</div><div class="monitor-desc">Understand what happened when things go wrong</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">12 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 13 · EARN THE RIGHT -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s15">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Payoff</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Earn the right to vibe code</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 36px; max-width:560px;">The enemy isn't vibe coding. The enemy is skipping the thinking.</h2>
+      <div class="versus a3" style="max-width: 740px; margin-bottom: 32px;">
+        <div class="card accent-left" style="padding: 20px 24px;">
+          <div class="card-label accent">Without the workflow</div>
+          <div class="card-title" style="font-size:18px; margin-bottom:8px;">Junior dev vibe coding</div>
+          <div class="card-body">No design. No plan. Just prompting. Creates a mess. Gets stuck. Can't maintain it. Compounds fast.</div>
+        </div>
+        <div class="vs-label">vs</div>
+        <div class="card green-left" style="padding: 20px 24px;">
+          <div class="card-label green">With the workflow</div>
+          <div class="card-title" style="font-size:18px; margin-bottom:8px;">Senior dev vibe coding</div>
+          <div class="card-body">Design done. Architecture decided. Tasks broken down. Then moves fast within that structure. Produces something great.</div>
+        </div>
+      </div>
+      <p class="pull-quote a4">Do the thinking first. Then you've earned the right to move fast.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">13 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 14 · FULL RECAP -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s16">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> The Complete Picture</span>
+    </div>
+    <div class="slide-body">
+      <p class="label a1">Everything in one view</p>
+      <div class="rule a1"></div>
+      <h2 class="heading a2" style="margin-bottom: 36px;">The workflow. Seven stages. AI at every step.</h2>
+      <div class="lifecycle a3" style="margin-bottom: 28px;">
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">01</span><span class="name">Requirements</span><span class="sub">PRD, research, prototype</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">02</span><span class="name">Design</span><span class="sub">Architecture, schema, auth</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">03</span><span class="name">Plan</span><span class="sub">Tasks, kanban, breakdown</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">04</span><span class="name">Build</span><span class="sub">Brief → agent → code</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">05</span><span class="name">Review</span><span class="sub">Self-review, human check</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">06</span><span class="name">Deploy</span><span class="sub">CI/CD, pipelines</span></div></div>
+        <div class="connector lit"></div>
+        <div class="phase"><div class="phase-box lit"><div class="ai-dot"></div><span class="num">07</span><span class="name">Monitor</span><span class="sub">Errors, uptime, alerts</span></div></div>
+      </div>
+      <div class="cols a4" style="gap:16px; max-width: 680px;">
+        <div class="card" style="flex:1;">
+          <div class="card-body">This is not new. This is how great software has always been built. <strong style="color:var(--text)">AI just made every step faster.</strong></div>
+        </div>
+        <div class="card accent-bg" style="flex:1;">
+          <div class="card-body">Understand the process. Use AI at every stage. <strong style="color:var(--text)">That's the entire edge.</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — AI Development Workflow</span>
+      <span class="slide-num">14 / 17</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────── -->
+  <!-- 15 · CLOSE -->
+  <!-- ─────────────────────────────────────────────────────── -->
+  <div class="slide" id="s17">
+    <div class="slide-header">
+      <span class="stage-label"><span>//</span> That's It</span>
+    </div>
+    <div class="slide-body" style="justify-content:flex-end; padding-bottom:40px;">
+      <p class="label a1" style="margin-bottom:28px;">Stop Vibe Coding</p>
+      <h1 class="display a2">Do the thinking.</h1>
+      <h1 class="display a3"><em>Then move fast.</em></h1>
+      <div class="rule a4"></div>
+      <p class="subheading a5" style="max-width:480px;">The people who understand this process will get dramatically better results from AI tools. The people who don't will keep vibe coding themselves into the same messes. Just faster.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-title">Stop Vibe Coding — Build Software With AI Better Than 99% of People</span>
+      <span class="slide-num">15 / 17</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── NAV ── -->
+<div class="nav">
+  <button onclick="prev()">← Prev</button>
+  <button onclick="next()">Next →</button>
+</div>
+
+<script>
+  let cur = 1;
+  const total = 17;
+
+  function show(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('s' + n);
+    el.classList.add('active');
+    document.getElementById('progress').style.width = ((n / total) * 100) + '%';
+  }
+
+  function next() { if (cur < total) show(++cur); }
+  function prev() { if (cur > 1) show(--cur); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+  });
+
+  show(1);
+</script>
+</body>
+</html>
