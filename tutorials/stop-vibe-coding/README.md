@@ -60,6 +60,19 @@ Follow the existing pattern in app/routers/health.py.
 
 The difference in output quality is dramatic.
 
+**Example prompt for breaking down a spec:**
+
+```
+Read the spec in .ai/specs/auth.md.
+
+Break it down into independent work items that can be completed
+one at a time. Each work item should have a clear title, a short
+description of what needs to be done, and any dependencies on
+other work items.
+
+Once you have the list, push each work item to Linear as a new task.
+```
+
 ### 4. Build — Write the code
 
 Brief the agent properly. Give it:
