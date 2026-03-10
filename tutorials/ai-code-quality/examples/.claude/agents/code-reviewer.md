@@ -55,7 +55,7 @@ For each changed file:
 
 Tag findings as BUG if a contract is broken, NIT otherwise.
 
-**Agent 4 — Confidence Verification (Haiku)**
+**Agent 4 — Confidence Verification (Sonnet)**
 Take all findings from Agents 1-3. For each finding:
 - Check if the file or issue type matches any SKIP_PATTERNS
 - Check if the issue is pre-existing (exists on the base branch too)

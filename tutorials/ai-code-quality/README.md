@@ -311,7 +311,7 @@ For each changed file:
 
 Tag findings as BUG if a contract is broken, NIT otherwise.
 
-**Agent 4 — REVIEW.md Skip Verification (Haiku)**
+**Agent 4 — Confidence Verification (Sonnet)**
 Take all findings from Agents 1-3. For each finding:
 - Check if the file or issue type matches any SKIP_PATTERNS
 - Check if the issue is pre-existing (exists on the base branch too)
@@ -389,14 +389,16 @@ Otherwise, review uncommitted local changes.
 |---|---|---|
 | Reads REVIEW.md | No | Yes |
 | Local + PR review | PR only | Both |
-| Number of agents | 5 Sonnet + Haiku | 3 Sonnet + 1 Haiku (configurable) |
+| Number of agents | 5 Sonnet + Haiku scoring | 4 Sonnet (all strong models) |
 | Git blame analysis | Yes (Agent #3) | No (add if you want) |
 | Previous PR comments | Yes (Agent #4) | No (add if you want) |
 | Confidence scoring | Yes (0-100, threshold 80) | Yes (0-100, threshold 75) |
 | Skip patterns | No | Yes (from REVIEW.md) |
 | Editable | No | Yes — it's your markdown file |
 
-The plugin has two agents the custom version doesn't: git blame history and previous PR comment analysis. You can add those as Agent 5 and Agent 6 if you want them. The custom version has REVIEW.md integration and local review, which the plugin doesn't.
+The plugin has two agents the custom version doesn't: git blame history and previous PR comment analysis. You can add those as Agent 5 and Agent 6 if you want them. The custom version has REVIEW.md integration, local review, and stronger models across the board.
+
+**Why model choice matters here:** The official plugin uses Haiku for triage and confidence scoring to keep costs down. That's reasonable for a general-purpose tool, but the confidence scoring step is the **worst place to use a cheap model**. This is where the reviewer decides "is this a real bug or noise?" A weaker model scoring a subtle auth bypass at 50/100 and silently filtering it out is worse than never running review at all — because you think you were covered. In the custom agent, every step uses Sonnet. You spend more per review, but the whole point is to find bugs. Don't economise on the step that decides whether a bug gets reported.
 
 **You don't have to choose.** Run your custom `/review` locally, run the plugin `/code-review` on PRs. Two passes, different perspectives.
 
