@@ -247,11 +247,49 @@ This is an important distinction:
 
 ---
 
-## Part 3: Advanced — Custom Code Review Agent
+## Part 3: Advanced — Custom Code Review Plugin
 
-If you want even more control, you can create a full agent definition (not just a slash command). This is the same pattern the `/code-review` plugin uses internally, but you own every detail.
+If you want even more control, you can package the custom reviewer as an **installable Claude Code plugin**. Same format as the official ones — a `plugin.json`, a command, and an agent. Install it once, use it in any project.
 
-Create `.claude/agents/code-reviewer.md`:
+### Install It
+
+The plugin lives in this tutorial's repo. Install it directly:
+
+```bash
+claude plugins install https://github.com/owainlewis/youtube-tutorials/tree/main/tutorials/ai-code-quality/plugin
+```
+
+This gives you the `/review` command globally. It reads REVIEW.md from whatever project you're in.
+
+### Or Copy It Into Your Project
+
+If you'd rather keep it project-local, copy the files:
+
+```
+your-project/
+├── .claude/
+│   ├── commands/review.md           # /review command
+│   └── agents/code-reviewer.md      # the agent
+```
+
+### The Model is Configurable
+
+The agent frontmatter controls which model runs:
+
+```yaml
+---
+name: code-reviewer
+model: sonnet          # change to: opus, haiku, etc.
+---
+```
+
+Change `model: sonnet` to `model: opus` for deeper analysis on critical repos, or leave it as `sonnet` for a good balance of cost and quality. This is set in the agent file, not buried in code — edit one line.
+
+The official `/code-review` plugin hardcodes Haiku for its scoring agents. You can't change that without forking the plugin. Here, it's one line of frontmatter.
+
+### The Agent Definition
+
+`agents/code-reviewer.md`:
 
 ```markdown
 ---
@@ -385,20 +423,21 @@ Otherwise, review uncommitted local changes.
 
 ### How This Compares
 
-| | Plugin `/code-review` | Custom agent |
+| | Plugin `/code-review` | Custom plugin `/review` |
 |---|---|---|
 | Reads REVIEW.md | No | Yes |
 | Local + PR review | PR only | Both |
-| Number of agents | 5 Sonnet + Haiku scoring | 4 Sonnet (all strong models) |
+| Model | 5 Sonnet + Haiku scoring | Configurable (one line of frontmatter) |
 | Git blame analysis | Yes (Agent #3) | No (add if you want) |
 | Previous PR comments | Yes (Agent #4) | No (add if you want) |
 | Confidence scoring | Yes (0-100, threshold 80) | Yes (0-100, threshold 75) |
 | Skip patterns | No | Yes (from REVIEW.md) |
-| Editable | No | Yes — it's your markdown file |
+| Installable | `claude plugins install code-review` | `claude plugins install <your-repo-url>` |
+| Editable | No (Anthropic's plugin) | Yes — it's your markdown file |
 
-The plugin has two agents the custom version doesn't: git blame history and previous PR comment analysis. You can add those as Agent 5 and Agent 6 if you want them. The custom version has REVIEW.md integration, local review, and stronger models across the board.
+The official plugin has two agents the custom version doesn't: git blame history and previous PR comment analysis. You can add those as Agent 5 and Agent 6 if you want. The custom version has REVIEW.md integration, local review, configurable models, and skip patterns.
 
-**Why model choice matters here:** The official plugin uses Haiku for triage and confidence scoring to keep costs down. That's reasonable for a general-purpose tool, but the confidence scoring step is the **worst place to use a cheap model**. This is where the reviewer decides "is this a real bug or noise?" A weaker model scoring a subtle auth bypass at 50/100 and silently filtering it out is worse than never running review at all — because you think you were covered. In the custom agent, every step uses Sonnet. You spend more per review, but the whole point is to find bugs. Don't economise on the step that decides whether a bug gets reported.
+**Why model choice matters here:** The official plugin hardcodes Haiku for triage and confidence scoring. That's reasonable for keeping costs down, but the confidence scoring step is the **worst place to use a cheap model**. This is where the reviewer decides "is this a real bug or noise?" A weaker model scoring a subtle auth bypass at 50/100 and silently filtering it out is worse than never running review at all — because you think you were covered. In the custom plugin, you set the model in one line of frontmatter. Default is Sonnet for everything. Change it to Opus for critical repos. Your choice, not Anthropic's.
 
 **You don't have to choose.** Run your custom `/review` locally, run the plugin `/code-review` on PRs. Two passes, different perspectives.
 
@@ -610,7 +649,7 @@ your-project/
 | 3. Create `/review` command | Custom command reading REVIEW.md | Your markdown file | API usage |
 | 4. Add hooks | Format, secrets, debug warnings | Deterministic scripts | Free |
 | 5. Add GitHub Action | Automatic PR review | CI automation | API usage |
-| 6. (Optional) Custom agent | Full multi-agent reviewer | Your markdown file | API usage |
+| 6. (Optional) Custom plugin | Installable multi-agent reviewer with REVIEW.md | `claude plugins install <url>` | API usage |
 
 **Start with step 1.** Install the plugins, use `/simplify` and `/code-review` as-is. See if generic review is enough.
 
@@ -618,7 +657,7 @@ your-project/
 
 **Steps 4-5 make it automatic.** Hooks for the mechanical stuff, GitHub Action for PR review. Nobody has to remember anything.
 
-**Step 6 if you want full control.** A custom agent with 4 parallel reviewers, REVIEW.md integration, confidence scoring, skip patterns. You own every detail.
+**Step 6 if you want full control.** Install the custom review plugin — 4 parallel agents, REVIEW.md integration, confidence scoring, configurable model. One line to install, one line to change the model.
 
 The pattern: **start generic, make it specific, then automate it.**
 

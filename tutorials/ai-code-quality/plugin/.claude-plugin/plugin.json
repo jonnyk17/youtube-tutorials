@@ -1,0 +1,8 @@
+{
+  "name": "review-md",
+  "version": "1.0.0",
+  "description": "Code review guided by your project's REVIEW.md. Local and PR review with multi-agent analysis and configurable model.",
+  "author": {
+    "name": "Owain Lewis"
+  }
+}
