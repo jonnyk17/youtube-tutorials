@@ -24,18 +24,25 @@ def approval_listener(auto_approve: list[str]):
             return
         if event.name in auto_approve:
             return
-        console.print(f"  [yellow bold]Allow {event.name}? [y/n][/yellow bold] ", end="")
+        console.print(
+            f"  [yellow bold]Allow {event.name}? [y/n][/yellow bold] ", end=""
+        )
         answer = input().strip().lower()
         if answer != "y":
             raise PermissionError(f"User denied {event.name}")
+
     return listener
 
 
 def main():
     parser = argparse.ArgumentParser(description="nano-agent")
-    parser.add_argument("task", nargs="?", default=None, help="Initial task (omit for interactive mode)")
+    parser.add_argument(
+        "task", nargs="?", default=None, help="Initial task (omit for interactive mode)"
+    )
     parser.add_argument("--approve", action="store_true", help="Enable approval gate")
-    parser.add_argument("--thinking", action="store_true", help="Enable extended thinking")
+    parser.add_argument(
+        "--thinking", action="store_true", help="Enable extended thinking"
+    )
     parser.add_argument("--config", default="config.yaml", help="Path to config file")
     args = parser.parse_args()
 
