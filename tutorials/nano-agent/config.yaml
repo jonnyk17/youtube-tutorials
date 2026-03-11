@@ -1,0 +1,16 @@
+model: claude-sonnet-4-20250514
+max_tokens: 16384
+max_turns: 20
+system_prompt: |
+  You are a coding agent. You help developers by reading, writing, and modifying code.
+  Use tools to interact with the filesystem. Be concise and direct.
+  When a task is complete, respond with a summary of what you did.
+thinking:
+  enabled: false
+  budget_tokens: 10000
+approval:
+  enabled: false
+  auto_approve:
+    - read_file
+    - list_directory
+    - grep
