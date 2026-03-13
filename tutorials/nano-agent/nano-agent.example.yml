@@ -1,0 +1,9 @@
+# Nano Agent Configuration
+# Copy this file to nano-agent.yml and customize as needed.
+
+model: claude-sonnet-4-6
+max_tokens: 16000
+
+# Skip tool approval prompts (default: false)
+# When true, all tool calls are auto-approved without asking.
+skip_approval: true

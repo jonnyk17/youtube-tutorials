@@ -1,13 +1,16 @@
 [project]
 name = "nano-agent"
 version = "0.1.0"
-description = "A minimal coding agent built from scratch with the Anthropic API"
-requires-python = ">=3.11"
+description = "A minimal coding agent for learning how to build AI agents"
+requires-python = ">=3.12"
 dependencies = [
-    "anthropic>=0.52.0",
-    "rich>=13.0",
+    "anthropic>=0.40.0",
     "pyyaml>=6.0",
+    "rich>=13.0",
 ]
+
+[project.scripts]
+nano-agent = "nano_agent.main:main"
 
 [dependency-groups]
 dev = [
@@ -15,15 +18,9 @@ dev = [
     "ipykernel",
 ]
 
-[tool.uv]
-package = true
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["nano_agent"]
-
-[project.scripts]
-nano-agent = "nano_agent.main:main"
+packages = ["src/nano_agent"]

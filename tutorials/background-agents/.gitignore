@@ -9,6 +9,7 @@ __pycache__/
 .claude/skills/
 .claude/agents/
 .claude/settings.local.json
+agents/
 
 # Content and transcripts
 workspace/
