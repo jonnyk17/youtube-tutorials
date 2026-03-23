@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Review the changes made in this session. Check for bugs, security issues, and violations of project conventions. If you find a REVIEW.md in the project root, check against those rules too. If you find high-confidence issues, respond with exit code 2 to block and describe what needs to be fixed.",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

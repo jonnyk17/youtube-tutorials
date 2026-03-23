@@ -1,0 +1,18 @@
+[project]
+name = "6-types-of-rag"
+version = "0.1.0"
+description = "Six types of RAG, clearly explained. Real code examples using OpenAI and PostgreSQL."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=1.50.0",
+    "psycopg[binary]>=3.2.0",
+    "python-dotenv>=1.0.0",
+    "docling>=2.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ipykernel",
+]

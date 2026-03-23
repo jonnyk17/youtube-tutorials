@@ -1,114 +1,98 @@
-# AI Code Review Skills for Claude Code
+# 6 Levels of AI Code Review
 
-A collection of focused code review skills, hooks, and agent configurations for Claude Code. Each skill is a specialized reviewer that checks for one category of issues. Run them individually or as a team for comprehensive review.
+Companion repo for the video. Everything you need to set up a complete AI code review pipeline.
 
-## The Problem
+## The 6 Levels
 
-AI-generated code has 1.7x more issues than human-written code. 75% more logic bugs. 41% higher churn rate. Nearly 40% of committed code is now AI-generated, and review capacity hasn't kept up.
+```
+LOCAL (before push)
+├── Level 1: Read the Diff (manual, 30 seconds)
+├── Level 2: Built-in Commands (/review, /simplify)
+├── Level 3: Automated Checks (hooks for linting, formatting)
+├── Level 4: Custom Review with REVIEW.md (/blueprint:code-review)
+└── Level 5: Third-Party Local Review (CodeRabbit)
 
-These skills help you catch issues before they ship.
+REMOTE (on the PR)
+└── Level 6: CI Review (Codex, CodeRabbit CI, Copilot)
+```
 
-## Skills
-
-| Skill | What It Checks |
-|-------|---------------|
-| **security-reviewer** | OWASP top 10, hardcoded secrets, auth issues, injection, input validation |
-| **code-simplifier** | Unnecessary complexity, dead code, duplication, over-engineering |
-| **convention-checker** | CLAUDE.md compliance, naming, file structure, API patterns |
-| **dependency-auditor** | Outdated packages, known CVEs, unused deps, duplicates |
-| **documentation-checker** | Stale comments, outdated README, missing docs, dead TODOs |
+Start at Level 1. Add layers as your codebase grows.
 
 ## Quick Start
 
-### Install a single skill
+### Level 3: Automated Hooks
 
-Copy any skill folder into your project's `.claude/skills/` directory:
-
-```bash
-cp -r skills/security-reviewer .claude/skills/
-```
-
-### Install all skills
+Copy the hooks config into your project:
 
 ```bash
-cp -r skills/* .claude/skills/
+cp hooks/settings.json .claude/settings.local.json
 ```
 
-### Install hooks (auto-lint, auto-format on every edit)
+This runs ESLint on every file edit. Swap `eslint` for your linter (ruff, mypy, prettier, etc.).
 
-Copy the hooks configuration into your Claude Code settings:
+### Level 4: Custom Review with REVIEW.md
+
+1. Copy the example REVIEW.md to your project root:
 
 ```bash
-# Project-level (recommended)
-cat hooks/settings.json
-# Merge into your .claude/settings.json
+cp examples/REVIEW.md ./REVIEW.md
 ```
 
-## Usage
+2. Edit it with your team's specific rules.
 
-### Review current changes
+3. Install Blueprint and run a review:
 
-Ask Claude to use a specific reviewer:
+```bash
+# Install Blueprint plugin
+/plugin marketplace add owainlewis/blueprint
+/plugin install blueprint@owainlewis-blueprint
 
-```
-Review my recent changes for security issues
-```
-
-```
-Simplify the code I just wrote
-```
-
-```
-Check if my code follows project conventions
+# Review your changes
+/blueprint:code-review
 ```
 
-### Run all reviewers as a team
+### Level 5: CodeRabbit Local Review
 
-```
-Run a full code review on my recent changes using all review skills
-```
+```bash
+# Install CodeRabbit CLI
+curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+coderabbit auth login
 
-### Periodic codebase audit
+# Install the Claude Code plugin
+/plugin install coderabbit
 
-```
-Audit the entire codebase for security vulnerabilities
-```
-
-```
-Find all outdated dependencies and known CVEs
+# Review your changes
+/coderabbit:review
 ```
 
-```
-Check for documentation rot across the project
-```
+### Level 6: CI Review
 
-## Automatic Review (Hooks)
+**Codex on GitHub:**
+- Enable in your Codex web settings
+- Every PR gets automatically reviewed
+- Included with ChatGPT Pro subscription
 
-The `hooks/` directory contains Claude Code hook configurations that run checks automatically:
+**CodeRabbit on GitHub:**
+- Install the GitHub App: https://github.com/apps/coderabbitai
+- Every PR gets automatically reviewed
+- Free for open source
 
-- **Post-edit lint**: Runs your linter after every file edit
-- **Post-edit format**: Runs your formatter after every file edit
-- **Stop review**: Runs a quick review agent when Claude finishes a task
-
-See [hooks/README.md](hooks/README.md) for setup instructions.
-
-## Building Your Own Skills
-
-Each skill follows a simple pattern:
+## Files in This Repo
 
 ```
-skill-name/
-  SKILL.md      # Description, triggers, and overview
-  AGENTS.md     # Full instructions for the reviewing agent
-  rules/        # Individual rule files (one per check)
-    rule-name.md
+ai-code-review/
+├── README.md                    # This file
+├── hooks/
+│   ├── settings.json            # Claude Code hooks config (Level 3)
+│   └── stop-hook.json           # Stop hook for automatic review (Level 4)
+├── examples/
+│   ├── REVIEW.md                # Example REVIEW.md for your project (Level 4)
+│   └── agents-md-review.md      # Example agents.md review section for Codex (Level 6)
+└── ARCHITECTURE.md              # Visual diagram of all 6 levels
 ```
 
-The `rules/` directory makes skills modular. Add, remove, or customize individual rules without touching the core skill. See any existing skill as a template.
+## Related
 
-## Philosophy
-
-- **Focused over general.** Each skill checks one category of issues well, rather than checking everything poorly.
-- **Low noise.** Only flag issues you're confident about. False positives erode trust.
-- **Actionable.** Every issue flagged should include a specific fix, not just a warning.
-- **Composable.** Skills work alone or together. Mix and match for your workflow.
+- [Blueprint plugin](https://github.com/owainlewis/blueprint) - Full SDLC workflow including /code-review
+- [CodeRabbit](https://coderabbit.ai) - AI code review (local CLI + GitHub App)
+- [Codex](https://openai.com/codex) - OpenAI's coding agent with built-in code review
