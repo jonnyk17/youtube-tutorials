@@ -1,4 +1,25 @@
-# Architecture: 6 Levels of AI Code Review
+# Architecture: 5 Levels of AI Code Review
+
+## AI Review vs Human Review
+
+```
+┌─────────────────────────────────────┐     ┌─────────────────────────────────────┐
+│            AI REVIEW                 │     │           HUMAN REVIEW              │
+│                                     │     │                                     │
+│  Superior at:                       │     │  Superior at:                       │
+│  pattern matching, speed,           │     │  judgement, context, strategy        │
+│  consistency                        │     │                                     │
+│                                     │     │  - Does this solve the problem?     │
+│  - Security (OWASP, injection,      │     │  - Is this the right architecture?  │
+│    secrets, XSS)                    │     │  - Does it meet acceptance criteria?│
+│  - Bug detection (logic, null,      │     │  - Business logic verification      │
+│    races, off-by-one)               │     │  - Will this break in 3 months?     │
+│  - Style guide adherence            │     │  - Should we even build this?       │
+│  - Scales to any volume             │     │                                     │
+│  - Never gets tired                 │     │  5 min focused on the right things  │
+│                                     │     │  > 30 min reading every line        │
+└─────────────────────────────────────┘     └─────────────────────────────────────┘
+```
 
 ## The Pipeline
 
@@ -11,31 +32,35 @@
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                       LOCAL (before push)                        │
+│                     QUALITY GATES (not review)                   │
+│                                                                 │
+│   Linting (ruff, eslint), formatting (black, prettier),         │
+│   type checking (mypy, tsc). Deterministic. Automatic.          │
+│   Run via hooks on every file edit. The foundation.             │
+│                                                                 │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   CODE REVIEW: LOCAL (before push)               │
 │                                                                 │
 │   Level 1: Read the Diff                                        │
-│   Manual. 30 seconds. Did it do what you asked?                 │
-│   Did it touch files you didn't expect?                         │
+│   Manual. 30 seconds. Correctness, blast radius, security.      │
+│   Did the agent do only what you asked?                         │
 │                                                                 │
-│   Level 2: Built-in Review Commands                             │
-│   /review  -> general feedback on recent changes                │
-│   /simplify -> reduce complexity, remove over-engineering       │
-│   Same context window. Quick self-check.                        │
+│   Level 2: Self-Review                                          │
+│   Prompt: "Review for bugs, security, over-engineering."        │
+│   /simplify for cleanup. Same context. Quick.                   │
 │                                                                 │
-│   Level 3: Automated Checks (Hooks)                             │
-│   Linting, formatting, type checking.                           │
-│   Runs automatically on every edit via Claude Code hooks.       │
-│   Deterministic. 100% precision. Zero effort.                   │
+│   Level 3: Custom Review (REVIEW.md)                            │
+│   Your rules, your stack, portable across any agent.            │
+│   /blueprint:code-review or write your own command.             │
+│   Stop hooks for automatic review on task completion.           │
 │                                                                 │
-│   Level 4: Custom Review with REVIEW.md                         │
-│   Your team's specific rules encoded in a file.                 │
-│   /blueprint:code-review reads REVIEW.md automatically.         │
-│   Stop hooks can trigger review on every task completion.       │
-│                                                                 │
-│   Level 5: Third-Party Local Review                             │
-│   /coderabbit:review -> purpose-built review tool               │
-│   40+ linters, SAST scanners, false positive filtering.         │
-│   A step up from DIY review skills.                             │
+│   Level 4: Third-Party Local Review                             │
+│   /coderabbit:review (40+ scanners, SAST)                      │
+│   Codex /review (4 presets, P0-P3 priority)                     │
+│   Cross-model review: write with Claude, review with Codex.    │
 │                                                                 │
 └────────────────────────────┬────────────────────────────────────┘
                              │
@@ -43,22 +68,23 @@
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                       REMOTE (on the PR)                        │
+│                   CODE REVIEW: REMOTE (on the PR)                │
 │                                                                 │
-│   Level 6: CI Review                                            │
+│   Level 5: CI Review                                            │
 │                                                                 │
 │   ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│   │    Codex      │  │  CodeRabbit  │  │  Copilot / Anthropic │  │
-│   │              │  │     CI       │  │     Code Review      │  │
-│   │  Full repo   │  │  40+ SAST    │  │  Built into GitHub / │  │
-│   │  access.     │  │  scanners.   │  │  Claude ecosystem.   │  │
-│   │  Traces      │  │  Inline PR   │  │                      │  │
-│   │  deps.       │  │  comments.   │  │                      │  │
-│   │  Tests its   │  │  Free for    │  │                      │  │
-│   │  hypotheses. │  │  open source.│  │                      │  │
+│   │    Codex      │  │  CodeRabbit  │  │  Anthropic           │  │
+│   │  on GitHub    │  │     CI       │  │  /code-review        │  │
+│   │              │  │              │  │  security-review      │  │
+│   │  Full repo   │  │  40+ SAST    │  │                      │  │
+│   │  access.     │  │  scanners.   │  │  4 parallel agents.  │  │
+│   │  Tests its   │  │  Inline PR   │  │  Confidence scoring. │  │
+│   │  hypotheses. │  │  comments.   │  │  $15-25/review       │  │
+│   │  Included    │  │  Free for    │  │  (enterprise).       │  │
+│   │  w/ ChatGPT. │  │  open source.│  │                      │  │
 │   └──────────────┘  └──────────────┘  └──────────────────────┘  │
 │                                                                 │
-│   Cross-model review: Claude writes, Codex reviews.             │
+│   Cross-model: Claude writes, Codex reviews.                    │
 │   Different models catch different things.                      │
 │                                                                 │
 └────────────────────────────┬────────────────────────────────────┘
@@ -67,45 +93,33 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                       HUMAN REVIEW                              │
 │                                                                 │
-│   Architecture decisions. Business logic. "Should we even       │
-│   build this?" Integration concerns. What AI can't judge.       │
-│                                                                 │
-│   5 min of human review on the right things >                   │
-│   30 min reading every line.                                    │
+│   Architecture. Business logic. "Should we build this?"         │
+│   What AI cannot judge.                                         │
 │                                                                 │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
                           MERGE
-
+```
 
 ## What Each Level Catches
 
-┌────────┬──────────────────────────────────┬─────────────────────┐
-│ Level  │ What it catches                  │ Cost / Effort       │
-├────────┼──────────────────────────────────┼─────────────────────┤
-│ 1      │ Unexpected changes, wrong files  │ Free. 30 seconds.   │
-│ 2      │ Obvious bugs, over-engineering   │ Free. 10 seconds.   │
-│ 3      │ Lint errors, type errors, format │ Free. Automatic.    │
-│ 4      │ Project-specific rule violations │ Free. Automatic.    │
-│ 5      │ Security, SAST, coverage gaps    │ Free/Paid. Local.   │
-│ 6      │ Architectural bugs, cross-file   │ Free/Paid. On PR.   │
-│ Human  │ Business logic, architecture     │ Time. On PR.        │
-└────────┴──────────────────────────────────┴─────────────────────┘
+```
+┌────────┬──────────────────────────────────────┬──────────────────────┐
+│ Level  │ What it catches                      │ Cost / Effort        │
+├────────┼──────────────────────────────────────┼──────────────────────┤
+│ Gates  │ Lint errors, type errors, formatting │ Free. Automatic.     │
+│ 1      │ Unexpected changes, wrong files      │ Free. 30 seconds.    │
+│ 2      │ Obvious bugs, over-engineering       │ Free. 10 seconds.    │
+│ 3      │ Project-specific rule violations     │ Free. Your rules.    │
+│ 4      │ Security, SAST, coverage gaps        │ Free/Paid. Local.    │
+│ 5      │ Architectural bugs, cross-file       │ Free/Paid. On PR.    │
+│ Human  │ Business logic, architecture         │ Time. Judgement.     │
+└────────┴──────────────────────────────────────┴──────────────────────┘
 ```
 
 ## The Key Insight
 
-Each level catches a different class of issue. No single level catches everything.
-The earlier you catch a bug, the cheaper it is to fix.
+There is no perfect tool. AI catches things humans miss. Humans catch things AI misses. The value is in layering them.
 
-```
-Level 1-2:  "Did the agent do what I asked?"
-Level 3:    "Is the code syntactically correct?"
-Level 4:    "Does it follow our team's rules?"
-Level 5:    "Is it secure and well-tested?"
-Level 6:    "Does it work in the context of the full codebase?"
-Human:      "Is this the right approach?"
-```
-
-Start at Level 1. Add layers as you need them.
+Find a single reliable way to review locally. Layer CI on top as a safety net. Start simple. Add complexity only when you need it.
