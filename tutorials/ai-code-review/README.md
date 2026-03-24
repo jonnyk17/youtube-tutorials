@@ -1,38 +1,69 @@
-# 5 Levels of AI Code Review
+# How I Review AI-Generated Code
 
 Companion repo for the video. Everything you need to set up a complete AI code review pipeline.
 
-## The 5 Levels
+## The Problem
+
+Code review was already the bottleneck. Developers take hours or days to review a single PR. Most teams struggle to review two or three a day.
+
+AI makes this 10x worse. Same number of reviewers, 10x more PRs.
+
+The answer isn't to skip review. It's to layer your checks so humans only focus on what requires human judgement.
+
+## The 4 Layers
 
 ```
-QUALITY GATES (set up first, not review)
-└── Linting, formatting, type checking via hooks
+LAYER 1: AUTOMATE THE OBVIOUS
+   Linting, formatting, tests, security scans.
+   Run via hooks. Deterministic. No judgement.
+   Principle: don't make people review things automated tools could catch.
 
-LOCAL (before push)
-├── Level 1: Read the Diff (manual, 30 seconds)
-├── Level 2: Self-Review (/simplify, prompt it)
-├── Level 3: Custom Review with REVIEW.md (write your own, /blueprint:code-review)
-└── Level 4: Third-Party Local Review (CodeRabbit, Codex /review)
+LAYER 2: REVIEW LOCALLY (before push)
+   Actually run the code. (Don't be lazy.)
+   Read the diff. Check for silent side effects.
+   Get an AI review in fresh context.
+   Three options: custom command, Codex /review, CodeRabbit plugin.
 
-REMOTE (on the PR)
-└── Level 5: CI Review (Codex on GitHub, CodeRabbit CI, claude-code-security-review)
+LAYER 3: REVIEW ON CI (on the PR)
+   Automatic AI review on every PR before a human sees it.
+   Safety net for when you forget to run Layer 2.
+   Codex on GitHub, CodeRabbit CI, claude-code-security-review.
+
+LAYER 4: HUMAN REVIEW
+   Architecture, business logic, "should we build this?"
+   By now, everything mechanical is handled.
 ```
 
-Start at Level 1. Add layers as your codebase grows.
+Each layer filters out a category of problems so the next layer sees less noise.
 
 ## Quick Start
 
-### Quality Gates: Automated Hooks
+### Layer 1: Automated Hooks
 
 Copy the hooks config into your project:
 
 ```bash
+# Copy the full hooks config (PostToolUse linting + Stop hook)
 cp hooks/settings.json .claude/settings.local.json
+
+# Copy the stop-checks script
+mkdir -p .claude/hooks
+cp hooks/stop-checks.sh .claude/hooks/stop-checks.sh
+chmod +x .claude/hooks/stop-checks.sh
 ```
 
-This runs ruff on every Python file edit. Swap for your stack's linter.
+This gives you two hooks:
 
-### Level 3: Custom Review with REVIEW.md
+- **PostToolUse** runs ruff on every Python file edit (swap for your stack's linter)
+- **Stop** runs linting + security scanning every time Claude tries to finish a task. If checks fail, Claude is blocked and must fix the issues.
+
+See `hooks/stop-checks.sh` for the full script. Edit it for your stack.
+
+You can also use the agent-based stop hook for AI-powered review. See `hooks/stop-hook.json` for that config.
+
+### Layer 2: AI Review Locally
+
+**Option A: Custom command with REVIEW.md (recommended)**
 
 1. Copy the example REVIEW.md to your project root:
 
@@ -42,7 +73,7 @@ cp examples/REVIEW.md ./REVIEW.md
 
 2. Edit it with your team's specific rules.
 
-3. Install Blueprint and run a review:
+3. Run a review using Blueprint or your own command:
 
 ```bash
 # Install Blueprint plugin
@@ -55,7 +86,15 @@ cp examples/REVIEW.md ./REVIEW.md
 
 Or write your own review command. See `examples/codex-review-prompt.md` for an excellent reference prompt to adapt.
 
-### Level 4: CodeRabbit Local Review
+**Option B: Codex /review**
+
+```bash
+# Built into Codex CLI
+codex /review
+# Four presets: base branch, uncommitted, specific commit, custom
+```
+
+**Option C: CodeRabbit plugin**
 
 ```bash
 # Install CodeRabbit CLI
@@ -69,7 +108,7 @@ coderabbit auth login
 /coderabbit:review
 ```
 
-### Level 5: CI Review
+### Layer 3: CI Review
 
 **Codex on GitHub:**
 - Enable in your Codex web settings
@@ -88,16 +127,18 @@ coderabbit auth login
 
 ```
 ai-code-review/
-├── README.md
-├── ARCHITECTURE.md                      # Visual diagram of all 5 levels
+├── README.md                           # This file
+├── ARCHITECTURE.md                     # Visual diagram of all 4 layers
+├── SLIDES.html                         # Branded slide deck for the video
 ├── hooks/
-│   ├── settings.json                    # Post-edit lint hook (ruff)
-│   └── stop-hook.json                   # Stop hook for automatic AI review
+│   ├── settings.json                   # Full hooks config (PostToolUse + Stop)
+│   ├── stop-checks.sh                  # Stop hook script (lint + security + debug checks)
+│   └── stop-hook.json                  # Alternative: agent-based Stop hook for AI review
 └── examples/
-    ├── REVIEW.md                        # Example review rules for your project
-    ├── codex-review-prompt.md           # OpenAI's review prompt (great reference)
-    ├── agents-md-review.md              # Review section for agents.md (Codex)
-    └── real-world-reviews.md            # Real examples + key takeaway
+    ├── REVIEW.md                       # Example review rules for your project
+    ├── codex-review-prompt.md          # OpenAI's review prompt (great reference)
+    ├── agents-md-review.md             # Review section for agents.md (Codex)
+    └── real-world-reviews.md           # Real examples + key takeaway
 ```
 
 ## Related
