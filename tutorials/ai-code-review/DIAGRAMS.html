@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 Levels of AI Code Review - Diagrams</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 40px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 2rem; margin-bottom: 8px; }
+  h2 {
+    font-size: 1.5rem;
+    margin: 60px 0 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--accent);
+  }
+  h3 { font-size: 1.1rem; margin: 24px 0 12px; color: var(--muted); }
+  p, li { color: var(--muted); margin-bottom: 12px; }
+  .subtitle { color: var(--muted); margin-bottom: 40px; }
+
+  /* Diagram containers */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+
+  /* Side-by-side comparison */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .comparison-card {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    position: relative;
+  }
+  .comparison-card.ai { border-color: var(--accent); }
+  .comparison-card.human { border-color: var(--green); }
+  .comparison-card h4 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .comparison-card.ai h4 { color: var(--accent); }
+  .comparison-card.human h4 { color: var(--green); }
+  .comparison-card .tagline {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .comparison-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .comparison-card li {
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  .comparison-card.ai li::before { content: ""; position: absolute; left: 0; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .comparison-card.human li::before { content: ""; position: absolute; left: 0; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .comparison-card .bottom-line {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* Pipeline */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .pipeline-node {
+    width: 100%;
+    max-width: 700px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .pipeline-node.start { border-color: var(--muted); background: rgba(139,148,158,0.08); }
+  .pipeline-node.gates { border-color: var(--orange); background: rgba(210,153,34,0.08); }
+  .pipeline-node.local { border-color: var(--accent); background: rgba(88,166,255,0.06); }
+  .pipeline-node.remote { border-color: var(--purple); background: rgba(188,140,255,0.06); }
+  .pipeline-node.human-review { border-color: var(--green); background: rgba(63,185,80,0.06); }
+  .pipeline-node.merge { border-color: var(--green); background: var(--green); color: #000; font-weight: 700; }
+
+  .pipeline-node .label {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .pipeline-node.gates .label { color: var(--orange); }
+  .pipeline-node.local .label { color: var(--accent); }
+  .pipeline-node.remote .label { color: var(--purple); }
+  .pipeline-node.human-review .label { color: var(--green); }
+
+  .pipeline-node .title { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .pipeline-node .desc { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+
+  .pipeline-arrow {
+    width: 2px;
+    height: 28px;
+    background: var(--border);
+    position: relative;
+  }
+  .pipeline-arrow::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: -4px;
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--border);
+  }
+  .pipeline-arrow.push-label::before {
+    content: "git push";
+    position: absolute;
+    left: 16px;
+    top: 4px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: monospace;
+    white-space: nowrap;
+  }
+
+  /* Levels inside pipeline */
+  .levels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+    text-align: left;
+  }
+  .level-item {
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+  .level-item .level-num {
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .level-item .level-name { color: var(--text); font-weight: 600; }
+  .level-item .level-desc { color: var(--muted); font-size: 0.8rem; }
+
+  /* CI options row */
+  .ci-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .ci-option {
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: left;
+  }
+  .ci-option .ci-name { font-weight: 600; color: var(--text); font-size: 0.9rem; }
+  .ci-option .ci-detail { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+
+  /* Table */
+  .review-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .review-table th {
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 2px solid var(--border);
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .review-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .review-table tr:last-child td { border-bottom: none; }
+  .review-table .level-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 52px;
+    text-align: center;
+  }
+  .tag-gates { background: rgba(210,153,34,0.2); color: var(--orange); }
+  .tag-1, .tag-2, .tag-3, .tag-4 { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .tag-5 { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .tag-human { background: rgba(63,185,80,0.15); color: var(--green); }
+  .review-table .cost { color: var(--muted); font-size: 0.85rem; }
+
+  /* Review checklist */
+  .checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .check-group {
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent);
+  }
+  .check-group h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .check-group ul { list-style: none; padding: 0; }
+  .check-group li {
+    font-size: 0.85rem;
+    color: var(--text);
+    padding: 3px 0;
+    padding-left: 18px;
+    position: relative;
+  }
+  .check-group li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+    font-family: monospace;
+  }
+
+  /* Cross-model diagram */
+  .cross-model {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px 0;
+  }
+  .model-box {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    text-align: center;
+    min-width: 180px;
+  }
+  .model-box.claude { border-color: var(--accent); }
+  .model-box.codex { border-color: var(--green); }
+  .model-box .model-name { font-weight: 700; font-size: 1rem; }
+  .model-box.claude .model-name { color: var(--accent); }
+  .model-box.codex .model-name { color: var(--green); }
+  .model-box .model-role { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+  .flow-arrow {
+    font-size: 1.5rem;
+    color: var(--muted);
+  }
+  .flow-label {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  /* Section talk notes */
+  .talk-notes {
+    background: rgba(88,166,255,0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .talk-notes strong { color: var(--accent); }
+  .talk-notes p { color: var(--text); margin-bottom: 8px; }
+  .talk-notes p:last-child { margin-bottom: 0; }
+
+  @media (max-width: 700px) {
+    .comparison { grid-template-columns: 1fr; }
+    .ci-options { grid-template-columns: 1fr; }
+    .levels-grid { grid-template-columns: 1fr; }
+    .checklist { grid-template-columns: 1fr; }
+    .cross-model { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>5 Levels of AI Code Review</h1>
+<p class="subtitle">Section-by-section diagrams for the video walkthrough</p>
+
+<!-- ============================================================ -->
+<h2>1. AI Review vs Human Review</h2>
+
+<div class="talk-notes">
+  <strong>Talk through:</strong>
+  <p>AI and human review are complementary, not competing. AI handles the volume. Humans handle the judgement. Five minutes of human review focused on the right things beats thirty minutes of line-by-line reading.</p>
+</div>
+
+<div class="diagram">
+  <div class="comparison">
+    <div class="comparison-card ai">
+      <h4>AI Review</h4>
+      <div class="tagline">Superior at: pattern matching, speed, consistency</div>
+      <ul>
+        <li>Security scans (OWASP, injection, secrets, XSS)</li>
+        <li>Bug detection (logic, null, races, off-by-one)</li>
+        <li>Style guide adherence</li>
+        <li>Syntax and completeness</li>
+        <li>Scales to any volume and large PRs</li>
+        <li>Never gets tired, never skips</li>
+      </ul>
+      <div class="bottom-line">Handles the mechanical checks at machine speed</div>
+    </div>
+    <div class="comparison-card human">
+      <h4>Human Review</h4>
+      <div class="tagline">Superior at: judgement, context, strategy</div>
+      <ul>
+        <li>Does this solve the business problem?</li>
+        <li>Is this the right architecture?</li>
+        <li>Does it meet acceptance criteria?</li>
+        <li>Business logic verification</li>
+        <li>Will this cause problems in 3 months?</li>
+        <li>Should we even build this?</li>
+      </ul>
+      <div class="bottom-line">5 min focused on the right things > 30 min reading every line</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2>2. The Full Pipeline</h2>
+
+<div class="talk-notes">
+  <strong>Talk through:</strong>
+  <p>The complete flow from writing code to merge. Quality gates are the foundation (not review). Then five levels of actual code review, local then remote. Humans at the end, focused only on what AI can't judge.</p>
+</div>
+
+<div class="diagram">
+  <div class="pipeline">
+
+    <div class="pipeline-node start">
+      <div class="title">You write code with an AI agent</div>
+      <div class="desc">Claude Code, Cursor, Windsurf, Copilot, etc.</div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <div class="pipeline-node gates">
+      <div class="label">Foundation</div>
+      <div class="title">Quality Gates (not review)</div>
+      <div class="desc">Linting (ruff, eslint), formatting (black, prettier), type checking (mypy, tsc). Deterministic. Automatic. Run via hooks on every file edit.</div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <div class="pipeline-node local">
+      <div class="label">Local - Before Push</div>
+      <div class="title">Code Review: Levels 1-4</div>
+      <div class="levels-grid">
+        <div class="level-item">
+          <div class="level-num">Level 1</div>
+          <div class="level-name">Read the Diff</div>
+          <div class="level-desc">Manual. 30 seconds. Correctness, blast radius, security.</div>
+        </div>
+        <div class="level-item">
+          <div class="level-num">Level 2</div>
+          <div class="level-name">Self-Review</div>
+          <div class="level-desc">Prompt the agent to review its own work. /simplify.</div>
+        </div>
+        <div class="level-item">
+          <div class="level-num">Level 3</div>
+          <div class="level-name">Custom Review (REVIEW.md)</div>
+          <div class="level-desc">Your rules, your stack. Portable across any agent.</div>
+        </div>
+        <div class="level-item">
+          <div class="level-num">Level 4</div>
+          <div class="level-name">Third-Party Local</div>
+          <div class="level-desc">CodeRabbit, Codex /review. Purpose-built tools.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow push-label"></div>
+
+    <div class="pipeline-node remote">
+      <div class="label">Remote - On the PR</div>
+      <div class="title">Level 5: CI Review</div>
+      <div class="ci-options">
+        <div class="ci-option">
+          <div class="ci-name">Codex on GitHub</div>
+          <div class="ci-detail">Full repo access. Tests its hypotheses. Included with ChatGPT.</div>
+        </div>
+        <div class="ci-option">
+          <div class="ci-name">CodeRabbit CI</div>
+          <div class="ci-detail">40+ SAST scanners. Inline PR comments. Free for open source.</div>
+        </div>
+        <div class="ci-option">
+          <div class="ci-name">Anthropic Security Review</div>
+          <div class="ci-detail">4 parallel agents. Confidence scoring. Security focused.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <div class="pipeline-node human-review">
+      <div class="label">Final Check</div>
+      <div class="title">Human Review</div>
+      <div class="desc">Architecture. Business logic. "Should we build this?" What AI cannot judge.</div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <div class="pipeline-node merge">
+      <div class="title">MERGE</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2>3. What Good Review Looks For</h2>
+
+<div class="talk-notes">
+  <strong>Talk through:</strong>
+  <p>Before the tools, ground the viewer in what a human reviewer actually checks. These four categories apply at every level. AI makes different mistakes than humans: it over-engineers, adds unnecessary abstractions, and silently changes behavior while "fixing" something.</p>
+</div>
+
+<div class="diagram">
+  <div class="checklist">
+    <div class="check-group">
+      <h4>Correctness</h4>
+      <ul>
+        <li>Does this code do what it's supposed to do?</li>
+        <li>Are edge cases handled? (empty, null, zero, negative)</li>
+        <li>Are error paths correct, not just present?</li>
+      </ul>
+    </div>
+    <div class="check-group">
+      <h4>Intent &amp; Blast Radius</h4>
+      <ul>
+        <li>Does this change do only what was asked?</li>
+        <li>Did the agent touch files it shouldn't have?</li>
+        <li>#1 issue with AI code: silent side effects</li>
+      </ul>
+    </div>
+    <div class="check-group">
+      <h4>Security</h4>
+      <ul>
+        <li>Input validation at system boundaries</li>
+        <li>No credentials or secrets in code</li>
+        <li>No injection vectors (SQL, command, XSS)</li>
+      </ul>
+    </div>
+    <div class="check-group">
+      <h4>Design</h4>
+      <ul>
+        <li>Is this the simplest solution that works?</li>
+        <li>Is there unnecessary abstraction?</li>
+        <li>Would a new team member understand this?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2>4. What Each Level Catches</h2>
+
+<div class="talk-notes">
+  <strong>Talk through:</strong>
+  <p>Each level catches different things at different cost. Levels 1-3 are where 90% of the value is, and they're all free. Start at Level 1, add layers as your codebase grows.</p>
+</div>
+
+<div class="diagram">
+  <table class="review-table">
+    <thead>
+      <tr>
+        <th>Level</th>
+        <th>What it catches</th>
+        <th>Cost / Effort</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="level-tag tag-gates">Gates</span></td>
+        <td>Lint errors, type errors, formatting</td>
+        <td class="cost">Free. Automatic.</td>
+      </tr>
+      <tr>
+        <td><span class="level-tag tag-1">1</span></td>
+        <td>Unexpected changes, wrong files, scope creep</td>
+        <td class="cost">Free. 30 seconds.</td>
+      </tr>
+      <tr>
+        <td><span class="level-tag tag-2">2</span></td>
+        <td>Obvious bugs, over-engineering, unused code</td>
+        <td class="cost">Free. 10 seconds.</td>
+      </tr>
+      <tr>
+        <td><span class="level-tag tag-3">3</span></td>
+        <td>Project-specific rule violations</td>
+        <td class="cost">Free. Your rules.</td>
+      </tr>
+      <tr>
+        <td><span class="level-tag tag-4">4</span></td>
+        <td>Security vulnerabilities, SAST, coverage gaps</td>
+        <td class="cost">Free/Paid. Local.</td>
+      </tr>
+      <tr>
+        <td><span class="level-tag tag-5">5</span></td>
+        <td>Architectural bugs, cross-file issues</td>
+        <td class="cost">Free/Paid. On PR.</td>
+      </tr>
+      <tr>
+        <td><span class="level-tag tag-human">Human</span></td>
+        <td>Business logic, architecture, "should we build this?"</td>
+        <td class="cost">Time. Judgement.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================================================ -->
+<h2>5. The Cross-Model Insight</h2>
+
+<div class="talk-notes">
+  <strong>Talk through:</strong>
+  <p>Different models have different blind spots. Claude is excellent at generating code but tends to give its own work a clean bill of health. Codex caught architectural bugs Claude missed entirely. Write with one model, review with another. You're probably already paying for both.</p>
+</div>
+
+<div class="diagram">
+  <div class="cross-model">
+    <div class="model-box claude">
+      <div class="model-name">Claude Code</div>
+      <div class="model-role">Writes the code</div>
+      <div class="model-role" style="margin-top:8px; font-size:0.8rem;">Local development</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-label">git push</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="border:2px solid var(--border);border-radius:8px;padding:14px 20px;text-align:center;">
+        <div style="font-weight:600;color:var(--text);">GitHub PR</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Triggers CI review</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-label">auto-review</div>
+    </div>
+    <div class="model-box codex">
+      <div class="model-name">Codex</div>
+      <div class="model-role">Reviews the code</div>
+      <div class="model-role" style="margin-top:8px; font-size:0.8rem;">Different blind spots</div>
+    </div>
+  </div>
+  <p style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:16px;">Different models catch different things. The value is in the mismatch.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>6. The Key Insight</h2>
+
+<div class="diagram" style="text-align:center;padding:40px;">
+  <p style="font-size:1.2rem;color:var(--text);max-width:600px;margin:0 auto;">There is no perfect tool. AI catches things humans miss. Humans catch things AI misses.</p>
+  <p style="font-size:1.1rem;color:var(--accent);margin-top:16px;max-width:600px;margin-left:auto;margin-right:auto;font-weight:600;">The value is in layering them.</p>
+  <div style="display:flex;justify-content:center;gap:40px;margin-top:28px;">
+    <div style="text-align:center;">
+      <div style="font-size:2rem;font-weight:700;color:var(--accent);">1-3</div>
+      <div style="font-size:0.85rem;color:var(--muted);">Where 90% of the value is</div>
+      <div style="font-size:0.8rem;color:var(--muted);">Free. Today.</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2rem;font-weight:700;color:var(--purple);">4-5</div>
+      <div style="font-size:0.85rem;color:var(--muted);">Safety net layer</div>
+      <div style="font-size:0.8rem;color:var(--muted);">Add as you grow.</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2rem;font-weight:700;color:var(--green);">Human</div>
+      <div style="font-size:0.85rem;color:var(--muted);">Architecture & judgement</div>
+      <div style="font-size:0.8rem;color:var(--muted);">What AI can't do.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
