@@ -48,20 +48,19 @@ def load_document(filename: str) -> str:
 
 def full_text_search(query: str) -> str:
     """Keyword search on product descriptions."""
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT name, brand, price, rating, description
-            FROM products
-            WHERE description_tsv @@ websearch_to_tsquery('english', %s)
-            ORDER BY ts_rank(description_tsv, websearch_to_tsquery('english', %s)) DESC
-            LIMIT 5
-            """,
-            (query, query),
-        )
-        results = cur.fetchall()
-    conn.close()
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT name, brand, price, rating, description
+                FROM products
+                WHERE description_tsv @@ websearch_to_tsquery('english', %s)
+                ORDER BY ts_rank(description_tsv, websearch_to_tsquery('english', %s)) DESC
+                LIMIT 5
+                """,
+                (query, query),
+            )
+            results = cur.fetchall()
 
     if not results:
         return "No keyword matches found."
@@ -74,19 +73,18 @@ def vector_search(query: str) -> str:
     """Semantic search on product descriptions."""
     query_embedding = embed(query)
 
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT name, brand, price, rating, description
-            FROM products
-            ORDER BY embedding <=> %s::vector
-            LIMIT 5
-            """,
-            (str(query_embedding),),
-        )
-        results = cur.fetchall()
-    conn.close()
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT name, brand, price, rating, description
+                FROM products
+                ORDER BY embedding <=> %s::vector
+                LIMIT 5
+                """,
+                (str(query_embedding),),
+            )
+            results = cur.fetchall()
 
     return "\n".join(
         f"- {r[0]} ({r[1]}) ${r[2]} {r[3]}★: {r[4]}" for r in results
@@ -95,12 +93,11 @@ def vector_search(query: str) -> str:
 
 def sql_query(query: str) -> str:
     """Execute a SQL query against the products table."""
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(query)
-        columns = [desc[0] for desc in cur.description]
-        results = [dict(zip(columns, row)) for row in cur.fetchall()]
-    conn.close()
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            columns = [desc[0] for desc in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
     return json.dumps(results, default=str) if results else "No results."
 
 

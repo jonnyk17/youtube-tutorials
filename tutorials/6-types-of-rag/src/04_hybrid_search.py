@@ -38,51 +38,50 @@ def hybrid_search(query: str, limit: int = 5) -> list[dict]:
     """
     query_embedding = embed(query)
 
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            WITH fts AS (
-                SELECT id, name, brand, category, price, rating, color, description,
-                       ROW_NUMBER() OVER (ORDER BY ts_rank(description_tsv, websearch_to_tsquery('english', %(query)s)) DESC) AS rank_fts
-                FROM products
-                WHERE description_tsv @@ websearch_to_tsquery('english', %(query)s)
-            ),
-            vec AS (
-                SELECT id, name, brand, category, price, rating, color, description,
-                       ROW_NUMBER() OVER (ORDER BY embedding <=> %(embedding)s::vector) AS rank_vec
-                FROM products
-            ),
-            combined AS (
-                SELECT
-                    COALESCE(fts.id, vec.id) AS id,
-                    COALESCE(fts.name, vec.name) AS name,
-                    COALESCE(fts.brand, vec.brand) AS brand,
-                    COALESCE(fts.category, vec.category) AS category,
-                    COALESCE(fts.price, vec.price) AS price,
-                    COALESCE(fts.rating, vec.rating) AS rating,
-                    COALESCE(fts.color, vec.color) AS color,
-                    COALESCE(fts.description, vec.description) AS description,
-                    COALESCE(1.0 / (%(k)s + fts.rank_fts), 0) +
-                    COALESCE(1.0 / (%(k)s + vec.rank_vec), 0) AS rrf_score
-                FROM fts
-                FULL OUTER JOIN vec ON fts.id = vec.id
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                WITH fts AS (
+                    SELECT id, name, brand, category, price, rating, color, description,
+                           ROW_NUMBER() OVER (ORDER BY ts_rank(description_tsv, websearch_to_tsquery('english', %(query)s)) DESC) AS rank_fts
+                    FROM products
+                    WHERE description_tsv @@ websearch_to_tsquery('english', %(query)s)
+                ),
+                vec AS (
+                    SELECT id, name, brand, category, price, rating, color, description,
+                           ROW_NUMBER() OVER (ORDER BY embedding <=> %(embedding)s::vector) AS rank_vec
+                    FROM products
+                ),
+                combined AS (
+                    SELECT
+                        COALESCE(fts.id, vec.id) AS id,
+                        COALESCE(fts.name, vec.name) AS name,
+                        COALESCE(fts.brand, vec.brand) AS brand,
+                        COALESCE(fts.category, vec.category) AS category,
+                        COALESCE(fts.price, vec.price) AS price,
+                        COALESCE(fts.rating, vec.rating) AS rating,
+                        COALESCE(fts.color, vec.color) AS color,
+                        COALESCE(fts.description, vec.description) AS description,
+                        COALESCE(1.0 / (%(k)s + fts.rank_fts), 0) +
+                        COALESCE(1.0 / (%(k)s + vec.rank_vec), 0) AS rrf_score
+                    FROM fts
+                    FULL OUTER JOIN vec ON fts.id = vec.id
+                )
+                SELECT name, brand, category, price, rating, color, description, rrf_score
+                FROM combined
+                ORDER BY rrf_score DESC
+                LIMIT %(limit)s
+                """,
+                {
+                    "query": query,
+                    "embedding": str(query_embedding),
+                    "k": K,
+                    "limit": limit,
+                },
             )
-            SELECT name, brand, category, price, rating, color, description, rrf_score
-            FROM combined
-            ORDER BY rrf_score DESC
-            LIMIT %(limit)s
-            """,
-            {
-                "query": query,
-                "embedding": str(query_embedding),
-                "k": K,
-                "limit": limit,
-            },
-        )
-        columns = [desc[0] for desc in cur.description]
-        results = [dict(zip(columns, row)) for row in cur.fetchall()]
-    conn.close()
+            columns = [desc[0] for desc in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
     return results
 
 

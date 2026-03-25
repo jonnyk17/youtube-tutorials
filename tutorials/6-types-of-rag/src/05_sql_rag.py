@@ -54,12 +54,11 @@ Rules:
 
 def execute_query(sql: str) -> list[dict]:
     """Execute a SQL query and return results as dicts."""
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(sql)
-        columns = [desc[0] for desc in cur.description]
-        results = [dict(zip(columns, row)) for row in cur.fetchall()]
-    conn.close()
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            columns = [desc[0] for desc in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
     return results
 
 

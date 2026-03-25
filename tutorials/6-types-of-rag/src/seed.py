@@ -154,56 +154,54 @@ def chunk_document(filepath: Path) -> list[str]:
 
 def seed():
     print("Connecting to database...")
-    conn = psycopg.connect(DATABASE_URL)
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            # Clear existing data
+            cur.execute("DELETE FROM document_chunks")
+            cur.execute("DELETE FROM products")
 
-    with conn.cursor() as cur:
-        # Clear existing data
-        cur.execute("DELETE FROM document_chunks")
-        cur.execute("DELETE FROM products")
+            # Seed products
+            print(f"Embedding {len(PRODUCTS)} products...")
+            descriptions = [p["description"] for p in PRODUCTS]
+            embeddings = embed_texts(descriptions)
 
-        # Seed products
-        print(f"Embedding {len(PRODUCTS)} products...")
-        descriptions = [p["description"] for p in PRODUCTS]
-        embeddings = embed_texts(descriptions)
-
-        for product, embedding in zip(PRODUCTS, embeddings):
-            cur.execute(
-                """
-                INSERT INTO products (name, brand, category, price, rating, color, description, embedding)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s::vector)
-                """,
-                (
-                    product["name"],
-                    product["brand"],
-                    product["category"],
-                    product["price"],
-                    product["rating"],
-                    product["color"],
-                    product["description"],
-                    str(embedding),
-                ),
-            )
-        print(f"Inserted {len(PRODUCTS)} products.")
-
-        # Seed document chunks
-        data_dir = Path(__file__).parent.parent / "data"
-        for doc_path in sorted(data_dir.glob("*.md")):
-            chunks = chunk_document(doc_path)
-            print(f"Chunking {doc_path.name}: {len(chunks)} chunks")
-
-            chunk_embeddings = embed_texts(chunks)
-            for i, (chunk, embedding) in enumerate(zip(chunks, chunk_embeddings)):
+            for product, embedding in zip(PRODUCTS, embeddings):
                 cur.execute(
                     """
-                    INSERT INTO document_chunks (source, chunk_index, content, embedding)
-                    VALUES (%s, %s, %s, %s::vector)
+                    INSERT INTO products (name, brand, category, price, rating, color, description, embedding)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s::vector)
                     """,
-                    (doc_path.name, i, chunk, str(embedding)),
+                    (
+                        product["name"],
+                        product["brand"],
+                        product["category"],
+                        product["price"],
+                        product["rating"],
+                        product["color"],
+                        product["description"],
+                        str(embedding),
+                    ),
                 )
-            print(f"Inserted {len(chunks)} chunks from {doc_path.name}.")
+            print(f"Inserted {len(PRODUCTS)} products.")
 
-    conn.commit()
-    conn.close()
+            # Seed document chunks
+            data_dir = Path(__file__).parent.parent / "data"
+            for doc_path in sorted(data_dir.glob("*.md")):
+                chunks = chunk_document(doc_path)
+                print(f"Chunking {doc_path.name}: {len(chunks)} chunks")
+
+                chunk_embeddings = embed_texts(chunks)
+                for i, (chunk, embedding) in enumerate(zip(chunks, chunk_embeddings)):
+                    cur.execute(
+                        """
+                        INSERT INTO document_chunks (source, chunk_index, content, embedding)
+                        VALUES (%s, %s, %s, %s::vector)
+                        """,
+                        (doc_path.name, i, chunk, str(embedding)),
+                    )
+                print(f"Inserted {len(chunks)} chunks from {doc_path.name}.")
+
+        conn.commit()
     print("Done.")
 
 

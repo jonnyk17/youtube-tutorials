@@ -30,21 +30,20 @@ def vector_search(query: str, limit: int = 5) -> list[dict]:
     """Search products using vector similarity (cosine distance)."""
     query_embedding = embed(query)
 
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT name, brand, category, price, rating, color, description,
-                   1 - (embedding <=> %s::vector) AS similarity
-            FROM products
-            ORDER BY embedding <=> %s::vector
-            LIMIT %s
-            """,
-            (str(query_embedding), str(query_embedding), limit),
-        )
-        columns = [desc[0] for desc in cur.description]
-        results = [dict(zip(columns, row)) for row in cur.fetchall()]
-    conn.close()
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT name, brand, category, price, rating, color, description,
+                       1 - (embedding <=> %s::vector) AS similarity
+                FROM products
+                ORDER BY embedding <=> %s::vector
+                LIMIT %s
+                """,
+                (str(query_embedding), str(query_embedding), limit),
+            )
+            columns = [desc[0] for desc in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
     return results
 
 

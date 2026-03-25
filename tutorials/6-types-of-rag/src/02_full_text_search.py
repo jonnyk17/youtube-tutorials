@@ -22,22 +22,21 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 
 def full_text_search(query: str, limit: int = 5) -> list[dict]:
     """Search products using PostgreSQL full-text search."""
-    conn = psycopg.connect(DATABASE_URL)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT name, brand, category, price, rating, color, description,
-                   ts_rank(description_tsv, websearch_to_tsquery('english', %s)) AS rank
-            FROM products
-            WHERE description_tsv @@ websearch_to_tsquery('english', %s)
-            ORDER BY rank DESC
-            LIMIT %s
-            """,
-            (query, query, limit),
-        )
-        columns = [desc[0] for desc in cur.description]
-        results = [dict(zip(columns, row)) for row in cur.fetchall()]
-    conn.close()
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT name, brand, category, price, rating, color, description,
+                       ts_rank(description_tsv, websearch_to_tsquery('english', %s)) AS rank
+                FROM products
+                WHERE description_tsv @@ websearch_to_tsquery('english', %s)
+                ORDER BY rank DESC
+                LIMIT %s
+                """,
+                (query, query, limit),
+            )
+            columns = [desc[0] for desc in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
     return results
 
 
