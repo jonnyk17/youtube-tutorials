@@ -395,11 +395,7 @@
       <span class="pill pill-s">4 Layers</span>
     </div>
     <h1 class="display title reveal d2" style="font-size:72px;">How I Review<br>AI-Generated Code</h1>
-    <p class="sub reveal d3">Each layer filters out a category of problems so the next layer sees less noise. By the time a human reviews, the only things left are the things only a human can judge.</p>
-    <div class="stat-hero reveal d4">
-      <div class="stat-num">2x</div>
-      <div class="stat-label">More bugs in AI-generated code vs human-written code</div>
-    </div>
+    <p class="sub reveal d3">Four layers of review. Each one filters out a category of problems so the next layer sees less noise. By the time a human looks at the code, the only things left require human judgement.</p>
   </div>
   <div class="slide-divider"></div>
 </section>
@@ -411,24 +407,57 @@
   <div class="orb orb-2" style="top:20%;left:60%;width:500px;height:400px;"></div>
   <div class="inner">
     <div class="num reveal d1">The Problem</div>
-    <h2 class="display title reveal d2" style="font-size:52px;max-width:700px;">Code review was already the bottleneck.</h2>
-    <p class="sub reveal d3" style="max-width:540px;">I've seen developers take hours or days to review a single PR. Most teams struggle to review two or three a day. It was never fast enough.</p>
+    <h2 class="display title reveal d2" style="font-size:50px;max-width:700px;">Bad code in production is expensive. AI agents are generating more of it than we can review.</h2>
+    <p class="sub reveal d3" style="max-width:560px;">Amazon loses an estimated $13M for every hour of downtime. A single bad CrowdStrike update in 2024 grounded airlines worldwide. Code review is our last line of defense. Now AI agents generate 10x more code with the same number of reviewers, and that code has measurably more problems.</p>
 
-    <div class="grid-2 reveal d4" style="margin-top:40px;">
-      <div class="card" style="border-top:3px solid var(--muted);text-align:center;padding:32px 24px;">
-        <div style="font-family:'Instrument Serif',serif;font-size:64px;color:var(--muted);line-height:1;">2-3</div>
-        <div style="font-size:14px;color:var(--dim);margin-top:8px;font-weight:500;">PRs reviewed per dev per day</div>
-        <div style="font-size:12px;color:var(--dim);margin-top:4px;">Before AI. Already a bottleneck.</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:36px;" class="reveal d4">
+      <div class="card" style="text-align:center;padding:24px 16px;border-top:3px solid var(--signal);">
+        <div style="font-family:'Instrument Serif',serif;font-size:48px;color:var(--signal);line-height:1;">1.7x</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;font-weight:500;">More bugs in AI code</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:3px;">Including critical issues</div>
       </div>
-      <div class="card" style="border-top:3px solid var(--signal);text-align:center;padding:32px 24px;">
-        <div style="font-family:'Instrument Serif',serif;font-size:64px;color:var(--signal);line-height:1;">10x</div>
-        <div style="font-size:14px;color:var(--muted);margin-top:8px;font-weight:500;">More PRs generated with AI agents</div>
-        <div style="font-size:12px;color:var(--dim);margin-top:4px;">Same number of developers reviewing.</div>
+      <div class="card" style="text-align:center;padding:24px 16px;border-top:3px solid var(--signal);">
+        <div style="font-family:'Instrument Serif',serif;font-size:48px;color:var(--signal);line-height:1;">45%</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;font-weight:500;">Contain security flaws</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:3px;">SQL injection, XSS, secrets</div>
+      </div>
+      <div class="card" style="text-align:center;padding:24px 16px;border-top:3px solid var(--cobalt);">
+        <div style="font-family:'Instrument Serif',serif;font-size:48px;color:var(--cobalt);line-height:1;">75%</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;font-weight:500;">More logic errors</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:3px;">vs human-written code</div>
+      </div>
+      <div class="card" style="text-align:center;padding:24px 16px;border-top:3px solid var(--cobalt);">
+        <div style="font-family:'Instrument Serif',serif;font-size:48px;color:var(--cobalt);line-height:1;">62%</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;font-weight:500;">Need modifications</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:3px;">to fix bugs post-generation</div>
       </div>
     </div>
 
-    <div class="meta reveal d5" style="margin-top:32px;">
-      <p>The problem isn't that AI code is bad. It's that we're generating so much of it that our traditional review process can't keep up. <strong>We need to change how we work.</strong></p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px;" class="reveal d5">
+      <div class="card" style="padding:14px 16px;">
+        <div class="card-label" style="color:var(--dim);margin-bottom:4px;font-size:9px;">Failure mode</div>
+        <div style="font-size:13px;font-weight:600;color:var(--frost);">Happy path bias</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px;">Missing null checks, error handling, edge cases</div>
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <div class="card-label" style="color:var(--dim);margin-bottom:4px;font-size:9px;">Failure mode</div>
+        <div style="font-size:13px;font-weight:600;color:var(--frost);">Hallucinations</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px;">Invents functions, methods, and variables that don't exist</div>
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <div class="card-label" style="color:var(--dim);margin-bottom:4px;font-size:9px;">Failure mode</div>
+        <div style="font-size:13px;font-weight:600;color:var(--frost);">Over-complication</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px;">Unnecessary abstractions, redundant patterns</div>
+      </div>
+      <div class="card" style="padding:14px 16px;">
+        <div class="card-label" style="color:var(--dim);margin-bottom:4px;font-size:9px;">Failure mode</div>
+        <div style="font-size:13px;font-weight:600;color:var(--frost);">Silent side effects</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px;">Changes behavior while "fixing" something adjacent</div>
+      </div>
+    </div>
+
+    <div class="meta reveal d6" style="margin-top:24px;">
+      <p>AI agents let us move faster. That's a good thing. But we still need a review process, and humans can't review 10x more code. <strong>We need to figure that out.</strong></p>
     </div>
   </div>
   <div class="slide-divider"></div>
@@ -443,7 +472,7 @@
   <div class="inner">
     <div class="num reveal d1">01</div>
     <h2 class="display title reveal d2">AI Review vs Human Review</h2>
-    <p class="sub reveal d3">Complementary, not competing. The goal: make human review time count.</p>
+    <p class="sub reveal d3">We need both. AI catches things tired engineers miss. Humans have context AI doesn't. The goal: minimize the cost of human review.</p>
     <div class="grid-2 reveal d4" style="margin-top:36px;">
       <div class="card cmp">
         <div class="card-label">AI Review</div>
