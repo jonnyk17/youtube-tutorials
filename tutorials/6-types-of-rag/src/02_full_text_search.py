@@ -24,12 +24,35 @@ def full_text_search(query: str, limit: int = 5) -> list[dict]:
     """Search products using PostgreSQL full-text search."""
     with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
+            # Postgres has a built-in search engine. Here's how the pieces work:
+            #
+            # websearch_to_tsquery('english', 'blue running shoes')
+            #   This is just Postgres's way of parsing a search query.
+            #   You give it plain text like Google, it handles the rest.
+            #   It strips filler words, and stems them ("running" -> "run")
+            #   so "running" matches "runner", "runs", etc.
+            #
+            # search_tsv
+            #   A column that stores pre-processed tokens from the product's
+            #   name, brand, category, color, and description combined.
+            #   Postgres builds this automatically whenever a row is inserted.
+            #   We combine multiple columns so "blue Nike running shoes"
+            #   can match even though those words live in different columns.
+            #
+            # @@
+            #   The match operator. Think of it like "contains".
+            #   WHERE search_tsv @@ query means
+            #   "where this product's searchable text contains these words"
+            #
+            # ts_rank(...)
+            #   Scores how well each row matches. Higher = better match.
+            #   We sort by this so the best matches come first.
             cur.execute(
                 """
                 SELECT name, brand, category, price, rating, color, description,
-                       ts_rank(description_tsv, websearch_to_tsquery('english', %s)) AS rank
+                       ts_rank(search_tsv, websearch_to_tsquery('english', %s)) AS rank
                 FROM products
-                WHERE description_tsv @@ websearch_to_tsquery('english', %s)
+                WHERE search_tsv @@ websearch_to_tsquery('english', %s)
                 ORDER BY rank DESC
                 LIMIT %s
                 """,

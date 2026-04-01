@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 Types of RAG, Clearly Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Libre+Franklin:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #05070C;
+    --card: #0C0F18;
+    --cobalt: #3B6CE8;
+    --signal: #F27A3A;
+    --frost: #F1F5F9;
+    --muted: #6B7280;
+    --dim: #3D4452;
+    --border: #1A1F2E;
+    --cobalt-dim: rgba(59, 108, 232, 0.10);
+    --cobalt-mid: rgba(59, 108, 232, 0.22);
+    --cobalt-glow: rgba(59, 108, 232, 0.35);
+    --signal-dim: rgba(242, 122, 58, 0.10);
+    --signal-mid: rgba(242, 122, 58, 0.22);
+    --signal-glow: rgba(242, 122, 58, 0.30);
+    --green: #34D399;
+    --green-dim: rgba(52, 211, 153, 0.10);
+    --green-mid: rgba(52, 211, 153, 0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+  body {
+    font-family: 'Libre Franklin', sans-serif;
+    background: var(--canvas);
+    color: var(--frost);
+    line-height: 1.5;
+    font-weight: 400;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 9999; opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .slide {
+    height: 100vh; scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 60px 100px; position: relative; overflow: hidden;
+  }
+  .slide .orb {
+    position: absolute; border-radius: 50%; filter: blur(120px);
+    pointer-events: none; opacity: 0; transition: opacity 1.2s ease;
+  }
+  .slide.in-view .orb { opacity: 1; }
+  .orb-1 { width: 600px; height: 500px; background: var(--cobalt-dim); top: -10%; left: -5%; }
+  .orb-2 { width: 400px; height: 350px; background: var(--signal-dim); bottom: -8%; right: -3%; }
+  .orb-3 { width: 300px; height: 300px; background: var(--cobalt-dim); top: 50%; right: 10%; }
+  .inner { position: relative; z-index: 1; max-width: 1100px; width: 100%; margin: 0 auto; }
+
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slide.in-view .reveal { opacity: 1; transform: translateY(0); }
+  .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; }
+  .d3 { transition-delay: 0.24s; } .d4 { transition-delay: 0.32s; }
+  .d5 { transition-delay: 0.40s; } .d6 { transition-delay: 0.48s; }
+  .d7 { transition-delay: 0.56s; } .d8 { transition-delay: 0.64s; }
+
+  .display { font-family: 'Instrument Serif', serif; font-weight: 400; line-height: 1.12; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .num {
+    font-weight: 800; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--cobalt); margin-bottom: 18px; display: inline-block;
+    padding: 4px 0; border-bottom: 2px solid var(--cobalt-mid);
+  }
+  .title { font-size: 58px; color: var(--frost); margin-bottom: 14px; }
+  .sub { font-size: 18px; font-weight: 300; color: var(--muted); max-width: 580px; line-height: 1.65; }
+
+  .card {
+    background: var(--card); border-radius: 10px; padding: 24px;
+    border: 1px solid var(--border); transition: border-color 0.4s, box-shadow 0.4s;
+  }
+  .card:hover { border-color: var(--cobalt-mid); box-shadow: 0 0 24px -8px var(--cobalt-dim); }
+  .card-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--cobalt); margin-bottom: 10px;
+  }
+  .card h4 { font-size: 18px; font-weight: 700; color: var(--frost); margin-bottom: 6px; }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.55; }
+
+  .pill {
+    display: inline-block; padding: 4px 14px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  }
+  .pill-c { background: var(--cobalt-dim); color: var(--cobalt); border: 1px solid var(--cobalt-mid); }
+  .pill-s { background: var(--signal-dim); color: var(--signal); border: 1px solid var(--signal-mid); }
+  .pill-g { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-mid); }
+
+  .nav-wrap {
+    position: fixed; right: 32px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: flex-end; gap: 14px; z-index: 100;
+  }
+  .dot-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .dot-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    color: transparent; text-transform: uppercase; transition: color 0.3s; white-space: nowrap;
+  }
+  .dot-row:hover .dot-label, .dot-row.on .dot-label { color: var(--muted); }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--dim);
+    border: none; padding: 0; cursor: pointer; transition: all 0.35s; flex-shrink: 0;
+  }
+  .dot-row.on .dot { background: var(--cobalt); width: 8px; height: 8px; box-shadow: 0 0 10px var(--cobalt-glow); }
+  .hint {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: var(--dim); z-index: 100; pointer-events: none;
+    transition: opacity 0.6s; letter-spacing: 0.04em;
+  }
+  body.scrolled .hint { opacity: 0; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+
+  .slide-divider {
+    position: absolute; bottom: 0; left: 100px; right: 100px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+  }
+
+  /* Spectrum bar */
+  .spectrum {
+    display: flex; align-items: center; margin-top: 32px; margin-bottom: 24px;
+    position: relative; padding: 0 20px;
+  }
+  .spectrum-bar {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: linear-gradient(to right, var(--green), var(--cobalt), var(--signal));
+  }
+  .spectrum-labels {
+    display: flex; justify-content: space-between; width: 100%;
+    position: absolute; top: -20px; left: 20px; right: 20px;
+  }
+  .spectrum-labels span { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .spectrum-labels .sl { color: var(--green); }
+  .spectrum-labels .sr { color: var(--signal); }
+
+  /* Type cards */
+  .type-card { position: relative; text-align: center; padding: 20px 14px; }
+  .type-num {
+    font-family: 'Instrument Serif', serif; font-size: 36px; line-height: 1;
+    margin-bottom: 6px;
+  }
+  .type-name { font-size: 13px; font-weight: 700; color: var(--frost); margin-bottom: 4px; }
+  .type-desc { font-size: 11px; color: var(--dim); }
+
+  .type-card.t1 { border-top: 3px solid var(--green); }
+  .type-card.t1 .type-num { color: var(--green); }
+  .type-card.t2 { border-top: 3px solid #5EEAD4; }
+  .type-card.t2 .type-num { color: #5EEAD4; }
+  .type-card.t3 { border-top: 3px solid var(--cobalt); }
+  .type-card.t3 .type-num { color: var(--cobalt); }
+  .type-card.t4 { border-top: 3px solid #818CF8; }
+  .type-card.t4 .type-num { color: #818CF8; }
+  .type-card.t5 { border-top: 3px solid var(--signal); }
+  .type-card.t5 .type-num { color: var(--signal); }
+  .type-card.t6 { border-top: 3px solid #F472B6; }
+  .type-card.t6 .type-num { color: #F472B6; }
+
+  /* Detail slides */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+  .strength { border-left: 3px solid var(--cobalt); padding-left: 16px; margin-bottom: 12px; }
+  .strength h5 { font-size: 13px; font-weight: 700; color: var(--cobalt); margin-bottom: 4px; }
+  .strength p { font-size: 13px; color: var(--muted); }
+  .weakness { border-left: 3px solid var(--signal); padding-left: 16px; margin-bottom: 12px; }
+  .weakness h5 { font-size: 13px; font-weight: 700; color: var(--signal); margin-bottom: 4px; }
+  .weakness p { font-size: 13px; color: var(--muted); }
+
+  .code-block {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--muted); line-height: 1.7; overflow-x: auto; white-space: pre;
+  }
+  .code-block .hl { color: var(--cobalt); }
+  .code-block .cm { color: var(--dim); font-style: italic; }
+  .code-block .fn { color: var(--signal); }
+  .code-block .st { color: var(--green); }
+
+  .meta {
+    margin-top: 24px; padding: 18px 22px;
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--signal); border-radius: 0 10px 10px 0;
+    max-width: 680px; box-shadow: -4px 0 20px -8px var(--signal-dim);
+  }
+  .meta p { font-size: 15px; color: var(--frost); line-height: 1.65; }
+  .meta strong { color: var(--signal); font-weight: 700; }
+
+  .big-num { font-family: 'Instrument Serif', serif; font-size: 72px; line-height: 1; }
+</style>
+</head>
+<body>
+
+<nav class="nav-wrap" id="nav"></nav>
+<div class="hint">Scroll or arrow keys</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 1. TITLE -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s0">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="inner">
+    <div class="reveal d1" style="display:flex;gap:8px;margin-bottom:28px;">
+      <span class="pill pill-c">RAG</span>
+      <span class="pill pill-s">6 Types</span>
+      <span class="pill pill-g">With Code</span>
+    </div>
+    <h1 class="display title reveal d2" style="font-size:72px;">6 Types of RAG,<br>Clearly Explained</h1>
+    <p class="sub reveal d3">RAG is not one technique. It's a spectrum from simple file loading to agentic retrieval. Most developers default to vector search. There are five other options they're ignoring.</p>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 2. THE CORE IDEA -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s1">
+  <div class="orb orb-3"></div>
+  <div class="inner">
+    <div class="num reveal d1">The Core Idea</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">RAG is just: fetch information, give it to the LLM.</h2>
+    <p class="sub reveal d3">How you fetch that information is the whole game. Everything else stays the same.</p>
+
+    <div class="code-block reveal d4" style="margin-top:32px;max-width:620px;">
+<span class="hl">def</span> <span class="fn">rag_response</span>(user_query: str) -> str:
+    context = <span class="fn">retrieve</span>(user_query)  <span class="cm"># THIS is the only part that changes</span>
+
+    response = client.responses.create(
+        model=<span class="st">"gpt-5.4"</span>,
+        input=f<span class="st">"Context:\n{context}\n\nQuestion: {user_query}"</span>
+    )
+    <span class="hl">return</span> response.output_text</div>
+
+    <div class="meta reveal d5">
+      <p>That <span class="mono" style="color:var(--signal);font-size:14px;">retrieve()</span> function. That one line. That's what this entire video is about. <strong>Six ways to implement it.</strong></p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 3. THE SPECTRUM -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="orb orb-1" style="top:30%;left:60%;"></div>
+  <div class="inner">
+    <div class="num reveal d1">The Spectrum</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Six approaches. Each solves a different problem.</h2>
+
+    <div class="spectrum reveal d3">
+      <div class="spectrum-labels">
+        <span class="sl">Less infrastructure</span>
+        <span class="sr">More flexibility</span>
+      </div>
+      <div class="spectrum-bar"></div>
+    </div>
+
+    <div class="grid-6 reveal d4">
+      <div class="card type-card t1">
+        <div class="type-num">1</div>
+        <div class="type-name">Document Loading</div>
+        <div class="type-desc">Load entire files into context</div>
+      </div>
+      <div class="card type-card t2">
+        <div class="type-num">2</div>
+        <div class="type-name">Full-Text Search</div>
+        <div class="type-desc">Keyword matching with Postgres</div>
+      </div>
+      <div class="card type-card t3">
+        <div class="type-num">3</div>
+        <div class="type-name">Vector Search</div>
+        <div class="type-desc">Semantic similarity with pgvector</div>
+      </div>
+      <div class="card type-card t4">
+        <div class="type-num">4</div>
+        <div class="type-name">Hybrid Search</div>
+        <div class="type-desc">Keyword + semantic combined</div>
+      </div>
+      <div class="card type-card t5">
+        <div class="type-num">5</div>
+        <div class="type-name">SQL RAG</div>
+        <div class="type-desc">Query structured data directly</div>
+      </div>
+      <div class="card type-card t6">
+        <div class="type-num">6</div>
+        <div class="type-name">Agentic RAG</div>
+        <div class="type-desc">Agent picks the right strategy</div>
+      </div>
+    </div>
+
+    <div class="meta reveal d5">
+      <p>These aren't ordered by difficulty. SQL RAG is simpler than vector search. <strong>The skill is knowing which approach fits which problem.</strong></p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 3b. BEFORE WE DIVE IN -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s2b">
+  <div class="orb orb-2" style="top:40%;left:60%;"></div>
+  <div class="inner">
+    <div class="num reveal d1">Before We Dive In</div>
+    <h2 class="display title reveal d2" style="font-size:44px;">Some of this will feel overwhelming. That's normal.</h2>
+
+    <div class="grid-3 reveal d3" style="margin-top:36px;">
+      <div class="card" style="border-top:3px solid var(--cobalt);padding:24px;">
+        <div class="card-label">The code is complex</div>
+        <p>Especially the SQL. Hybrid search in particular. I still find some of these queries confusing, and I've been writing SQL for years.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--green);padding:24px;">
+        <div class="card-label" style="color:var(--green);">Run the examples</div>
+        <p>Clone the repo. Run each script. The best way to understand this is to see it work. It clicks after a few runs, not from watching once.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--signal);padding:24px;">
+        <div class="card-label" style="color:var(--signal);">Focus on the judgment</div>
+        <p>AI can write the code for you. But it can't choose which pattern to use. That's the skill this video teaches.</p>
+      </div>
+    </div>
+
+    <div class="meta reveal d4">
+      <p>Don't try to memorize the code. Focus on understanding <strong>when and why you'd pick each approach.</strong> That's what separates a demo from something you can put in front of real users.</p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 4. DOCUMENT LOADING -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="orb orb-2" style="top:20%;left:50%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--green);border-bottom-color:var(--green-mid);">Type 1</div>
+    <h2 class="display title reveal d2">Document Loading</h2>
+    <p class="sub reveal d3">Load entire files into context. No database, no embeddings, no chunking.</p>
+
+    <div class="detail-grid reveal d4">
+      <div>
+        <div class="strength">
+          <h5>When to use</h5>
+          <p>Small document sets. FAQs, policies, runbooks, recipes. Anything where partial retrieval loses meaning.</p>
+        </div>
+        <div class="strength">
+          <h5>Why it works</h5>
+          <p>No lost context. The LLM sees the entire document. More accurate for step-by-step content where order matters.</p>
+        </div>
+        <div class="weakness">
+          <h5>Where it breaks</h5>
+          <p>Doesn't scale to many documents. Uses more tokens. Not suitable when you need to search across thousands of files.</p>
+        </div>
+      </div>
+      <div class="code-block" style="font-size:12px;">
+<span class="hl">def</span> <span class="fn">retrieve</span>(query: str) -> str:
+    docs = []
+    <span class="hl">for</span> path <span class="hl">in</span> Path(<span class="st">"docs/"</span>).glob(<span class="st">"*.md"</span>):
+        docs.append(path.read_text())
+    <span class="hl">return</span> <span class="st">"\n\n"</span>.join(docs)
+
+<span class="cm"># That's it. No database. No embeddings.</span>
+<span class="cm"># Just files in a prompt.</span></div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 5. FULL-TEXT SEARCH -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="orb orb-1" style="top:60%;left:-5%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:#5EEAD4;border-bottom-color:rgba(94,234,212,0.3);">Type 2</div>
+    <h2 class="display title reveal d2">Full-Text Search</h2>
+    <p class="sub reveal d3">Keyword matching. When exact terms matter more than meaning.</p>
+
+    <div class="detail-grid reveal d4">
+      <div>
+        <div class="strength">
+          <h5>When to use</h5>
+          <p>User knows exactly what they want. Brand names, product codes, specific terms. "Nike" means Nike, not Adidas.</p>
+        </div>
+        <div class="strength">
+          <h5>Built into Postgres</h5>
+          <p>tsvector and tsquery. No extra infrastructure. Already in your database.</p>
+        </div>
+        <div class="weakness">
+          <h5>Where it breaks</h5>
+          <p>"Comfortable shoes for long distance running." It looks for "comfortable" literally. Misses "cushioned," "supportive," "designed for endurance."</p>
+        </div>
+      </div>
+      <div class="code-block" style="font-size:12px;">
+<span class="hl">SELECT</span> name, description
+<span class="hl">FROM</span> products
+<span class="hl">WHERE</span> to_tsvector(<span class="st">'english'</span>, description)
+    @@ websearch_to_tsquery(<span class="st">'english'</span>, <span class="fn">$query</span>)
+<span class="hl">ORDER BY</span> ts_rank(...) <span class="hl">DESC</span>
+<span class="hl">LIMIT</span> 5;
+
+<span class="cm">-- "blue running shoes" ✓</span>
+<span class="cm">-- "comfortable for distance" ✗</span></div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 6. VECTOR SEARCH -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="orb orb-3" style="top:10%;right:5%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--cobalt);">Type 3</div>
+    <h2 class="display title reveal d2">Vector Search</h2>
+    <p class="sub reveal d3">Semantic similarity. Understands what you mean, not just what you said.</p>
+
+    <div class="detail-grid reveal d4">
+      <div>
+        <div class="strength">
+          <h5>When to use</h5>
+          <p>Natural language queries against unstructured text. Product descriptions, reviews, documentation. "Comfortable for distance" finds "cushioned midsole."</p>
+        </div>
+        <div class="strength">
+          <h5>Same database</h5>
+          <p>pgvector in Postgres. No separate vector database needed. Just a different column type.</p>
+        </div>
+        <div class="weakness">
+          <h5>Where it breaks</h5>
+          <p>"Nike shoes under $100." Vector search doesn't understand price as a filter. Returns $200 shoes because the description is semantically similar.</p>
+        </div>
+      </div>
+      <div class="code-block" style="font-size:12px;">
+<span class="hl">SELECT</span> name, description,
+    1 - (embedding <=> <span class="fn">$query_vec</span>) <span class="hl">AS</span> similarity
+<span class="hl">FROM</span> products
+<span class="hl">ORDER BY</span> embedding <=> <span class="fn">$query_vec</span>
+<span class="hl">LIMIT</span> 5;
+
+<span class="cm">-- "comfortable for distance" ✓</span>
+<span class="cm">-- "Nike under $100" ✗</span></div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 7. HYBRID SEARCH -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s6">
+  <div class="orb orb-1" style="top:40%;left:55%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:#818CF8;border-bottom-color:rgba(129,140,248,0.3);">Type 4</div>
+    <h2 class="display title reveal d2">Hybrid Search</h2>
+    <p class="sub reveal d3">Best of both worlds. Keyword precision + semantic understanding, merged with Reciprocal Rank Fusion.</p>
+
+    <div class="detail-grid reveal d4">
+      <div>
+        <div class="strength">
+          <h5>The production default</h5>
+          <p>If you're not sure which approach to use, start here. Runs both keyword and vector search, merges results with RRF scoring.</p>
+        </div>
+        <div class="strength">
+          <h5>One Postgres query</h5>
+          <p>"Nike running shoes comfortable for distance." Keyword locks in "Nike." Vector finds comfort descriptions. Combined: Nike shoes that are actually comfortable.</p>
+        </div>
+        <div class="weakness">
+          <h5>Where it breaks</h5>
+          <p>"Shoes under $100 with 4+ stars." Price and ratings are structured data. Search isn't the right tool for filtering on exact values.</p>
+        </div>
+      </div>
+      <div class="code-block" style="font-size:11px;">
+<span class="hl">WITH</span> fts <span class="hl">AS</span> (
+  <span class="hl">SELECT</span> id, ts_rank(...) <span class="hl">AS</span> rank <span class="hl">FROM</span> products
+  <span class="hl">WHERE</span> tsv @@ query
+),
+vec <span class="hl">AS</span> (
+  <span class="hl">SELECT</span> id, <span class="hl">ROW_NUMBER</span>() <span class="hl">OVER</span>(...) <span class="hl">AS</span> rank
+  <span class="hl">FROM</span> products <span class="hl">ORDER BY</span> embedding <=> <span class="fn">$vec</span>
+)
+<span class="hl">SELECT</span> id,
+  <span class="fn">1.0/(60+fts.rank) + 1.0/(60+vec.rank)</span> <span class="hl">AS</span> rrf
+<span class="hl">FROM</span> fts <span class="hl">JOIN</span> vec <span class="hl">USING</span>(id)
+<span class="hl">ORDER BY</span> rrf <span class="hl">DESC</span>;</div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 8. SQL RAG -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="orb orb-2" style="top:15%;left:40%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--signal);border-bottom-color:var(--signal-mid);">Type 5</div>
+    <h2 class="display title reveal d2">SQL RAG</h2>
+    <p class="sub reveal d3">The one nobody talks about. When your data is structured, generate queries instead of searching text.</p>
+
+    <div class="detail-grid reveal d4">
+      <div>
+        <div class="strength">
+          <h5>5a: Parameterized (the safe default)</h5>
+          <p>The LLM extracts filters from natural language. Those parameters slot into a pre-written query you control. Safe, fast, predictable.</p>
+        </div>
+        <div class="strength">
+          <h5>5b: Dynamic (for flexibility)</h5>
+          <p>The LLM writes the full SQL itself. Needed for GROUP BY, aggregations, and questions you can't predict. More powerful, more risk.</p>
+        </div>
+        <div class="weakness">
+          <h5>Where it breaks</h5>
+          <p>"Something good for trail running in wet conditions." There's no "wetness" column. You need semantic search for that.</p>
+        </div>
+      </div>
+      <div>
+        <div class="code-block" style="font-size:11px;margin-bottom:12px;">
+<span class="cm">-- 5a: LLM fills in the form, you write the query</span>
+<span class="cm">-- User: "Nike running shoes under $100"</span>
+<span class="cm">-- LLM extracts: {brand: Nike, category: running, max_price: 100}</span>
+
+<span class="hl">SELECT</span> name, price, rating <span class="hl">FROM</span> products
+<span class="hl">WHERE</span> brand = <span class="fn">%s</span> <span class="hl">AND</span> category = <span class="fn">%s</span> <span class="hl">AND</span> price <= <span class="fn">%s</span></div>
+        <div class="code-block" style="font-size:11px;">
+<span class="cm">-- 5b: LLM writes the SQL from scratch</span>
+<span class="cm">-- User: "Which brand has the highest average rating?"</span>
+
+<span class="hl">SELECT</span> brand, <span class="fn">AVG</span>(rating)
+<span class="hl">FROM</span> products <span class="hl">GROUP BY</span> brand
+<span class="hl">ORDER BY</span> <span class="fn">AVG</span>(rating) <span class="hl">DESC LIMIT</span> 1;</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 9. AGENTIC RAG -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s8">
+  <div class="orb orb-1" style="top:20%;left:10%;"></div>
+  <div class="orb orb-3" style="top:60%;right:5%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:#F472B6;border-bottom-color:rgba(244,114,182,0.3);">Type 6</div>
+    <h2 class="display title reveal d2">Agentic RAG</h2>
+    <p class="sub reveal d3">The agent picks the right retrieval strategy for each part of the question.</p>
+
+    <div class="reveal d4" style="margin-top:28px;">
+      <div class="card" style="border-top:3px solid #F472B6;padding:28px;">
+        <div class="card-label" style="color:#F472B6;">Example query</div>
+        <h4 style="font-size:16px;font-weight:400;font-style:italic;color:var(--frost);">"I want running shoes under $150 but what's your return policy if they don't fit?"</h4>
+        <div class="grid-2" style="margin-top:20px;">
+          <div class="card" style="border-left:3px solid var(--signal);border-top:none;border-radius:0 8px 8px 0;">
+            <div class="card-label" style="color:var(--signal);">Tool call 1</div>
+            <h4>Product Filter</h4>
+            <p>"Running shoes under $150" is a standard lookup. Extracts parameters, runs a safe query.</p>
+          </div>
+          <div class="card" style="border-left:3px solid var(--green);border-top:none;border-radius:0 8px 8px 0;">
+            <div class="card-label" style="color:var(--green);">Tool call 2</div>
+            <h4>Document Loading</h4>
+            <p>"Return policy" is a small policy doc. Loads the whole file. No search needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta reveal d5">
+      <p>The agent has five tools: document loading, keyword search, vector search, product filter, and dynamic SQL. It picks the right one for each part of the question. <strong>This is where the spectrum pays off.</strong></p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 10. THE TAKEAWAY -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="slide" id="s9">
+  <div class="orb orb-1" style="top:30%;left:50%;width:500px;height:400px;"></div>
+  <div class="orb orb-2" style="top:60%;left:10%;width:300px;height:250px;"></div>
+  <div class="inner">
+    <div class="num reveal d1">The Takeaway</div>
+    <h2 class="display reveal d2" style="font-size:44px;max-width:720px;color:var(--frost);line-height:1.2;margin-bottom:14px;">
+      Start simple. Move right only when simple breaks.
+    </h2>
+    <p class="sub reveal d3" style="max-width:540px;">Don't over-engineer it. If your docs fit in context, just load them. Postgres handles full-text, vector, and SQL in one database. You don't need five different tools.</p>
+
+    <div class="grid-3 reveal d4" style="margin-top:40px;">
+      <div class="card" style="text-align:center;padding:28px 20px;border-top:3px solid var(--green);">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">START HERE</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--frost);">Document Loading</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px;">If docs fit in context, this is all you need</div>
+      </div>
+      <div class="card" style="text-align:center;padding:28px 20px;border-top:3px solid var(--cobalt);">
+        <div style="font-size:13px;font-weight:700;color:var(--cobalt);margin-bottom:8px;">PRODUCTION DEFAULT</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--frost);">Hybrid Search</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px;">Not sure? Start here. Best of both worlds.</div>
+      </div>
+      <div class="card" style="text-align:center;padding:28px 20px;border-top:3px solid var(--signal);">
+        <div style="font-size:13px;font-weight:700;color:var(--signal);margin-bottom:8px;">UNDERRATED</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--frost);">SQL RAG</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px;">Structured data? Just query it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const nav = document.getElementById('nav');
+  const labels = ['Title','Core Idea','Spectrum','Before We Dive In','Docs','Full-Text','Vector','Hybrid','SQL','Agentic','Takeaway'];
+
+  slides.forEach((_, i) => {
+    const row = document.createElement('div');
+    row.className = 'dot-row' + (i === 0 ? ' on' : '');
+    row.onclick = () => slides[i].scrollIntoView({ behavior: 'smooth' });
+    const lbl = document.createElement('span');
+    lbl.className = 'dot-label';
+    lbl.textContent = labels[i] || '';
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    row.appendChild(lbl);
+    row.appendChild(dot);
+    nav.appendChild(row);
+  });
+
+  const rows = nav.querySelectorAll('.dot-row');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        const i = Array.from(slides).indexOf(e.target);
+        rows.forEach((r, j) => r.classList.toggle('on', j === i));
+      }
+    });
+  }, { threshold: 0.35 });
+  slides.forEach(s => obs.observe(s));
+
+  document.addEventListener('keydown', e => {
+    const c = Array.from(rows).findIndex(r => r.classList.contains('on'));
+    if (['ArrowDown','ArrowRight',' '].includes(e.key)) {
+      e.preventDefault();
+      if (c < slides.length - 1) slides[c+1].scrollIntoView({ behavior: 'smooth' });
+    }
+    if (['ArrowUp','ArrowLeft'].includes(e.key)) {
+      e.preventDefault();
+      if (c > 0) slides[c-1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  window.addEventListener('scroll', () => document.body.classList.add('scrolled'), { once: true });
+  slides[0].classList.add('in-view');
+</script>
+
+</body>
+</html>

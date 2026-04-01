@@ -11,14 +11,20 @@ CREATE TABLE products (
     rating DECIMAL(2,1) NOT NULL,
     color TEXT NOT NULL,
     description TEXT NOT NULL,
-    -- Full-text search index column
-    description_tsv TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', description)) STORED,
+    -- Full-text search index column.
+    -- We combine multiple columns so keyword search can find products by
+    -- name, brand, category, color, AND description. If we only indexed
+    -- the description, searching "blue Nike running shoes" would fail
+    -- because "blue" is in the color column, not the description.
+    search_tsv TSVECTOR GENERATED ALWAYS AS (
+        to_tsvector('english', name || ' ' || brand || ' ' || category || ' ' || color || ' ' || description)
+    ) STORED,
     -- Vector embedding column (OpenAI text-embedding-3-small outputs 1536 dimensions)
     embedding VECTOR(1536)
 );
 
 -- Full-text search index
-CREATE INDEX idx_products_fts ON products USING GIN (description_tsv);
+CREATE INDEX idx_products_fts ON products USING GIN (search_tsv);
 
 -- Vector similarity search index (cosine distance)
 CREATE INDEX idx_products_embedding ON products USING hnsw (embedding vector_cosine_ops);

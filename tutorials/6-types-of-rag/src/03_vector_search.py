@@ -21,17 +21,41 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 
 
 def embed(text: str) -> list[float]:
-    """Embed a single text using OpenAI."""
+    """Turn text into a list of numbers (a "vector") that captures its meaning.
+
+    OpenAI's embedding model reads the text and returns ~1500 numbers.
+    Texts with similar meaning get similar numbers.
+    "comfortable running shoe" and "cushioned jogging sneaker" would
+    produce vectors that are close together, even though the words are different.
+    """
     response = client.embeddings.create(model="text-embedding-3-small", input=[text])
     return response.data[0].embedding
 
 
 def vector_search(query: str, limit: int = 5) -> list[dict]:
-    """Search products using vector similarity (cosine distance)."""
+    """Search products using vector similarity (cosine distance).
+
+    In production, you'd move this query into a stored procedure so your
+    Python code is just: SELECT * FROM vector_search(query_embedding, limit)
+    But for learning, the inline SQL makes it easier to see what's happening.
+    """
+    # Step 1: Turn the user's question into a vector (list of numbers)
     query_embedding = embed(query)
 
     with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
+            # Step 2: Find the products whose descriptions are closest in meaning
+            #
+            # embedding <=> %s::vector
+            #   The <=> operator measures the distance between two vectors.
+            #   Small distance = similar meaning. Think of it like measuring
+            #   how far apart two points are on a map.
+            #   We sort by this distance so the closest matches come first.
+            #
+            # 1 - (distance) AS similarity
+            #   We flip the distance into a similarity score.
+            #   1.0 = perfect match, 0.0 = completely unrelated.
+            #   This just makes the output easier to read.
             cur.execute(
                 """
                 SELECT name, brand, category, price, rating, color, description,

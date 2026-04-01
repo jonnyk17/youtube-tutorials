@@ -2,7 +2,7 @@
 Type 6: Agentic RAG
 
 The agent picks the right retrieval strategy based on the question.
-It has tools for all five previous approaches and decides which to use.
+It has tools for all previous approaches and decides which to use.
 
 Best for: Complex questions that span structured and unstructured data.
 Run: uv run src/06_agentic_rag.py
@@ -54,8 +54,8 @@ def full_text_search(query: str) -> str:
                 """
                 SELECT name, brand, price, rating, description
                 FROM products
-                WHERE description_tsv @@ websearch_to_tsquery('english', %s)
-                ORDER BY ts_rank(description_tsv, websearch_to_tsquery('english', %s)) DESC
+                WHERE search_tsv @@ websearch_to_tsquery('english', %s)
+                ORDER BY ts_rank(search_tsv, websearch_to_tsquery('english', %s)) DESC
                 LIMIT 5
                 """,
                 (query, query),
@@ -98,6 +98,69 @@ def sql_query(query: str) -> str:
             cur.execute(query)
             columns = [desc[0] for desc in cur.description]
             results = [dict(zip(columns, row)) for row in cur.fetchall()]
+    return json.dumps(results, default=str) if results else "No results."
+
+
+def product_filter(
+    brand: str | None = None,
+    category: str | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    min_rating: float | None = None,
+    color: str | None = None,
+    sort_by: str | None = None,
+    limit: int | None = None,
+) -> str:
+    """Parameterized product filter. Builds safe SQL from structured parameters."""
+    sql = "SELECT name, brand, category, price, rating, color FROM products"
+    conditions: list[str] = []
+    values: list = []
+
+    if brand:
+        conditions.append("brand ILIKE %s")
+        values.append(brand)
+
+    if category:
+        conditions.append("category ILIKE %s")
+        values.append(category)
+
+    if min_price is not None:
+        conditions.append("price >= %s")
+        values.append(min_price)
+
+    if max_price is not None:
+        conditions.append("price <= %s")
+        values.append(max_price)
+
+    if min_rating is not None:
+        conditions.append("rating >= %s")
+        values.append(min_rating)
+
+    if color:
+        conditions.append("color ILIKE %s")
+        values.append(color)
+
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+
+    sort_map = {
+        "price_asc": "price ASC",
+        "price_desc": "price DESC",
+        "rating_asc": "rating ASC",
+        "rating_desc": "rating DESC",
+        "name_asc": "name ASC",
+    }
+    if sort_by and sort_by in sort_map:
+        sql += f" ORDER BY {sort_map[sort_by]}"
+
+    sql += f" LIMIT {int(limit or 10)}"
+
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, values)
+            columns = [desc[0] for desc in cur.description]
+            results = [dict(zip(columns, row)) for row in cur.fetchall()]
+
     return json.dumps(results, default=str) if results else "No results."
 
 
@@ -152,7 +215,7 @@ TOOLS = [
     {
         "type": "function",
         "name": "sql_query",
-        "description": f"Execute a SQL SELECT query on the products table. Use for exact filters on price, rating, brand, category, or color. Schema: {PRODUCT_SCHEMA}",
+        "description": f"Execute a dynamic SQL SELECT query on the products table. Use ONLY for complex aggregations, GROUP BY, joins, or unusual analytical queries that product_filter cannot handle. Schema: {PRODUCT_SCHEMA}",
         "parameters": {
             "type": "object",
             "properties": {
@@ -164,6 +227,56 @@ TOOLS = [
             "required": ["query"],
         },
     },
+    {
+        "type": "function",
+        "name": "product_filter",
+        "description": "Parameterized product search. PREFER this over sql_query for standard product lookups with filters on brand, category, price, rating, or color. Safer and faster than dynamic SQL.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string",
+                    "description": "Brand name (Nike, Adidas, Asics, Salomon, New Balance)",
+                },
+                "category": {
+                    "type": "string",
+                    "description": "Product category (running, casual, hiking, training)",
+                },
+                "min_price": {
+                    "type": "number",
+                    "description": "Minimum price in USD",
+                },
+                "max_price": {
+                    "type": "number",
+                    "description": "Maximum price in USD",
+                },
+                "min_rating": {
+                    "type": "number",
+                    "description": "Minimum rating (1.0 to 5.0)",
+                },
+                "color": {
+                    "type": "string",
+                    "description": "Product color",
+                },
+                "sort_by": {
+                    "type": "string",
+                    "enum": [
+                        "price_asc",
+                        "price_desc",
+                        "rating_asc",
+                        "rating_desc",
+                        "name_asc",
+                    ],
+                    "description": "Sort order for results",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max number of results (default 10)",
+                },
+            },
+            "required": [],
+        },
+    },
 ]
 
 TOOL_HANDLERS = {
@@ -171,6 +284,7 @@ TOOL_HANDLERS = {
     "full_text_search": lambda args: full_text_search(args["query"]),
     "vector_search": lambda args: vector_search(args["query"]),
     "sql_query": lambda args: sql_query(args["query"]),
+    "product_filter": lambda args: product_filter(**args),
 }
 
 
@@ -182,7 +296,7 @@ def ask(question: str) -> str:
 
     response = client.responses.create(
         model="gpt-5.4",
-        instructions="You are a helpful shopping assistant for ShopMax. Use the available tools to find the best information to answer the customer's question. You can use multiple tools if the question has multiple parts.",
+        instructions="You are a helpful shopping assistant for ShopMax. Use the available tools to find the best information to answer the customer's question. You can use multiple tools if the question has multiple parts. Prefer product_filter for standard product lookups. Use sql_query only for complex aggregations or analytical queries.",
         input=question,
         tools=TOOLS,
     )
@@ -249,4 +363,8 @@ if __name__ == "__main__":
     answer = ask(
         "Do you have any Salomon shoes? And can I return them if I use them on a trail?"
     )
+    print(f"\nA: {answer}")
+
+    # Needs parameterized SQL: standard product filter
+    answer = ask("Show me Adidas shoes under $80")
     print(f"\nA: {answer}")

@@ -19,34 +19,58 @@ load_dotenv()
 client = OpenAI()
 DATABASE_URL = os.environ["DATABASE_URL"]
 
-# RRF constant (standard value from the original paper)
+# RRF constant. 60 is the standard value from the original research paper.
+# Higher K = rankings are more "blended" and less spiky.
+# You almost never need to change this.
 K = 60
 
 
 def embed(text: str) -> list[float]:
-    """Embed a single text using OpenAI."""
+    """Turn text into a vector that captures its meaning."""
     response = client.embeddings.create(model="text-embedding-3-small", input=[text])
     return response.data[0].embedding
 
 
 def hybrid_search(query: str, limit: int = 5) -> list[dict]:
     """
-    Hybrid search using Reciprocal Rank Fusion (RRF).
+    Hybrid search: run keyword search AND vector search, then merge the results.
 
-    Runs both full-text and vector search, then merges results
-    using RRF scoring: score = 1/(K + rank_fts) + 1/(K + rank_vector)
+    The idea is simple. Keyword search is good at exact matches ("Nike").
+    Vector search is good at meaning ("comfortable for long runs").
+    Why not run both and combine the results?
+
+    That's what Reciprocal Rank Fusion (RRF) does. Each result gets a score
+    based on where it ranked in both lists. If a product ranked #1 in keyword
+    search and #3 in vector search, it gets a high combined score.
+
+    In production, you'd move this into a stored procedure so your Python
+    code is just: SELECT * FROM hybrid_search(query_text, query_embedding, limit)
+    But for learning, the inline SQL makes it easier to see what's happening.
     """
     query_embedding = embed(query)
 
     with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
+            # This query has three parts (CTEs), run in order:
+            #
+            # 1. "fts" = keyword search results, ranked by text match quality
+            #    Same full-text search from the previous example.
+            #
+            # 2. "vec" = vector search results, ranked by semantic similarity
+            #    Same vector search from the previous example.
+            #
+            # 3. "combined" = merge both lists using RRF scoring
+            #    FULL OUTER JOIN means we keep results even if they only
+            #    appeared in one of the two searches.
+            #    The RRF formula: score = 1/(K + rank_keyword) + 1/(K + rank_vector)
+            #    Products that rank well in BOTH searches get the highest scores.
             cur.execute(
                 """
                 WITH fts AS (
                     SELECT id, name, brand, category, price, rating, color, description,
-                           ROW_NUMBER() OVER (ORDER BY ts_rank(description_tsv, websearch_to_tsquery('english', %(query)s)) DESC) AS rank_fts
+                           ROW_NUMBER() OVER (ORDER BY ts_rank(search_tsv, websearch_to_tsquery('english', %(query)s)) DESC) AS rank_fts
                     FROM products
-                    WHERE description_tsv @@ websearch_to_tsquery('english', %(query)s)
+                    WHERE search_tsv @@ websearch_to_tsquery('english', %(query)s)
                 ),
                 vec AS (
                     SELECT id, name, brand, category, price, rating, color, description,
