@@ -383,34 +383,36 @@
     <h2 class="display title reveal d2" style="font-size:48px;">Red, green, refactor.</h2>
 
     <div class="reveal d3" style="display:flex;justify-content:center;margin-top:24px;">
-      <svg width="480" height="340" viewBox="0 -10 480 340" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Circular arrow path -->
-        <path d="M240 60 A120 110 0 0 1 370 175" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
-        <path d="M370 175 A120 110 0 0 1 240 290" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
-        <path d="M240 290 A120 110 0 0 1 110 175" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
-        <path d="M110 175 A120 110 0 0 1 240 60" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+      <svg width="420" height="300" viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Arrow: Red to Green (top-right arc) -->
+        <path d="M275 72 Q 340 40, 345 130" stroke="#3D4452" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow)"/>
+        <!-- Arrow: Green to Refactor (bottom arc) -->
+        <path d="M320 220 Q 210 310, 140 220" stroke="#3D4452" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow)"/>
+        <!-- Arrow: Refactor to Red (top-left arc) -->
+        <path d="M108 130 Q 100 40, 185 65" stroke="#3D4452" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow)"/>
 
-        <!-- Arrow heads on the arcs -->
-        <polygon points="360,145 370,175 345,162" fill="#3D4452"/>
-        <polygon points="268,288 240,295 252,272" fill="#3D4452"/>
-        <polygon points="122,205 110,175 135,188" fill="#3D4452"/>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3D4452"/>
+          </marker>
+        </defs>
 
-        <!-- Red circle -->
-        <circle cx="240" cy="60" r="52" fill="rgba(248,113,113,0.12)" stroke="#F87171" stroke-width="2"/>
-        <text x="240" y="54" text-anchor="middle" fill="#F87171" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="15">Red</text>
-        <text x="240" y="72" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">Write test. It fails.</text>
+        <!-- Red node -->
+        <circle cx="230" cy="65" r="48" fill="rgba(248,113,113,0.10)" stroke="#F87171" stroke-width="1.5"/>
+        <text x="230" y="60" text-anchor="middle" fill="#F87171" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="14">Red</text>
+        <text x="230" y="77" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="10">Write test. It fails.</text>
 
-        <!-- Green circle -->
-        <circle cx="370" cy="195" r="52" fill="rgba(52,211,153,0.12)" stroke="#34D399" stroke-width="2"/>
-        <text x="370" y="189" text-anchor="middle" fill="#34D399" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="15">Green</text>
-        <text x="370" y="207" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">Minimum code</text>
-        <text x="370" y="220" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">to pass.</text>
+        <!-- Green node -->
+        <circle cx="340" cy="190" r="48" fill="rgba(52,211,153,0.10)" stroke="#34D399" stroke-width="1.5"/>
+        <text x="340" y="183" text-anchor="middle" fill="#34D399" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="14">Green</text>
+        <text x="340" y="198" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="10">Minimum code</text>
+        <text x="340" y="210" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="10">to pass.</text>
 
-        <!-- Blue circle -->
-        <circle cx="110" cy="195" r="52" fill="rgba(59,108,232,0.12)" stroke="#3B6CE8" stroke-width="2"/>
-        <text x="110" y="189" text-anchor="middle" fill="#3B6CE8" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="15">Refactor</text>
-        <text x="110" y="207" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">Clean up. Tests</text>
-        <text x="110" y="220" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">keep it honest.</text>
+        <!-- Blue node -->
+        <circle cx="110" cy="190" r="48" fill="rgba(59,108,232,0.10)" stroke="#3B6CE8" stroke-width="1.5"/>
+        <text x="110" y="183" text-anchor="middle" fill="#3B6CE8" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="14">Refactor</text>
+        <text x="110" y="198" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="10">Clean up. Tests</text>
+        <text x="110" y="210" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="10">keep it honest.</text>
       </svg>
     </div>
 
