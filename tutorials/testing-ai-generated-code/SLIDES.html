@@ -206,35 +206,8 @@
   <div class="slide-divider"></div>
 </section>
 
-<!-- 2. WHY TESTING MATTERS -->
+<!-- 2. THE TESTING PYRAMID -->
 <section class="slide" id="s1">
-  <div class="orb orb-3"></div>
-  <div class="inner">
-    <div class="num reveal d1">Why Test?</div>
-    <h2 class="display title reveal d2" style="font-size:48px;">Two reasons. Both matter more with AI agents.</h2>
-
-    <div class="grid-2 reveal d3" style="margin-top:32px;">
-      <div class="card" style="border-top:3px solid var(--cobalt);padding:28px;">
-        <div class="card-label">Reason 1</div>
-        <h4>Correctness</h4>
-        <p>The code does what it's meant to do right now. The scoring function returns the right score. The login rejects the wrong password. The API returns the right data.</p>
-      </div>
-      <div class="card" style="border-top:3px solid var(--signal);padding:28px;">
-        <div class="card-label" style="color:var(--signal);">Reason 2</div>
-        <h4>Regressions</h4>
-        <p>Changes to one part of the codebase don't break something else. The agent fixes the search endpoint and accidentally breaks authentication. Tests catch that.</p>
-      </div>
-    </div>
-
-    <div class="meta reveal d4">
-      <p>AI agents make dozens of changes in a single session. They're focused on the task in front of them. <strong>They have no idea they just broke something else.</strong></p>
-    </div>
-  </div>
-  <div class="slide-divider"></div>
-</section>
-
-<!-- 3. THE TESTING PYRAMID -->
-<section class="slide" id="s2">
   <div class="orb orb-1" style="top:30%;left:60%;"></div>
   <div class="inner">
     <div class="num reveal d1">The Pyramid</div>
@@ -270,8 +243,8 @@
   <div class="slide-divider"></div>
 </section>
 
-<!-- 4. WHAT TO TEST -->
-<section class="slide" id="s3">
+<!-- 3. WHAT TO TEST -->
+<section class="slide" id="s2">
   <div class="orb orb-2" style="top:20%;left:50%;"></div>
   <div class="inner">
     <div class="num reveal d1" style="color:var(--green);border-bottom-color:var(--green-mid);">What to Test</div>
@@ -319,64 +292,8 @@
   <div class="slide-divider"></div>
 </section>
 
-<!-- 5. THE PROBLEM -->
-<section class="slide" id="s4">
-  <div class="orb orb-1" style="top:40%;left:55%;"></div>
-  <div class="inner">
-    <div class="num reveal d1" style="color:var(--red);border-bottom-color:var(--red-mid);">The Problem</div>
-    <h2 class="display title reveal d2" style="font-size:48px;">When AI tests its own code.</h2>
-
-    <div class="grid-2 reveal d3" style="margin-top:32px;">
-      <div class="card" style="border-top:3px solid var(--red);padding:28px;">
-        <div class="card-label" style="color:var(--red);">What happens</div>
-        <h4>The agent grades its own homework</h4>
-        <p style="margin-top:12px;">You say "write tests for this code." The agent reads the code and writes tests that confirm what it already did. Every test passes. You feel safe. But the tests prove nothing.</p>
-      </div>
-      <div class="card" style="border-top:3px solid var(--signal);padding:28px;">
-        <div class="card-label" style="color:var(--signal);">The real danger</div>
-        <h4>False confidence</h4>
-        <p style="margin-top:12px;">You can have a green test suite full of tests that test nothing useful. Framework boilerplate, library functions, implementation details. The feeling of safety without the reality.</p>
-      </div>
-    </div>
-
-    <div class="meta reveal d4">
-      <p><strong>More tests isn't better. Better tests are better.</strong> The prompt shapes the quality of the tests more than the AI does.</p>
-    </div>
-  </div>
-  <div class="slide-divider"></div>
-</section>
-
-<!-- 6. TEST-FIRST vs TEST-AFTER -->
-<section class="slide" id="s5">
-  <div class="orb orb-3" style="top:10%;right:5%;"></div>
-  <div class="inner">
-    <div class="num reveal d1">The Approach</div>
-    <h2 class="display title reveal d2" style="font-size:48px;">Test-first vs test-after.</h2>
-
-    <div class="grid-2 reveal d3" style="margin-top:32px;">
-      <div class="card" style="border-top:3px solid var(--signal);padding:28px;">
-        <div class="card-label" style="color:var(--signal);">Test-After</div>
-        <h4>Write code, then test</h4>
-        <p style="margin-top:12px;">Better than no tests. But with AI agents, the agent reads its own code and writes tests that confirm what it already did.</p>
-        <p style="margin-top:12px;color:var(--signal);font-weight:600;font-size:13px;">It's grading its own homework.</p>
-      </div>
-      <div class="card" style="border-top:3px solid var(--green);padding:28px;">
-        <div class="card-label" style="color:var(--green);">Test-First (TDD)</div>
-        <h4>Write the test, then the code</h4>
-        <p style="margin-top:12px;">The test defines what the code should do before it exists. The agent has a concrete target. It writes the minimum to pass. No over-engineering.</p>
-        <p style="margin-top:12px;color:var(--green);font-weight:600;font-size:13px;">You define "done." The agent gets there.</p>
-      </div>
-    </div>
-
-    <div class="meta reveal d4">
-      <p>Test-first works with agents because <strong>it constrains them.</strong> The agent writes the minimum code to pass the test. Without that constraint, agents over-engineer everything.</p>
-    </div>
-  </div>
-  <div class="slide-divider"></div>
-</section>
-
-<!-- 7. THE RED-GREEN CYCLE -->
-<section class="slide" id="s6">
+<!-- 4. THE RED-GREEN CYCLE -->
+<section class="slide" id="s3">
   <div class="orb orb-2" style="top:15%;left:40%;"></div>
   <div class="inner">
     <div class="num reveal d1" style="color:var(--green);border-bottom-color:var(--green-mid);">The Cycle</div>
@@ -427,97 +344,8 @@
   <div class="slide-divider"></div>
 </section>
 
-<!-- 8. THE WORKFLOW -->
-<section class="slide" id="s7">
-  <div class="orb orb-1" style="top:20%;left:10%;"></div>
-  <div class="orb orb-3" style="top:60%;right:5%;"></div>
-  <div class="inner">
-    <div class="num reveal d1" style="color:var(--signal);border-bottom-color:var(--signal-mid);">The Workflow</div>
-    <h2 class="display title reveal d2" style="font-size:48px;">Tell the agent what could go wrong.</h2>
-
-    <div class="grid-2 reveal d3" style="margin-top:32px;">
-      <div class="card" style="border-top:3px solid var(--red);padding:28px;">
-        <div class="card-label" style="color:var(--red);">Wrong</div>
-        <h4>Test the functions</h4>
-        <div class="code-block" style="margin-top:16px;font-size:11px;">
-Write unit tests for the auth service.
-Cover password hashing, session tokens,
-and session expiry.
-
-<span class="cm"># Produces 7 trivial tests.</span>
-<span class="cm"># Tests bcrypt. Tests secrets.</span>
-<span class="cm"># Tests nothing useful.</span></div>
-      </div>
-      <div class="card" style="border-top:3px solid var(--green);padding:28px;">
-        <div class="card-label" style="color:var(--green);">Right</div>
-        <h4>Test what could go wrong</h4>
-        <div class="code-block" style="margin-top:16px;font-size:11px;">
-<span class="fn">/tdd</span>
-
-Think about what could actually go wrong.
-Don't test library functions.
-Test our decisions and security risks.
-
-<span class="cm"># Produces 6 meaningful tests.</span>
-<span class="cm"># Every one proves a real requirement.</span></div>
-      </div>
-    </div>
-
-    <div class="meta reveal d4">
-      <p><strong>The prompt shapes the quality of the tests more than the AI does.</strong> You decide what to test. The /tdd skill handles the red-green cycle.</p>
-    </div>
-  </div>
-  <div class="slide-divider"></div>
-</section>
-
-<!-- 9. GOOD vs BAD TESTS -->
-<section class="slide" id="s8">
-  <div class="orb orb-2" style="top:40%;left:60%;"></div>
-  <div class="inner">
-    <div class="num reveal d1">Examples</div>
-    <h2 class="display title reveal d2" style="font-size:48px;">Good test vs bad test.</h2>
-
-    <div class="grid-2 reveal d3" style="margin-top:32px;">
-      <div>
-        <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:0.1em;margin-bottom:12px;">GOOD: TESTS BUSINESS LOGIC</div>
-        <div class="code-block" style="font-size:11px;border-color:var(--green-mid);">
-<span class="hl">def</span> <span class="fn">test_zero_experience_perfect_skills</span>():
-    candidate = Candidate(
-        years_experience=<span class="st">0</span>,
-        skills=[<span class="st">"python"</span>, <span class="st">"fastapi"</span>]
-    )
-    job = Job(
-        required_skills=[<span class="st">"python"</span>, <span class="st">"fastapi"</span>]
-    )
-    score = calculate_score(candidate, job)
-    <span class="hl">assert</span> score > <span class="st">0.5</span>
-
-<span class="cm"># Tests a real edge case.</span>
-<span class="cm"># Defines expected behavior.</span>
-<span class="cm"># Catches real bugs.</span></div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:0.1em;margin-bottom:12px;">BAD: TESTS THE FRAMEWORK</div>
-        <div class="code-block" style="font-size:11px;border-color:var(--red-mid);">
-<span class="hl">def</span> <span class="fn">test_health_returns_200</span>():
-    response = client.get(<span class="st">"/health"</span>)
-    <span class="hl">assert</span> response.status_code == <span class="st">200</span>
-
-<span class="hl">def</span> <span class="fn">test_sends_email</span>(mock_smtp):
-    send_welcome_email(<span class="st">"user@test.com"</span>)
-    mock_smtp.send.assert_called_once()
-
-<span class="cm"># Tests FastAPI, not your code.</span>
-<span class="cm"># Tests a mock, not email delivery.</span>
-<span class="cm"># False confidence.</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="slide-divider"></div>
-</section>
-
-<!-- 10. THE TAKEAWAY -->
-<section class="slide" id="s9">
+<!-- 5. THE TAKEAWAY -->
+<section class="slide" id="s4">
   <div class="orb orb-1" style="top:30%;left:50%;width:500px;height:400px;"></div>
   <div class="orb orb-2" style="top:60%;left:10%;width:300px;height:250px;"></div>
   <div class="inner">
@@ -550,7 +378,7 @@ Test our decisions and security risks.
 <script>
   const slides = document.querySelectorAll('.slide');
   const nav = document.getElementById('nav');
-  const labels = ['Title','Why Test?','Pyramid','What to Test','The Problem','Approaches','Red-Green','The Workflow','Examples','Takeaway'];
+  const labels = ['Title','Pyramid','What to Test','Red-Green','Takeaway'];
 
   slides.forEach((_, i) => {
     const row = document.createElement('div');
