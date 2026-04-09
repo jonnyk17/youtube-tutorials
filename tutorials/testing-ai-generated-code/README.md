@@ -35,21 +35,15 @@ flowchart LR
 ## The Testing Pyramid
 
 ```mermaid
-block-beta
-    columns 1
-    block:evals["🔍 Evals — non-deterministic AI output (slow, fuzzy)"]
-    end
-    block:e2e["🌐 E2E Tests — full user flows (slow, expensive)"]
-    end
-    block:integration["🔗 Integration Tests — components together"]
-    end
-    block:unit["🧪 Unit Tests — single functions (fast, cheap, most tests here)"]
-    end
+graph TD
+    EVALS["Evals — non-deterministic AI output"] --> E2E["E2E Tests — full user flows"]
+    E2E --> INTEGRATION["Integration Tests — components together"]
+    INTEGRATION --> UNIT["Unit Tests — single functions (most tests here)"]
 
-    style evals fill:#a78bfa,color:#fff,stroke:#a78bfa
-    style e2e fill:#f27a3a,color:#fff,stroke:#f27a3a
-    style integration fill:#3b6ce8,color:#fff,stroke:#3b6ce8
-    style unit fill:#34d399,color:#fff,stroke:#34d399
+    style EVALS fill:#a78bfa,color:#fff,stroke:#a78bfa
+    style E2E fill:#f27a3a,color:#fff,stroke:#f27a3a
+    style INTEGRATION fill:#3b6ce8,color:#fff,stroke:#3b6ce8
+    style UNIT fill:#34d399,color:#fff,stroke:#34d399
 ```
 
 ## What to Test
