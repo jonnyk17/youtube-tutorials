@@ -113,9 +113,9 @@ Test the edge case where a candidate has zero years of experience
 but perfect skill matches. The score should still be above 0.5
 because skills matter more than tenure.
 
+Only write the test. Do not implement anything.
 Run the test with: uv run pytest tests/ -x
-Use red-green TDD. Write the test first, watch it fail,
-then implement the minimum code to make it pass.
+Confirm it fails.
 ```
 
 ### Prompt 2: Make It Pass

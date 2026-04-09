@@ -18,8 +18,6 @@ This produces trivial tests. The agent tests that bcrypt hashes things and that 
 ```
 Read the spec at .ai/specs/auth.md
 
-Implement the auth service using TDD.
-
 Before writing any tests, identify what could actually go wrong
 with the auth logic in this application. Focus on:
 - Behaviours where a bug would be a security vulnerability
@@ -30,8 +28,9 @@ Don't test library functions (bcrypt, secrets). Test YOUR logic
 and YOUR decisions. If a test would still pass with a completely
 different implementation, it's probably not testing anything useful.
 
-Run tests with: uv run pytest tests/ -x
-Do one test at a time. Show me each red-green cycle.
+Write the first test only. Do not implement anything.
+Run it with: uv run pytest tests/ -x
+Confirm it fails.
 ```
 
 ## Why This Works
@@ -58,8 +57,9 @@ Create two recruiters with separate candidate lists.
 Query the /candidates endpoint as recruiter A.
 Assert that recruiter B's candidates are not in the response.
 
-Run tests with: uv run pytest tests/ -x
-Use red-green TDD.
+Only write the test. Do not implement anything.
+Run it with: uv run pytest tests/ -x
+Confirm it fails.
 ```
 
 ### Testing what could go wrong
@@ -72,7 +72,9 @@ produce a wrong score?
 - Job with no required skills listed
 - Candidate with skills in a different case ("Python" vs "python")
 
-Write a test for each. One at a time. Red-green cycle.
+Write a test for the first edge case only. Do not implement anything.
+Run it with: uv run pytest tests/ -x
+Confirm it fails.
 ```
 
 ### Testing a spec requirement
