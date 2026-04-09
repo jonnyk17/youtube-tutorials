@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How I Test AI-Generated Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Libre+Franklin:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #05070C;
+    --card: #0C0F18;
+    --cobalt: #3B6CE8;
+    --signal: #F27A3A;
+    --frost: #F1F5F9;
+    --muted: #6B7280;
+    --dim: #3D4452;
+    --border: #1A1F2E;
+    --cobalt-dim: rgba(59, 108, 232, 0.10);
+    --cobalt-mid: rgba(59, 108, 232, 0.22);
+    --cobalt-glow: rgba(59, 108, 232, 0.35);
+    --signal-dim: rgba(242, 122, 58, 0.10);
+    --signal-mid: rgba(242, 122, 58, 0.22);
+    --signal-glow: rgba(242, 122, 58, 0.30);
+    --green: #34D399;
+    --green-dim: rgba(52, 211, 153, 0.10);
+    --green-mid: rgba(52, 211, 153, 0.22);
+    --red: #F87171;
+    --red-dim: rgba(248, 113, 113, 0.10);
+    --red-mid: rgba(248, 113, 113, 0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+  body {
+    font-family: 'Libre Franklin', sans-serif;
+    background: var(--canvas);
+    color: var(--frost);
+    line-height: 1.5;
+    font-weight: 400;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 9999; opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .slide {
+    height: 100vh; scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 60px 100px; position: relative; overflow: hidden;
+  }
+  .slide .orb {
+    position: absolute; border-radius: 50%; filter: blur(120px);
+    pointer-events: none; opacity: 0; transition: opacity 1.2s ease;
+  }
+  .slide.in-view .orb { opacity: 1; }
+  .orb-1 { width: 600px; height: 500px; background: var(--cobalt-dim); top: -10%; left: -5%; }
+  .orb-2 { width: 400px; height: 350px; background: var(--signal-dim); bottom: -8%; right: -3%; }
+  .orb-3 { width: 300px; height: 300px; background: var(--cobalt-dim); top: 50%; right: 10%; }
+  .inner { position: relative; z-index: 1; max-width: 1100px; width: 100%; margin: 0 auto; }
+
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slide.in-view .reveal { opacity: 1; transform: translateY(0); }
+  .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; }
+  .d3 { transition-delay: 0.24s; } .d4 { transition-delay: 0.32s; }
+  .d5 { transition-delay: 0.40s; } .d6 { transition-delay: 0.48s; }
+  .d7 { transition-delay: 0.56s; } .d8 { transition-delay: 0.64s; }
+
+  .display { font-family: 'Instrument Serif', serif; font-weight: 400; line-height: 1.12; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .num {
+    font-weight: 800; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--cobalt); margin-bottom: 18px; display: inline-block;
+    padding: 4px 0; border-bottom: 2px solid var(--cobalt-mid);
+  }
+  .title { font-size: 58px; color: var(--frost); margin-bottom: 14px; }
+  .sub { font-size: 18px; font-weight: 300; color: var(--muted); max-width: 580px; line-height: 1.65; }
+
+  .card {
+    background: var(--card); border-radius: 10px; padding: 24px;
+    border: 1px solid var(--border); transition: border-color 0.4s, box-shadow 0.4s;
+  }
+  .card:hover { border-color: var(--cobalt-mid); box-shadow: 0 0 24px -8px var(--cobalt-dim); }
+  .card-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--cobalt); margin-bottom: 10px;
+  }
+  .card h4 { font-size: 18px; font-weight: 700; color: var(--frost); margin-bottom: 6px; }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.55; }
+
+  .pill {
+    display: inline-block; padding: 4px 14px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  }
+  .pill-c { background: var(--cobalt-dim); color: var(--cobalt); border: 1px solid var(--cobalt-mid); }
+  .pill-s { background: var(--signal-dim); color: var(--signal); border: 1px solid var(--signal-mid); }
+  .pill-g { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-mid); }
+  .pill-r { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-mid); }
+
+  .nav-wrap {
+    position: fixed; right: 32px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: flex-end; gap: 14px; z-index: 100;
+  }
+  .dot-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .dot-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    color: transparent; text-transform: uppercase; transition: color 0.3s; white-space: nowrap;
+  }
+  .dot-row:hover .dot-label, .dot-row.on .dot-label { color: var(--muted); }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--dim);
+    border: none; padding: 0; cursor: pointer; transition: all 0.35s; flex-shrink: 0;
+  }
+  .dot-row.on .dot { background: var(--cobalt); width: 8px; height: 8px; box-shadow: 0 0 10px var(--cobalt-glow); }
+  .hint {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: var(--dim); z-index: 100; pointer-events: none;
+    transition: opacity 0.6s; letter-spacing: 0.04em;
+  }
+  body.scrolled .hint { opacity: 0; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+
+  .slide-divider {
+    position: absolute; bottom: 0; left: 100px; right: 100px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+  }
+
+  .code-block {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--muted); line-height: 1.7; overflow-x: auto; white-space: pre;
+  }
+  .code-block .hl { color: var(--cobalt); }
+  .code-block .cm { color: var(--dim); font-style: italic; }
+  .code-block .fn { color: var(--signal); }
+  .code-block .st { color: var(--green); }
+  .code-block .rd { color: var(--red); }
+
+  .meta {
+    margin-top: 24px; padding: 18px 22px;
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--signal); border-radius: 0 10px 10px 0;
+    max-width: 680px; box-shadow: -4px 0 20px -8px var(--signal-dim);
+  }
+  .meta p { font-size: 15px; color: var(--frost); line-height: 1.65; }
+  .meta strong { color: var(--signal); font-weight: 700; }
+
+  .big-num { font-family: 'Instrument Serif', serif; font-size: 72px; line-height: 1; }
+
+  .strength { border-left: 3px solid var(--cobalt); padding-left: 16px; margin-bottom: 12px; }
+  .strength h5 { font-size: 13px; font-weight: 700; color: var(--cobalt); margin-bottom: 4px; }
+  .strength p { font-size: 13px; color: var(--muted); }
+  .weakness { border-left: 3px solid var(--signal); padding-left: 16px; margin-bottom: 12px; }
+  .weakness h5 { font-size: 13px; font-weight: 700; color: var(--signal); margin-bottom: 4px; }
+  .weakness p { font-size: 13px; color: var(--muted); }
+
+  .flow { display: flex; align-items: center; gap: 16px; margin-top: 32px; flex-wrap: wrap; }
+  .flow-step {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; text-align: center; min-width: 120px;
+  }
+  .flow-arrow { color: var(--dim); font-size: 20px; }
+  .flow-step.red { border-top: 3px solid var(--red); }
+  .flow-step.green { border-top: 3px solid var(--green); }
+  .flow-step.blue { border-top: 3px solid var(--cobalt); }
+  .flow-step h5 { font-size: 14px; font-weight: 700; color: var(--frost); margin-bottom: 4px; }
+  .flow-step p { font-size: 11px; color: var(--dim); }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 32px; }
+  .stat-card { text-align: center; padding: 28px 20px; }
+  .stat-num { font-family: 'Instrument Serif', serif; font-size: 48px; line-height: 1; margin-bottom: 8px; }
+  .stat-label { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav-wrap" id="nav"></nav>
+<div class="hint">Scroll or arrow keys</div>
+
+<!-- 1. TITLE -->
+<section class="slide" id="s0">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="inner">
+    <div class="reveal d1" style="display:flex;gap:8px;margin-bottom:28px;">
+      <span class="pill pill-c">Testing</span>
+      <span class="pill pill-s">TDD</span>
+      <span class="pill pill-g">AI Agents</span>
+    </div>
+    <h1 class="display title reveal d2" style="font-size:72px;">How I Test<br>AI-Generated Code</h1>
+    <p class="sub reveal d3">AI agents write code that looks correct and breaks in ways you don't expect. Tests give the agent a closed feedback loop. Write code, run the tests, see what failed, fix it.</p>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 2. WHY TESTING MATTERS -->
+<section class="slide" id="s1">
+  <div class="orb orb-3"></div>
+  <div class="inner">
+    <div class="num reveal d1">Why Test?</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Two reasons. Both matter more with AI agents.</h2>
+
+    <div class="grid-2 reveal d3" style="margin-top:32px;">
+      <div class="card" style="border-top:3px solid var(--cobalt);padding:28px;">
+        <div class="card-label">Reason 1</div>
+        <h4>Correctness</h4>
+        <p>The code does what it's meant to do right now. The scoring function returns the right score. The login rejects the wrong password. The API returns the right data.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--signal);padding:28px;">
+        <div class="card-label" style="color:var(--signal);">Reason 2</div>
+        <h4>Regressions</h4>
+        <p>Changes to one part of the codebase don't break something else. The agent fixes the search endpoint and accidentally breaks authentication. Tests catch that.</p>
+      </div>
+    </div>
+
+    <div class="meta reveal d4">
+      <p>AI agents make dozens of changes in a single session. They're focused on the task in front of them. <strong>They have no idea they just broke something else.</strong></p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 3. THE TESTING PYRAMID -->
+<section class="slide" id="s2">
+  <div class="orb orb-1" style="top:30%;left:60%;"></div>
+  <div class="inner">
+    <div class="num reveal d1">The Pyramid</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Four layers. Each catches something different.</h2>
+
+    <div class="grid-4 reveal d3" style="margin-top:32px;">
+      <div class="card" style="border-top:3px solid var(--green);padding:20px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:8px;letter-spacing:0.1em;">MOST TESTS HERE</div>
+        <h4>Unit Tests</h4>
+        <p style="font-size:12px;">Single functions. Fast. Cheap. Hundreds of them.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--cobalt);padding:20px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--cobalt);margin-bottom:8px;letter-spacing:0.1em;">FEWER</div>
+        <h4>Integration</h4>
+        <p style="font-size:12px;">Components together. API + database. Services connected.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--signal);padding:20px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--signal);margin-bottom:8px;letter-spacing:0.1em;">FEW</div>
+        <h4>E2E Tests</h4>
+        <p style="font-size:12px;">Full user flows. Real browser. Slow but tests what users see.</p>
+      </div>
+      <div class="card" style="border-top:3px solid #A78BFA;padding:20px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#A78BFA;margin-bottom:8px;letter-spacing:0.1em;">NEW LAYER</div>
+        <h4>LLM Evals</h4>
+        <p style="font-size:12px;">Non-deterministic output. AI judges AI. Fuzzy but necessary.</p>
+      </div>
+    </div>
+
+    <div class="meta reveal d4">
+      <p>Most of your testing with AI agents happens at the <strong>unit and integration level.</strong> That's where the feedback loop is tightest.</p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 4. WHAT TO TEST -->
+<section class="slide" id="s3">
+  <div class="orb orb-2" style="top:20%;left:50%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--green);border-bottom-color:var(--green-mid);">What to Test</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Test your logic. Skip everyone else's.</h2>
+
+    <div class="grid-2 reveal d3" style="margin-top:32px;">
+      <div>
+        <div class="strength">
+          <h5>Business logic</h5>
+          <p>Scoring, pricing, access rules. If this breaks, it costs money or trust.</p>
+        </div>
+        <div class="strength">
+          <h5>Complex conditionals</h5>
+          <p>Multiple branches, edge cases. If you can't hold all paths in your head, write a test.</p>
+        </div>
+        <div class="strength">
+          <h5>Data transformations</h5>
+          <p>Input shape to output shape. Easy to get wrong, easy to test.</p>
+        </div>
+        <div class="strength">
+          <h5>AI failure modes</h5>
+          <p>Null handling, boundaries, error recovery. AI nails the happy path, misses everything else.</p>
+        </div>
+      </div>
+      <div>
+        <div class="weakness">
+          <h5>Framework boilerplate</h5>
+          <p>Testing that FastAPI returns 200. You're testing their code, not yours.</p>
+        </div>
+        <div class="weakness">
+          <h5>Library behavior</h5>
+          <p>Asserting json.loads parses JSON. The standard library works.</p>
+        </div>
+        <div class="weakness">
+          <h5>Mocks testing mocks</h5>
+          <p>Asserting a mock was called. When the real thing breaks, the test still passes.</p>
+        </div>
+        <div class="weakness">
+          <h5>Simple CRUD</h5>
+          <p>No custom logic? The framework handles it. A test here tests the framework.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 5. THE STATS -->
+<section class="slide" id="s4">
+  <div class="orb orb-1" style="top:40%;left:55%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--red);border-bottom-color:var(--red-mid);">The Problem</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">When AI tests its own code.</h2>
+
+    <div class="stat-grid reveal d3">
+      <div class="card stat-card" style="border-top:3px solid var(--red);">
+        <div class="stat-num" style="color:var(--red);">4%</div>
+        <div class="stat-label">Mutation test score on AI-generated tests with 100% line coverage. Every line executed. Almost nothing caught.</div>
+      </div>
+      <div class="card stat-card" style="border-top:3px solid var(--signal);">
+        <div class="stat-num" style="color:var(--signal);">75%</div>
+        <div class="stat-label">More logic errors in AI-authored PRs compared to human PRs. The code looks clean. The logic is wrong.</div>
+      </div>
+      <div class="card stat-card" style="border-top:3px solid var(--green);">
+        <div class="stat-num" style="color:var(--green);">70%</div>
+        <div class="stat-label">Regression reduction with targeted TDD. Specific test instructions. Not vague "write tests" prompts.</div>
+      </div>
+      <div class="card stat-card" style="border-top:3px solid var(--cobalt);">
+        <div class="stat-num" style="color:var(--cobalt);">10%</div>
+        <div class="stat-label">Regression rate when agents were told "use TDD" without specific guidance. Worse than no TDD at all (6%).</div>
+      </div>
+    </div>
+
+    <div class="meta reveal d4">
+      <p>When AI writes tests for its own code, it's <strong>grading its own homework.</strong> The tests confirm what the code does, not what it should do.</p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 6. TEST-FIRST vs TEST-AFTER -->
+<section class="slide" id="s5">
+  <div class="orb orb-3" style="top:10%;right:5%;"></div>
+  <div class="inner">
+    <div class="num reveal d1">The Approach</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Test-first vs test-after.</h2>
+
+    <div class="grid-2 reveal d3" style="margin-top:32px;">
+      <div class="card" style="border-top:3px solid var(--signal);padding:28px;">
+        <div class="card-label" style="color:var(--signal);">Test-After</div>
+        <h4>Write code, then test</h4>
+        <p style="margin-top:12px;">Better than no tests. But with AI agents, the agent reads its own code and writes tests that confirm what it already did.</p>
+        <p style="margin-top:12px;color:var(--signal);font-weight:600;font-size:13px;">100% coverage. 4% useful.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--green);padding:28px;">
+        <div class="card-label" style="color:var(--green);">Test-First (TDD)</div>
+        <h4>Write the test, then the code</h4>
+        <p style="margin-top:12px;">The test defines what the code should do before it exists. The agent has a concrete target. It writes the minimum to pass. No over-engineering.</p>
+        <p style="margin-top:12px;color:var(--green);font-weight:600;font-size:13px;">You define "done." The agent gets there.</p>
+      </div>
+    </div>
+
+    <div class="meta reveal d4">
+      <p>Test-first works with agents because <strong>it constrains them.</strong> The agent writes the minimum code to pass the test. Without that constraint, agents over-engineer everything.</p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 7. THE RED-GREEN CYCLE -->
+<section class="slide" id="s6">
+  <div class="orb orb-2" style="top:15%;left:40%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--green);border-bottom-color:var(--green-mid);">The Cycle</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Red, green, refactor.</h2>
+
+    <div class="flow reveal d3">
+      <div class="flow-step red">
+        <h5 style="color:var(--red);">Red</h5>
+        <p>Write test.<br>It fails.</p>
+      </div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step green">
+        <h5 style="color:var(--green);">Green</h5>
+        <p>Write minimum<br>code to pass.</p>
+      </div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step blue">
+        <h5 style="color:var(--cobalt);">Refactor</h5>
+        <p>Clean up. Tests<br>keep it honest.</p>
+      </div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step red">
+        <h5 style="color:var(--red);">Red</h5>
+        <p>Next test.<br>Repeat.</p>
+      </div>
+    </div>
+
+    <div class="code-block reveal d4" style="margin-top:32px;max-width:620px;">
+<span class="cm"># Your entire TDD instruction to the agent:</span>
+
+<span class="st">"Use red-green TDD."</span>
+
+<span class="cm"># Five tokens. That's it.</span>
+<span class="cm"># Every good coding agent knows what this means.</span></div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 8. THE TWO-PROMPT APPROACH -->
+<section class="slide" id="s7">
+  <div class="orb orb-1" style="top:20%;left:10%;"></div>
+  <div class="orb orb-3" style="top:60%;right:5%;"></div>
+  <div class="inner">
+    <div class="num reveal d1" style="color:var(--signal);border-bottom-color:var(--signal-mid);">The Workflow</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Two prompts. You keep control.</h2>
+
+    <div class="grid-2 reveal d3" style="margin-top:32px;">
+      <div class="card" style="border-top:3px solid var(--cobalt);padding:28px;">
+        <div class="card-label">Prompt 1</div>
+        <h4>Write the test</h4>
+        <div class="code-block" style="margin-top:16px;font-size:11px;">
+Write a test for the scoring logic.
+Test the edge case where a candidate
+has zero experience but perfect skills.
+Score should be above 0.5.
+
+Run: <span class="fn">uv run pytest tests/ -x</span>
+Use red-green TDD.</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--green);padding:28px;">
+        <div class="card-label" style="color:var(--green);">Prompt 2</div>
+        <h4>Make it pass</h4>
+        <div class="code-block" style="margin-top:16px;font-size:11px;">
+Run the failing tests. Implement the
+minimum code to make them pass.
+<span class="rd">Do not modify the tests.</span>
+<span class="rd">Do not add tests.</span>
+After all pass, run the full suite.</div>
+      </div>
+    </div>
+
+    <div class="meta reveal d4">
+      <p><strong>Why two prompts?</strong> If you say "write tests and implement this feature," you've handed over the most important decision: what to test. The agent will test everything. You should decide what matters.</p>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 9. GOOD vs BAD TESTS -->
+<section class="slide" id="s8">
+  <div class="orb orb-2" style="top:40%;left:60%;"></div>
+  <div class="inner">
+    <div class="num reveal d1">Examples</div>
+    <h2 class="display title reveal d2" style="font-size:48px;">Good test vs bad test.</h2>
+
+    <div class="grid-2 reveal d3" style="margin-top:32px;">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:0.1em;margin-bottom:12px;">GOOD: TESTS BUSINESS LOGIC</div>
+        <div class="code-block" style="font-size:11px;border-color:var(--green-mid);">
+<span class="hl">def</span> <span class="fn">test_zero_experience_perfect_skills</span>():
+    candidate = Candidate(
+        years_experience=<span class="st">0</span>,
+        skills=[<span class="st">"python"</span>, <span class="st">"fastapi"</span>]
+    )
+    job = Job(
+        required_skills=[<span class="st">"python"</span>, <span class="st">"fastapi"</span>]
+    )
+    score = calculate_score(candidate, job)
+    <span class="hl">assert</span> score > <span class="st">0.5</span>
+
+<span class="cm"># Tests a real edge case.</span>
+<span class="cm"># Defines expected behavior.</span>
+<span class="cm"># Catches real bugs.</span></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:0.1em;margin-bottom:12px;">BAD: TESTS THE FRAMEWORK</div>
+        <div class="code-block" style="font-size:11px;border-color:var(--red-mid);">
+<span class="hl">def</span> <span class="fn">test_health_returns_200</span>():
+    response = client.get(<span class="st">"/health"</span>)
+    <span class="hl">assert</span> response.status_code == <span class="st">200</span>
+
+<span class="hl">def</span> <span class="fn">test_sends_email</span>(mock_smtp):
+    send_welcome_email(<span class="st">"user@test.com"</span>)
+    mock_smtp.send.assert_called_once()
+
+<span class="cm"># Tests FastAPI, not your code.</span>
+<span class="cm"># Tests a mock, not email delivery.</span>
+<span class="cm"># False confidence.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-divider"></div>
+</section>
+
+<!-- 10. THE TAKEAWAY -->
+<section class="slide" id="s9">
+  <div class="orb orb-1" style="top:30%;left:50%;width:500px;height:400px;"></div>
+  <div class="orb orb-2" style="top:60%;left:10%;width:300px;height:250px;"></div>
+  <div class="inner">
+    <div class="num reveal d1">The Takeaway</div>
+    <h2 class="display reveal d2" style="font-size:44px;max-width:720px;color:var(--frost);line-height:1.2;margin-bottom:14px;">
+      Write fewer, better tests. Not more tests.
+    </h2>
+    <p class="sub reveal d3" style="max-width:540px;">Tests are free to write now. But bad tests are as expensive to maintain as they've always been. Your job is to decide what matters. That judgment is the skill.</p>
+
+    <div class="grid-3 reveal d4" style="margin-top:40px;">
+      <div class="card" style="text-align:center;padding:28px 20px;border-top:3px solid var(--green);">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">TEST THIS</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--frost);">Business Logic</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px;">Scoring, pricing, access rules, edge cases</div>
+      </div>
+      <div class="card" style="text-align:center;padding:28px 20px;border-top:3px solid var(--cobalt);">
+        <div style="font-size:13px;font-weight:700;color:var(--cobalt);margin-bottom:8px;">USE THIS</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--frost);">Two-Prompt TDD</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px;">You decide what to test. Agent makes it pass.</div>
+      </div>
+      <div class="card" style="text-align:center;padding:28px 20px;border-top:3px solid var(--signal);">
+        <div style="font-size:13px;font-weight:700;color:var(--signal);margin-bottom:8px;">SKIP THIS</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--frost);">Framework Tests</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:6px;">Don't test other people's code</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const nav = document.getElementById('nav');
+  const labels = ['Title','Why Test?','Pyramid','What to Test','The Stats','Approaches','Red-Green','Two Prompts','Examples','Takeaway'];
+
+  slides.forEach((_, i) => {
+    const row = document.createElement('div');
+    row.className = 'dot-row' + (i === 0 ? ' on' : '');
+    row.onclick = () => slides[i].scrollIntoView({ behavior: 'smooth' });
+    const lbl = document.createElement('span');
+    lbl.className = 'dot-label';
+    lbl.textContent = labels[i] || '';
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    row.appendChild(lbl);
+    row.appendChild(dot);
+    nav.appendChild(row);
+  });
+
+  const rows = nav.querySelectorAll('.dot-row');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        const i = Array.from(slides).indexOf(e.target);
+        rows.forEach((r, j) => r.classList.toggle('on', j === i));
+      }
+    });
+  }, { threshold: 0.35 });
+  slides.forEach(s => obs.observe(s));
+
+  document.addEventListener('keydown', e => {
+    const c = Array.from(rows).findIndex(r => r.classList.contains('on'));
+    if (['ArrowDown','ArrowRight',' '].includes(e.key)) {
+      e.preventDefault();
+      if (c < slides.length - 1) slides[c+1].scrollIntoView({ behavior: 'smooth' });
+    }
+    if (['ArrowUp','ArrowLeft'].includes(e.key)) {
+      e.preventDefault();
+      if (c > 0) slides[c-1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  window.addEventListener('scroll', () => document.body.classList.add('scrolled'), { once: true });
+  slides[0].classList.add('in-view');
+</script>
+
+</body>
+</html>
