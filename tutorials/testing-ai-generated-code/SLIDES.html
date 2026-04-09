@@ -382,26 +382,36 @@
     <div class="num reveal d1" style="color:var(--green);border-bottom-color:var(--green-mid);">The Cycle</div>
     <h2 class="display title reveal d2" style="font-size:48px;">Red, green, refactor.</h2>
 
-    <div class="flow reveal d3">
-      <div class="flow-step red">
-        <h5 style="color:var(--red);">Red</h5>
-        <p>Write test.<br>It fails.</p>
-      </div>
-      <span class="flow-arrow">&rarr;</span>
-      <div class="flow-step green">
-        <h5 style="color:var(--green);">Green</h5>
-        <p>Write minimum<br>code to pass.</p>
-      </div>
-      <span class="flow-arrow">&rarr;</span>
-      <div class="flow-step blue">
-        <h5 style="color:var(--cobalt);">Refactor</h5>
-        <p>Clean up. Tests<br>keep it honest.</p>
-      </div>
-      <span class="flow-arrow">&rarr;</span>
-      <div class="flow-step red">
-        <h5 style="color:var(--red);">Red</h5>
-        <p>Next test.<br>Repeat.</p>
-      </div>
+    <div class="reveal d3" style="display:flex;justify-content:center;margin-top:24px;">
+      <svg width="480" height="320" viewBox="0 0 480 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Circular arrow path -->
+        <path d="M240 40 A120 120 0 0 1 360 160" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+        <path d="M360 160 A120 120 0 0 1 240 280" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+        <path d="M240 280 A120 120 0 0 1 120 160" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+        <path d="M120 160 A120 120 0 0 1 240 40" stroke="#3D4452" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+
+        <!-- Arrow heads on the arcs -->
+        <polygon points="355,130 365,160 340,150" fill="#3D4452"/>
+        <polygon points="265,278 240,285 250,262" fill="#3D4452"/>
+        <polygon points="125,190 115,160 140,170" fill="#3D4452"/>
+
+        <!-- Red circle -->
+        <circle cx="240" cy="40" r="48" fill="rgba(248,113,113,0.12)" stroke="#F87171" stroke-width="2"/>
+        <text x="240" y="34" text-anchor="middle" fill="#F87171" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="15">Red</text>
+        <text x="240" y="52" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">Write test. It fails.</text>
+
+        <!-- Green circle -->
+        <circle cx="370" cy="180" r="48" fill="rgba(52,211,153,0.12)" stroke="#34D399" stroke-width="2"/>
+        <text x="370" y="174" text-anchor="middle" fill="#34D399" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="15">Green</text>
+        <text x="370" y="192" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">Minimum code</text>
+        <text x="370" y="205" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">to pass.</text>
+
+        <!-- Blue circle -->
+        <circle cx="110" cy="180" r="48" fill="rgba(59,108,232,0.12)" stroke="#3B6CE8" stroke-width="2"/>
+        <text x="110" y="174" text-anchor="middle" fill="#3B6CE8" font-family="Libre Franklin, sans-serif" font-weight="700" font-size="15">Refactor</text>
+        <text x="110" y="192" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">Clean up. Tests</text>
+        <text x="110" y="205" text-anchor="middle" fill="#6B7280" font-family="Libre Franklin, sans-serif" font-weight="400" font-size="11">keep it honest.</text>
+      </svg>
     </div>
 
     <div class="code-block reveal d4" style="margin-top:32px;max-width:620px;">
