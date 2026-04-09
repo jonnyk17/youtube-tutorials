@@ -319,34 +319,28 @@
   <div class="slide-divider"></div>
 </section>
 
-<!-- 5. THE STATS -->
+<!-- 5. THE PROBLEM -->
 <section class="slide" id="s4">
   <div class="orb orb-1" style="top:40%;left:55%;"></div>
   <div class="inner">
     <div class="num reveal d1" style="color:var(--red);border-bottom-color:var(--red-mid);">The Problem</div>
     <h2 class="display title reveal d2" style="font-size:48px;">When AI tests its own code.</h2>
 
-    <div class="stat-grid reveal d3">
-      <div class="card stat-card" style="border-top:3px solid var(--red);">
-        <div class="stat-num" style="color:var(--red);">4%</div>
-        <div class="stat-label">Mutation test score on AI-generated tests with 100% line coverage. Every line executed. Almost nothing caught.</div>
+    <div class="grid-2 reveal d3" style="margin-top:32px;">
+      <div class="card" style="border-top:3px solid var(--red);padding:28px;">
+        <div class="card-label" style="color:var(--red);">What happens</div>
+        <h4>The agent grades its own homework</h4>
+        <p style="margin-top:12px;">You say "write tests for this code." The agent reads the code and writes tests that confirm what it already did. Every test passes. You feel safe. But the tests prove nothing.</p>
       </div>
-      <div class="card stat-card" style="border-top:3px solid var(--signal);">
-        <div class="stat-num" style="color:var(--signal);">75%</div>
-        <div class="stat-label">More logic errors in AI-authored PRs compared to human PRs. The code looks clean. The logic is wrong.</div>
-      </div>
-      <div class="card stat-card" style="border-top:3px solid var(--green);">
-        <div class="stat-num" style="color:var(--green);">70%</div>
-        <div class="stat-label">Regression reduction with targeted TDD. Specific test instructions. Not vague "write tests" prompts.</div>
-      </div>
-      <div class="card stat-card" style="border-top:3px solid var(--cobalt);">
-        <div class="stat-num" style="color:var(--cobalt);">10%</div>
-        <div class="stat-label">Regression rate when agents were told "use TDD" without specific guidance. Worse than no TDD at all (6%).</div>
+      <div class="card" style="border-top:3px solid var(--signal);padding:28px;">
+        <div class="card-label" style="color:var(--signal);">The real danger</div>
+        <h4>False confidence</h4>
+        <p style="margin-top:12px;">You can have a green test suite full of tests that test nothing useful. Framework boilerplate, library functions, implementation details. The feeling of safety without the reality.</p>
       </div>
     </div>
 
     <div class="meta reveal d4">
-      <p>When AI writes tests for its own code, it's <strong>grading its own homework.</strong> The tests confirm what the code does, not what it should do.</p>
+      <p><strong>More tests isn't better. Better tests are better.</strong> The prompt shapes the quality of the tests more than the AI does.</p>
     </div>
   </div>
   <div class="slide-divider"></div>
@@ -364,7 +358,7 @@
         <div class="card-label" style="color:var(--signal);">Test-After</div>
         <h4>Write code, then test</h4>
         <p style="margin-top:12px;">Better than no tests. But with AI agents, the agent reads its own code and writes tests that confirm what it already did.</p>
-        <p style="margin-top:12px;color:var(--signal);font-weight:600;font-size:13px;">100% coverage. 4% useful.</p>
+        <p style="margin-top:12px;color:var(--signal);font-weight:600;font-size:13px;">It's grading its own homework.</p>
       </div>
       <div class="card" style="border-top:3px solid var(--green);padding:28px;">
         <div class="card-label" style="color:var(--green);">Test-First (TDD)</div>
@@ -421,41 +415,44 @@
   <div class="slide-divider"></div>
 </section>
 
-<!-- 8. THE TWO-PROMPT APPROACH -->
+<!-- 8. THE WORKFLOW -->
 <section class="slide" id="s7">
   <div class="orb orb-1" style="top:20%;left:10%;"></div>
   <div class="orb orb-3" style="top:60%;right:5%;"></div>
   <div class="inner">
     <div class="num reveal d1" style="color:var(--signal);border-bottom-color:var(--signal-mid);">The Workflow</div>
-    <h2 class="display title reveal d2" style="font-size:48px;">Two prompts. You keep control.</h2>
+    <h2 class="display title reveal d2" style="font-size:48px;">Direct toward risk, not coverage.</h2>
 
     <div class="grid-2 reveal d3" style="margin-top:32px;">
-      <div class="card" style="border-top:3px solid var(--cobalt);padding:28px;">
-        <div class="card-label">Prompt 1</div>
-        <h4>Write the test</h4>
+      <div class="card" style="border-top:3px solid var(--red);padding:28px;">
+        <div class="card-label" style="color:var(--red);">Wrong</div>
+        <h4>Test the functions</h4>
         <div class="code-block" style="margin-top:16px;font-size:11px;">
-Write a test for the scoring logic.
-Test the edge case where a candidate
-has zero experience but perfect skills.
-Score should be above 0.5.
+Write unit tests for the auth service.
+Cover password hashing, session tokens,
+and session expiry.
 
-Run: <span class="fn">uv run pytest tests/ -x</span>
-Use red-green TDD.</div>
+<span class="cm"># Produces 7 trivial tests.</span>
+<span class="cm"># Tests bcrypt. Tests secrets.</span>
+<span class="cm"># Tests nothing useful.</span></div>
       </div>
       <div class="card" style="border-top:3px solid var(--green);padding:28px;">
-        <div class="card-label" style="color:var(--green);">Prompt 2</div>
-        <h4>Make it pass</h4>
+        <div class="card-label" style="color:var(--green);">Right</div>
+        <h4>Test what could go wrong</h4>
         <div class="code-block" style="margin-top:16px;font-size:11px;">
-Run the failing tests. Implement the
-minimum code to make them pass.
-<span class="rd">Do not modify the tests.</span>
-<span class="rd">Do not add tests.</span>
-After all pass, run the full suite.</div>
+<span class="fn">/tdd</span>
+
+Think about what could actually go wrong.
+Don't test library functions.
+Test our decisions and security risks.
+
+<span class="cm"># Produces 6 meaningful tests.</span>
+<span class="cm"># Every one proves a real requirement.</span></div>
       </div>
     </div>
 
     <div class="meta reveal d4">
-      <p><strong>Why two prompts?</strong> If you say "write tests and implement this feature," you've handed over the most important decision: what to test. The agent will test everything. You should decide what matters.</p>
+      <p><strong>The prompt shapes the quality of the tests more than the AI does.</strong> You decide what to test. The /tdd skill handles the red-green cycle.</p>
     </div>
   </div>
   <div class="slide-divider"></div>
@@ -541,7 +538,7 @@ After all pass, run the full suite.</div>
 <script>
   const slides = document.querySelectorAll('.slide');
   const nav = document.getElementById('nav');
-  const labels = ['Title','Why Test?','Pyramid','What to Test','The Stats','Approaches','Red-Green','Two Prompts','Examples','Takeaway'];
+  const labels = ['Title','Why Test?','Pyramid','What to Test','The Problem','Approaches','Red-Green','The Workflow','Examples','Takeaway'];
 
   slides.forEach((_, i) => {
     const row = document.createElement('div');
