@@ -280,7 +280,31 @@ testing-ai-generated-code/
         └── test_auth_service.py # 6 tests, all proving real requirements
 ```
 
+## The /tdd Skill
+
+The live demo uses the `/tdd` skill from the Blueprint plugin. It enforces red-green-refactor automatically: write a failing test, implement the minimum to pass, clean up, repeat. Every test must justify its existence.
+
+Install it:
+```bash
+/plugin marketplace add owainlewis/blueprint
+/plugin install blueprint@owainlewis-blueprint
+```
+
+Then use it:
+```
+/tdd
+
+Read the spec at .ai/specs/auth.md
+Implement the auth service. Think about what could actually go wrong.
+Don't test library functions. Test our decisions and security risks.
+```
+
+The skill handles the red-green cycle. You handle what to test.
+
+See the full skill: [Blueprint TDD Skill](https://github.com/owainlewis/blueprint/blob/main/skills/tdd/SKILL.md)
+
 ## Related
 
 - [How I Review AI-Generated Code](../ai-code-review/) - The companion video on code review
 - [Blueprint plugin](https://github.com/owainlewis/blueprint) - Full SDLC workflow including TDD skill
+- [Agent Skills by Addy Osmani](https://github.com/addyosmani/agent-skills) - Comprehensive collection of Claude Code skills including a detailed TDD skill with the Prove-It Pattern, test pyramid, DAMP over DRY, and anti-patterns guide
