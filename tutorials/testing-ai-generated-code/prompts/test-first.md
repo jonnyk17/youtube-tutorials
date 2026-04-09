@@ -28,6 +28,9 @@ Don't test library functions (bcrypt, secrets). Test YOUR logic
 and YOUR decisions. If a test would still pass with a completely
 different implementation, it's probably not testing anything useful.
 
+For each test, state which line of our code it would catch a bug in.
+If the answer is "it tests that bcrypt/secrets works correctly," drop it.
+
 Write the first test only. Do not implement anything.
 Run it with: uv run pytest tests/ -x
 Confirm it fails.
