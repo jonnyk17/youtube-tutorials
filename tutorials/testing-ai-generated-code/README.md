@@ -17,30 +17,39 @@ Two reasons we write tests:
 
 AI agents make both worse. They make dozens of changes across your codebase in a single session. They're focused on the task in front of them and have no idea they just broke authentication in another file. Tests are your insurance.
 
-```
-Without tests:
-  Agent writes code -> Looks right -> Ships -> Breaks in production
+```mermaid
+flowchart LR
+    subgraph without["Without Tests"]
+        direction LR
+        A1[Agent writes code] --> A2[Looks right] --> A3[Ships] --> A4[Breaks in production]
+    end
+    subgraph with_tests["With Tests"]
+        direction LR
+        B1[Agent writes code] --> B2[Runs tests] --> B3[Sees failure] --> B4[Fixes it] --> B5[Confirmed working]
+    end
 
-With tests:
-  Agent writes code -> Runs tests -> Sees failure -> Fixes it -> Confirmed working
+    style A4 fill:#f87171,color:#fff,stroke:#f87171
+    style B5 fill:#34d399,color:#fff,stroke:#34d399
 ```
 
 ## The Testing Pyramid
 
-```
-         /\
-        /  \       Evals (non-deterministic AI output)
-       /    \      Slow, fuzzy, but necessary for LLM apps
-      /------\
-     /        \    E2E Tests (full user flows)
-    /          \   Slow, expensive, test what users see
-   /------------\
-  /              \  Integration Tests (components together)
- /                \ Does the API talk to the database correctly?
-/------------------\
-|    Unit Tests     | Fast, cheap, test single functions
-|                   | Most of your testing happens here
-\------------------/
+```mermaid
+block-beta
+    columns 1
+    block:evals["🔍 Evals — non-deterministic AI output (slow, fuzzy)"]
+    end
+    block:e2e["🌐 E2E Tests — full user flows (slow, expensive)"]
+    end
+    block:integration["🔗 Integration Tests — components together"]
+    end
+    block:unit["🧪 Unit Tests — single functions (fast, cheap, most tests here)"]
+    end
+
+    style evals fill:#a78bfa,color:#fff,stroke:#a78bfa
+    style e2e fill:#f27a3a,color:#fff,stroke:#f27a3a
+    style integration fill:#3b6ce8,color:#fff,stroke:#3b6ce8
+    style unit fill:#34d399,color:#fff,stroke:#34d399
 ```
 
 ## What to Test
@@ -66,16 +75,39 @@ The stat: AI-generated code with 100% test coverage scored **4% on mutation test
 
 Write the test first. The test describes what the code *should* do. Then write the code to make it pass.
 
-The cycle:
-1. **Red** - Write a test. It fails (no implementation yet).
-2. **Green** - Write the minimum code to make it pass.
-3. **Refactor** - Clean up while the test keeps you honest.
+```mermaid
+flowchart LR
+    R["🔴 Red\nWrite test\nIt fails"] --> G["🟢 Green\nMinimum code\nto pass"] --> RF["🔵 Refactor\nClean up\nTests keep it honest"] --> R
+
+    style R fill:#f87171,color:#fff,stroke:#f87171
+    style G fill:#34d399,color:#fff,stroke:#34d399
+    style RF fill:#3b6ce8,color:#fff,stroke:#3b6ce8
+```
 
 With AI agents, this gives the agent a concrete target and prevents over-engineering.
 
 ## The Two-Prompt Approach
 
 The key insight: separate **what to test** from **making it pass**.
+
+```mermaid
+flowchart TD
+    YOU["👤 You decide what to test"] --> P1["Prompt 1: Write the test"]
+    P1 --> RED["🔴 Test fails"]
+    RED --> P2["Prompt 2: Make it pass"]
+    P2 --> IMPL["Agent writes minimum code"]
+    IMPL --> GREEN["🟢 Test passes"]
+    GREEN --> SUITE["Run full test suite"]
+    SUITE --> CHECK{Regressions?}
+    CHECK -->|No| NEXT["Next test"]
+    CHECK -->|Yes| FIX["Agent fixes regression"]
+    FIX --> SUITE
+
+    style YOU fill:#3b6ce8,color:#fff,stroke:#3b6ce8
+    style RED fill:#f87171,color:#fff,stroke:#f87171
+    style GREEN fill:#34d399,color:#fff,stroke:#34d399
+    style NEXT fill:#34d399,color:#fff,stroke:#34d399
+```
 
 ### Prompt 1: Write the Test
 
