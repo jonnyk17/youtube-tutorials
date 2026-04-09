@@ -80,21 +80,21 @@ flowchart LR
 
 With AI agents, this gives the agent a concrete target and prevents over-engineering.
 
-## The Two-Prompt Approach
+## The Workflow
 
-The key insight: separate **what to test** from **making it pass**.
+The key insight: **you decide what to test, the agent handles the red-green cycle.** One well-directed prompt beats two separate ones.
 
 ```mermaid
 flowchart TD
-    YOU["👤 You decide what to test"] --> P1["Prompt 1: Write the test"]
-    P1 --> RED["🔴 Test fails"]
-    RED --> P2["Prompt 2: Make it pass"]
-    P2 --> IMPL["Agent writes minimum code"]
-    IMPL --> GREEN["🟢 Test passes"]
-    GREEN --> SUITE["Run full test suite"]
+    YOU["👤 You decide what to test"] --> PROMPT["Write a prompt focused on risk"]
+    PROMPT --> TDD["Agent runs red-green-refactor"]
+    TDD --> RED["🔴 Writes test, confirms it fails"]
+    RED --> GREEN["🟢 Implements minimum code to pass"]
+    GREEN --> REFACTOR["🔵 Cleans up"]
+    REFACTOR --> SUITE["Runs full test suite"]
     SUITE --> CHECK{Regressions?}
     CHECK -->|No| NEXT["Next test"]
-    CHECK -->|Yes| FIX["Agent fixes regression"]
+    CHECK -->|Yes| FIX["Fixes regression"]
     FIX --> SUITE
 
     style YOU fill:#3b6ce8,color:#fff,stroke:#3b6ce8
@@ -103,53 +103,28 @@ flowchart TD
     style NEXT fill:#34d399,color:#fff,stroke:#34d399
 ```
 
-### Prompt 1: Write the Test
+### Example Prompt
 
-You decide what needs a test. Be specific about the behavior, not the implementation.
-
-```
-Write a test for the candidate scoring logic.
-Test the edge case where a candidate has zero years of experience
-but perfect skill matches. The score should still be above 0.5
-because skills matter more than tenure.
-
-Only write the test. Do not implement anything.
-Run the test with: uv run pytest tests/ -x
-Confirm it fails.
-```
-
-### Prompt 2: Make It Pass
-
-Now the agent has a failing test. Its only job is to write the implementation.
+Direct the agent toward **risk**, not coverage. Tell it what could go wrong, not which functions to test.
 
 ```
-Run the failing tests. Implement the minimum code to make them pass.
-Do not modify the tests. Do not add tests.
-After all tests pass, run the full test suite to check for regressions.
+/tdd
+
+Read the spec at .ai/specs/auth.md
+
+Implement the auth service. Think about what could actually go wrong.
+Focus on behaviours where a bug would be a security vulnerability.
+Don't test library functions (bcrypt, secrets). Test our decisions
+and security risks.
 ```
 
-### Why Two Prompts?
+The `/tdd` skill handles the red-green cycle automatically. You handle what to test.
+
+### The Principle
 
 If you say "write tests and implement this feature," you've handed over the most important decision: **what to test**. The agent will test everything because it has no judgment about what matters in your system. You do.
 
 Research backs this up: targeted TDD reduced regressions by 70%. Vague "do TDD" instructions made things worse (regressions went from 6% to 10%).
-
-## Single-Prompt Alternative
-
-For smaller tasks where the stakes are lower:
-
-```
-Implement the email validation endpoint.
-Use red-green TDD. Only write tests for:
-- Business logic and validation rules
-- Edge cases (empty input, malformed emails, unicode)
-Do NOT write tests for:
-- Framework routing (FastAPI handles this)
-- Database connection boilerplate
-- Library functions
-
-Run tests with: uv run pytest tests/ -x
-```
 
 ## CLAUDE.md Testing Config
 
