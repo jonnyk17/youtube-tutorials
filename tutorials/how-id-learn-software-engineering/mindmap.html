@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How I'd Learn Software Engineering</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0a0a0b;
+    color: #e4e4e7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #fafafa;
+    letter-spacing: -0.03em;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: #71717a;
+    text-align: center;
+    margin-bottom: 60px;
+    font-weight: 400;
+  }
+
+  .roadmap {
+    width: 100%;
+    max-width: 1100px;
+    position: relative;
+  }
+
+  /* The vertical line connecting phases */
+  .roadmap::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #3b82f6, #8b5cf6, #f59e0b);
+    transform: translateX(-50%);
+    z-index: 0;
+  }
+
+  .phase {
+    position: relative;
+    margin-bottom: 80px;
+    z-index: 1;
+  }
+
+  .phase:last-child { margin-bottom: 0; }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .phase-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    border: 2px solid;
+  }
+
+  .phase-1 .phase-number { background: #1e3a5f; color: #60a5fa; border-color: #3b82f6; }
+  .phase-2 .phase-number { background: #2e1065; color: #a78bfa; border-color: #8b5cf6; }
+  .phase-3 .phase-number { background: #451a03; color: #fbbf24; border-color: #f59e0b; }
+
+  .phase-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .phase-1 .phase-title { color: #60a5fa; }
+  .phase-2 .phase-title { color: #a78bfa; }
+  .phase-3 .phase-title { color: #fbbf24; }
+
+  .phase-desc {
+    font-size: 0.85rem;
+    color: #71717a;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .branch {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .branch:hover {
+    transform: translateY(-2px);
+  }
+
+  .phase-1 .branch:hover { border-color: #3b82f6; }
+  .phase-2 .branch:hover { border-color: #8b5cf6; }
+  .phase-3 .branch:hover { border-color: #f59e0b; }
+
+  .branch-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .branch-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .phase-1 .branch-icon { background: #1e3a5f; }
+  .phase-2 .branch-icon { background: #2e1065; }
+  .phase-3 .branch-icon { background: #451a03; }
+
+  .branch-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fafafa;
+  }
+
+  .branch-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .branch-items li {
+    font-size: 0.85rem;
+    color: #a1a1aa;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .branch-items li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .phase-1 .branch-items li::before { background: #3b82f6; }
+  .phase-2 .branch-items li::before { background: #8b5cf6; }
+  .phase-3 .branch-items li::before { background: #f59e0b; }
+
+  .footer {
+    margin-top: 80px;
+    text-align: center;
+    color: #52525b;
+    font-size: 0.8rem;
+  }
+
+  .footer a {
+    color: #71717a;
+    text-decoration: none;
+  }
+
+  /* For screen recording: allow zooming into phases */
+  .phase {
+    scroll-margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<h1>How I'd Learn Software Engineering</h1>
+<p class="subtitle">When AI writes the code</p>
+
+<div class="roadmap">
+
+  <!-- Phase 1 -->
+  <div class="phase phase-1" id="foundations">
+    <div class="phase-header">
+      <div class="phase-number">1</div>
+      <div>
+        <div class="phase-title">Foundations</div>
+        <div class="phase-desc">Learn these first</div>
+      </div>
+    </div>
+    <div class="branches">
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x2726;</div>
+          <div class="branch-name">Core Fundamentals</div>
+        </div>
+        <ul class="branch-items">
+          <li>One language deeply (Python)</li>
+          <li>Variables, functions, data structures</li>
+          <li>How code executes</li>
+          <li>Error handling &amp; edge cases</li>
+          <li>Reading code fluently</li>
+        </ul>
+      </div>
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x25E8;</div>
+          <div class="branch-name">System Design</div>
+        </div>
+        <ul class="branch-items">
+          <li>How web applications work</li>
+          <li>APIs &amp; HTTP</li>
+          <li>Databases (SQL vs NoSQL)</li>
+          <li>Caching &amp; load balancing</li>
+          <li>Message queues</li>
+          <li>Data flow between services</li>
+          <li>What happens when things fail</li>
+        </ul>
+      </div>
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x2699;</div>
+          <div class="branch-name">The Development Process</div>
+        </div>
+        <ul class="branch-items">
+          <li>Spec &mdash; define what you're building</li>
+          <li>Plan &mdash; break it into tasks</li>
+          <li>Build &mdash; write code + tests</li>
+          <li>Review &mdash; check for bugs &amp; security</li>
+          <li>Debug &mdash; find root causes</li>
+          <li>Git &mdash; branches, PRs, diffs</li>
+          <li>Testing &mdash; what, when, and why</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase phase-2" id="professional">
+    <div class="phase-header">
+      <div class="phase-number">2</div>
+      <div>
+        <div class="phase-title">Professional Skills</div>
+        <div class="phase-desc">Learn as you build</div>
+      </div>
+    </div>
+    <div class="branches">
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x25C8;</div>
+          <div class="branch-name">Product Thinking</div>
+        </div>
+        <ul class="branch-items">
+          <li>Define requirements before coding</li>
+          <li>Understand users and their problems</li>
+          <li>Scope decisions &amp; tradeoffs</li>
+          <li>Knowing when NOT to build</li>
+        </ul>
+      </div>
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x2616;</div>
+          <div class="branch-name">Operations</div>
+        </div>
+        <ul class="branch-items">
+          <li>Linux &amp; command line</li>
+          <li>Deployment (Railway, Render, VPS)</li>
+          <li>CI/CD pipelines</li>
+          <li>Networking &amp; DNS</li>
+          <li>Environment variables &amp; secrets</li>
+          <li>Monitoring &amp; logging</li>
+        </ul>
+      </div>
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x270E;</div>
+          <div class="branch-name">Communication</div>
+        </div>
+        <ul class="branch-items">
+          <li>Technical writing</li>
+          <li>Design documents</li>
+          <li>Explaining decisions to non-technical people</li>
+          <li>Clear prompting (for humans and AI)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase phase-3" id="accelerators">
+    <div class="phase-header">
+      <div class="phase-number">3</div>
+      <div>
+        <div class="phase-title">Accelerators</div>
+        <div class="phase-desc">Multiply everything else</div>
+      </div>
+    </div>
+    <div class="branches">
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x26A1;</div>
+          <div class="branch-name">AI Tools &amp; Workflows</div>
+        </div>
+        <ul class="branch-items">
+          <li>Pick one tool deeply (Claude Code, Cursor)</li>
+          <li>Context engineering (CLAUDE.md)</li>
+          <li>Spec-driven prompting</li>
+          <li>Reviewing AI output systematically</li>
+          <li>Debugging AI mistakes</li>
+        </ul>
+      </div>
+
+      <div class="branch">
+        <div class="branch-header">
+          <div class="branch-icon">&#x2B22;</div>
+          <div class="branch-name">Deliberate Practice</div>
+        </div>
+        <ul class="branch-items">
+          <li>Build one real project end to end</li>
+          <li>Ship it to production</li>
+          <li>Practice without AI sometimes</li>
+          <li>Use AI to accelerate learning</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>owainlewis.com &middot; <a href="https://github.com/owainlewis/youtube-tutorials">companion repo</a></p>
+</div>
+
+</body>
+</html>
