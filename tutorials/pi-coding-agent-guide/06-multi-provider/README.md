@@ -100,8 +100,8 @@ Run models on your own hardware:
 
 A practical approach to multi-provider usage:
 
-1. **Exploration/planning:** Use a cheap, fast model (Gemini Flash, GPT-4o-mini, Haiku)
-2. **Complex edits:** Switch to a frontier model (Claude Opus, GPT-4o, Gemini Pro)
+1. **Exploration/planning:** Use a cheap, fast model (Gemini Flash, Haiku)
+2. **Complex edits:** Switch to a frontier model (Claude Opus, Codex, Gemini Pro)
 3. **Second opinion:** Switch providers entirely. If Claude suggests an approach, ask GPT or Gemini to review it.
 4. **Large context:** Switch to Gemini Pro (1M context) for reading huge codebases
 5. **Privacy:** Switch to a local model (Ollama) for sensitive code

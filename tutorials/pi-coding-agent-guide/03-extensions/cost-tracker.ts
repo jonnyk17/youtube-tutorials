@@ -13,6 +13,7 @@ const PRICING: Record<string, { input: number; output: number }> = {
   "claude-opus-4": { input: 15, output: 75 },
   "claude-sonnet-4": { input: 3, output: 15 },
   "claude-haiku-4": { input: 0.8, output: 4 },
+  "codex": { input: 2.5, output: 10 },
   "gpt-4o": { input: 2.5, output: 10 },
   "gpt-4o-mini": { input: 0.15, output: 0.6 },
   "gemini-2.5-pro": { input: 1.25, output: 10 },

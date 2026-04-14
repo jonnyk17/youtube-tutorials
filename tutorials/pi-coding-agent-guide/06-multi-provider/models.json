@@ -36,7 +36,7 @@
           "maxTokens": 8192
         },
         {
-          "id": "openai/gpt-4o",
+          "id": "openai/codex",
           "reasoning": false,
           "contextWindow": 128000,
           "maxTokens": 16384
