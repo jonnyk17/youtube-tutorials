@@ -1,0 +1,20 @@
+# ~/.codex/config.toml
+# Copy this to your home directory and adjust to your preferences.
+
+# Default model. codex-1 is tuned for agentic coding tasks.
+# model = "codex-1"
+
+# Reasoning effort. Options: "low", "medium", "high", "extra-high"
+# Use "high" or "extra-high" for complex multi-step tasks.
+# Use "low" for fast, well-scoped tasks.
+reasoning_effort = "medium"
+
+# Approval mode. Controls what Codex can do without asking.
+# Options: "suggest" (default), "auto-edit", "full-auto"
+# Start with "suggest" until you understand the workflow.
+approval_mode = "suggest"
+
+# MCP servers (add when you have specific tools to connect)
+# [[mcp_servers]]
+# name = "linear"
+# ...

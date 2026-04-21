@@ -1,0 +1,25 @@
+# justfile — Codex automation targets
+# Copy relevant targets into your project's justfile.
+
+# Run Codex non-interactively on a task description.
+# Usage: just codex-run "add input validation to src/api/users.py"
+codex-run task:
+    codex exec "{{task}}"
+
+# Run Codex and capture the output to a file.
+# Usage: just codex-save "explain the auth flow" output.md
+codex-save task output:
+    codex exec "{{task}}" > {{output}}
+
+# Review the current diff before committing.
+codex-review:
+    codex exec "Review the current git diff against main. Flag anything that looks wrong, missing tests, or inconsistent with the existing codebase. Output a short list of issues."
+
+# Generate a conventional commit message from the current diff.
+codex-commit-msg:
+    codex exec "Look at the current git diff and write a conventional commit message for these changes. Output only the commit message, nothing else."
+
+# Ask Codex to write tests for a specific file.
+# Usage: just codex-test src/api/users.py
+codex-test file:
+    codex exec "Write tests for {{file}}. Follow the existing test patterns in the tests/ directory. Run the tests and confirm they pass."
