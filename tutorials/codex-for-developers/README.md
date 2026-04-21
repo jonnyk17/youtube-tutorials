@@ -10,15 +10,16 @@ Codex is OpenAI's AI coding agent. It is not a code completion tool — it is an
 
 The key difference from tools like Copilot or Cursor's inline completion: Codex works on tasks, not keystrokes. You describe what you want done. It does the work. You review.
 
-There are three ways to use it:
+**This guide covers two surfaces: the Desktop App and the CLI.**
 
-| Surface | Best for |
-|---------|----------|
-| **Desktop App** | Local supervised work, parallel tasks via Git worktrees, diff review |
-| **CLI** | Terminal workflow, scriptable automation, wiring into justfiles and CI |
-| **VS Code extension** | Quick in-editor tasks when you are already in a file |
+I have been using Claude Code daily for over a year and still do. But recently I have been spending more time with Codex on real client projects — specifically the desktop app. Working across multiple projects at once, each with its own session and context, is where it has clicked for me.
 
-This guide focuses on the Desktop App and CLI. Those are the two surfaces where developers get the most leverage. VS Code is worth knowing but I will cover it briefly.
+I do not use the VS Code extension in my daily workflow. I run the Codex app alongside VS Code rather than inside it. So I am not covering it here.
+
+| Surface | What it is |
+|---------|------------|
+| **Desktop App** | Local supervised work, parallel tasks, multi-project sessions, diff review |
+| **CLI** | Terminal workflow, interactive sessions, scriptable automation, justfile integration |
 
 ---
 
@@ -244,7 +245,15 @@ codex --reasoning extra-high "refactor the auth layer to support multiple provid
 
 Higher reasoning takes longer and costs more. Use it when the task genuinely needs it.
 
-### 9. Plan before you build
+### 9. Fast mode
+
+```bash
+/fast
+```
+
+Toggles fast mode on or off. When on, tasks run quicker but cost more credits. Use it for low-risk bounded work: formatting, docstrings, small edits. Turn it off for anything complex where getting it wrong is expensive. Check current state with `/fast status`.
+
+### 10. Plan before you build
 
 ```bash
 /plan
@@ -284,7 +293,28 @@ You start something locally and decide you want to step away and let it run in t
 
 Same as CLI: for anything where the scope is large or the direction is uncertain, use `/plan` first. Let Codex build a plan, review it, then execute.
 
-### 5. Plugins
+### 5. The app has more in it than you think
+
+Most people only ever use the task input box. Here is what else is in there.
+
+**Open in VS Code.** When Codex is working in a worktree, click to open that worktree directly in VS Code. This is how to browse what Codex is actually doing — full editor view, separate window, the separation is intentional.
+
+**Integrated terminal.** Every session has a built-in terminal scoped to the worktree directory. Run the test suite, check Git state, inspect a file — without leaving the app.
+
+**Git workflow.** Staged changes, diff review, and commit — all from inside the app. You do not need to switch to the terminal for basic Git operations.
+
+**Comment on diff lines.** When Codex produces a diff, you can leave comments on specific lines — exactly like a PR review. This changes review from binary (accept/reject) to conversational. You can say "this line is wrong, here is why" and iterate on just that part.
+
+**Keyboard shortcuts worth knowing:**
+
+| Shortcut | What it does |
+|----------|-------------|
+| `Cmd + Enter` | Submit the task |
+| `Cmd + K` | Open command palette |
+| `Cmd + /` | Toggle sidebar |
+| `Escape` | Stop the current task |
+
+### 6. Plugins
 
 Plugins connect Codex to external tools. Instead of context-switching to a browser, you describe the task in natural language and Codex handles the tool interaction.
 
@@ -302,7 +332,7 @@ This removes the copy-paste loop between your issue tracker and your coding sess
 
 See [`05-plugins/README.md`](05-plugins/README.md) for the full walkthrough and a list of other useful plugins.
 
-### 6. Review the diff properly
+### 7. Review the diff properly
 
 When a task completes, you get a diff. Do not just scan it. Read it like a code review:
 
@@ -340,6 +370,17 @@ Skills extend Codex with reusable workflows. A Skill is a `SKILL.md` file: front
 Store them at:
 - `~/.agents/skills/` — personal, available in all projects
 - `.agents/skills/` — repo-local, shared with your team
+
+**Demo these through the CLI.** It is the clearest way to see what is happening — you can watch Codex load the skill instructions and apply them. Start the CLI in a project that has a skill installed, describe a task matching the skill, and Codex picks it up automatically.
+
+```bash
+# Add a skill globally
+mkdir -p ~/.agents/skills/commit
+# copy 04-skills/example-skill/SKILL.md there
+
+# Start Codex in any project — the skill is now available everywhere
+codex
+```
 
 See [`04-skills/example-skill/SKILL.md`](04-skills/example-skill/SKILL.md) for a working example (the `commit` skill).
 
