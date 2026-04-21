@@ -233,17 +233,16 @@ Creates a new thread preserving the current transcript. Use this before attempti
 
 ### 8. Tune reasoning effort
 
-For fast, well-scoped tasks:
-```bash
-codex --reasoning low "add a docstring to this function"
-```
+Set reasoning effort inside an interactive session with `/model` — you can switch mid-session without restarting.
 
-For complex multi-step work:
-```bash
-codex --reasoning extra-high "refactor the auth layer to support multiple providers"
-```
+| Level | When to use |
+|-------|-------------|
+| `low` | Fast, well-scoped tasks where speed matters |
+| `medium` | Default. Most everyday work |
+| `high` | Complex changes, refactors, debugging |
+| `extra-high` | Long agentic tasks, security analysis, multi-file reasoning |
 
-Higher reasoning takes longer and costs more. Use it when the task genuinely needs it.
+Higher reasoning takes longer and costs more. The default (`medium`) is right for most things.
 
 ### 9. Fast mode
 
@@ -342,6 +341,20 @@ When a task completes, you get a diff. Do not just scan it. Read it like a code 
 - Did it touch anything outside the stated scope?
 
 See [`03-review/code_review.md`](03-review/code_review.md) for the full review checklist. Reference it from your `AGENTS.md` so Codex applies it automatically with `/review`.
+
+---
+
+## Subagents
+
+Codex can spawn parallel agents to handle specific subtasks, but only if you ask explicitly. Say "use parallel agents" or "delegate these in parallel" — it does not happen automatically.
+
+Good use case:
+
+> "Spawn one agent to look for security issues, one to find test gaps, and one for anything that looks fragile. Summarise the findings."
+
+The subagents return summaries to the main thread. This keeps your main conversation clean and avoids context rot from verbose intermediate output (logs, stack traces, test results piling up).
+
+Worth trying once you are comfortable with the basics.
 
 ---
 
