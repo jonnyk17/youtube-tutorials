@@ -231,18 +231,19 @@ When a session has been running for a while and the context is getting full, `/c
 
 Creates a new thread preserving the current transcript. Use this before attempting something that might not work — you keep your current state and can explore the alternative without losing context.
 
-### 8. Tune reasoning effort
+### 8. Model and reasoning
 
-Set reasoning effort inside an interactive session with `/model` — you can switch mid-session without restarting.
+**Always use GPT-5.4 Codex** — it is the best available model and the one worth using for real work. Switch with `/model` inside a session.
+
+**Reasoning effort** — default to Medium or High for most tasks. Use Extra High when the task is genuinely complex: multi-file refactors, security analysis, debugging something non-obvious.
 
 | Level | When to use |
 |-------|-------------|
-| `low` | Fast, well-scoped tasks where speed matters |
 | `medium` | Default. Most everyday work |
-| `high` | Complex changes, refactors, debugging |
-| `extra-high` | Long agentic tasks, security analysis, multi-file reasoning |
+| `high` | Complex changes, refactors, multi-step debugging |
+| `extra-high` | Long agentic tasks, architecture, security analysis |
 
-Higher reasoning takes longer and costs more. The default (`medium`) is right for most things.
+**Fast mode** is separate from reasoning level. `/fast` toggles a faster execution mode — useful for quick edits and low-stakes tasks, burns more credits. Use it when speed matters and getting it slightly wrong is cheap to fix.
 
 ### 9. Fast mode
 
