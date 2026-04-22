@@ -1,39 +1,35 @@
-# [Project Name]
+# Project Name
 
-## What this is
+One sentence describing what this project does.
 
-One sentence: what the project does and what it runs on.
+Read `docs/product-spec.md` when a task touches product direction, scope, phases, or user workflow.
+
+## Communication
+- Keep responses concise and practical.
+- Prefer a short summary plus commands/files changed over long explanations.
+- Ask questions instead of guessing.
+
+## Repository Shape
+- `backend/` contains all Python code.
+- `frontend/` Bun/TypeScript UI.
+- `docs/` contains product and phase planning docs.
 
 ## Commands
-
 ```bash
 just dev        # start development server
 just test       # run tests
-just lint       # run linter
-just check      # lint + typecheck + test (run this before committing)
+just check      # lint + typecheck + test
 ```
 
-## Project layout
+## Linear Workflow
 
-```
-src/            # application source
-  api/          # routes and handlers
-  services/     # business logic
-  models/       # data models
-tests/          # mirrors src/ structure
-```
+Linear project: `Your Project Name`.
 
-## Conventions
+Agents have access to Linear MCP for viewing project status and tickets.
 
-- Follow patterns already in the codebase. Do not introduce new ones without asking.
-- Tests go in `tests/` and mirror the source path.
-- No new dependencies without checking the stdlib first.
-- No `utils/`, `helpers/`, or `common/` folders.
-
-## Rules
-
-- Be concise. Short responses, no padding.
-- Write tests for new functionality. Keep them simple and focused.
-- Run `just check` before marking any task complete.
-- Do not touch files outside the stated scope of the task.
-- If something is unclear, ask one specific question rather than making assumptions.
+Use Linear as the source of truth for current work:
+- Pick up tickets from Linear.
+- Move a ticket to `In Progress` when starting work.
+- Keep implementation scoped to that ticket unless the user asks otherwise.
+- Move the ticket to `Done` once the work is implemented and verified.
+- Prefer high-level tickets over many tiny tasks while the product direction is still evolving.
