@@ -50,92 +50,6 @@ Already in VS Code and want a quick edit?                      → VS Code exten
 
 ---
 
-## Permissions and sandboxing
-
-This is the most confusing part of Codex because there are two separate controls and they interact. Most guides just ignore it. Here is the clearest explanation I can give.
-
-Codex runs commands on your machine — your test suite, your linter, your build scripts. Two dials control what it is allowed to do:
-
-**Dial 1: Sandbox** — what parts of your system can Codex touch?
-**Dial 2: Approval policy** — when does Codex stop and ask you before doing something?
-
-These are independent. You set both.
-
----
-
-### Dial 1: Sandbox mode
-
-| Mode | What it means | Use when |
-|------|--------------|----------|
-| `read-only` | Codex can look at files but cannot edit or run anything | You just want Codex to explain or analyse, not change anything |
-| `workspace-write` | Codex can edit files and run commands inside your project, but cannot touch the rest of your machine | **This is the default. Use this almost always.** |
-| `danger-full-access` | No restrictions. Codex can do anything your user account can do. | CI environments, Docker, tasks that need broader system access. Only when you know you need it. |
-
----
-
-### Dial 2: Approval policy
-
-| Policy | What it means | Use when |
-|--------|--------------|----------|
-| `untrusted` | Codex asks for approval before every action | You are cautious about a new or risky task |
-| `on-failure` | Codex runs freely, asks only if a command fails | Deprecated. Avoid. |
-| `on-request` | Codex runs freely, asks only when it decides it needs to escalate | **Good default for most work.** |
-| `never` | Codex never asks. Fully autonomous. | You trust the task completely and do not want interruptions |
-
----
-
-### Common setups
-
-| What you want | Sandbox | Approval | CLI shortcut |
-|---------------|---------|----------|-------------|
-| Normal supervised work | `workspace-write` | `on-request` | `--full-auto` |
-| Fully hands-off, no interruptions | `workspace-write` | `never` | — |
-| Just read and explain, no edits | `read-only` | `untrusted` | — |
-| CI / fully automated pipeline | `danger-full-access` | `never` | `--dangerously-bypass-approvals-and-sandbox` |
-
-**The one you want most of the time: `--full-auto`**
-
-This is a built-in shortcut that sets `workspace-write` + `on-request`. Codex works freely inside your project, does not interrupt you unless it hits something it genuinely needs to escalate, but the sandbox still protects the rest of your machine.
-
-```bash
-codex --full-auto
-```
-
-**The nuclear option: `--dangerously-bypass-approvals-and-sandbox`**
-
-No approvals, no sandbox. Everything off. The name is intentionally scary. Only use this in CI pipelines or environments that are already sandboxed externally. Do not use it on your dev machine.
-
----
-
-### How to set defaults
-
-**Desktop App:** Settings > the permissions dropdowns shown in the UI (Approval policy + Sandbox settings are separate dropdowns).
-
-**CLI flag (one session):**
-```bash
-codex --full-auto                              # workspace-write + on-request
-codex -s danger-full-access -a never          # both dials set manually
-```
-
-**config.toml (permanent default):**
-```toml
-approval_policy = "on-request"   # untrusted | on-request | never
-sandbox_mode = "workspace-write" # read-only | workspace-write | danger-full-access
-```
-
----
-
-### Worktrees are not sandboxing
-
-These often get confused. They are completely separate.
-
-- **Sandboxing** controls what processes Codex can run on your system
-- **Worktrees** control which files Codex is working on
-
-A worktree is a second checkout of your repo in a separate folder. If the task goes wrong, your main branch is untouched — just discard the worktree. It is file isolation, not process isolation. You can use any sandbox mode with or without worktrees.
-
----
-
 ## Setup
 
 **Desktop App:** Download from the official Codex page. Sign in with your OpenAI account.
@@ -372,6 +286,74 @@ When a task completes, you get a diff. Do not just scan it. Read it like a code 
 - Did it touch anything outside the stated scope?
 
 See [`03-review/code_review.md`](03-review/code_review.md) for the full review checklist. Reference it from your `AGENTS.md` so Codex applies it automatically with `/review`.
+
+---
+
+## Permissions and sandboxing
+
+Codex runs commands on your machine — your test suite, your linter, your build scripts. Two dials control what it is allowed to do:
+
+**Dial 1: Sandbox** — what parts of your system can Codex touch?
+**Dial 2: Approval policy** — when does Codex stop and ask you before doing something?
+
+These are independent. You set both.
+
+### Dial 1: Sandbox mode
+
+| Mode | What it means | Use when |
+|------|--------------|----------|
+| `read-only` | Codex can look at files but cannot edit or run anything | You just want Codex to explain or analyse, not change anything |
+| `workspace-write` | Codex can edit files and run commands inside your project, but cannot touch the rest of your machine | **This is the default. Use this almost always.** |
+| `danger-full-access` | No restrictions. Codex can do anything your user account can do. | CI environments, Docker, tasks that need broader system access. Only when you know you need it. |
+
+### Dial 2: Approval policy
+
+| Policy | What it means | Use when |
+|--------|--------------|----------|
+| `untrusted` | Codex asks for approval before every action | You are cautious about a new or risky task |
+| `on-request` | Codex runs freely, asks only when it needs to escalate | **Good default for most work.** |
+| `never` | Codex never asks. Fully autonomous. | You trust the task completely and do not want interruptions |
+
+### Common setups
+
+| What you want | Sandbox | Approval | CLI shortcut |
+|---------------|---------|----------|-------------|
+| Normal supervised work | `workspace-write` | `on-request` | `--full-auto` |
+| Fully hands-off, no interruptions | `workspace-write` | `never` | — |
+| Just read and explain, no edits | `read-only` | `untrusted` | — |
+| CI / fully automated pipeline | `danger-full-access` | `never` | `--dangerously-bypass-approvals-and-sandbox` |
+
+**The one you want most of the time: `--full-auto`**
+
+```bash
+codex --full-auto
+```
+
+Sets `workspace-write` + `on-request`. Codex works freely inside your project, does not interrupt you unless it hits something it needs to escalate, and the sandbox still protects the rest of your machine.
+
+**If Codex needs access outside your project:** use `--add-dir` to grant a specific directory rather than jumping to `danger-full-access`.
+
+```bash
+codex --add-dir /path/to/other/directory
+```
+
+**The nuclear option: `--dangerously-bypass-approvals-and-sandbox`**
+
+No approvals, no sandbox. The name is intentionally scary. Only use this in CI pipelines or environments that are already sandboxed externally.
+
+### How to set defaults
+
+**Desktop App:** Settings panel — Approval policy and Sandbox are separate dropdowns.
+
+**config.toml (permanent default):**
+```toml
+approval_policy = "on-request"   # untrusted | on-request | never
+sandbox_mode = "workspace-write" # read-only | workspace-write | danger-full-access
+```
+
+### Worktrees are not sandboxing
+
+These often get confused. Sandboxing controls what processes Codex can run on your system. Worktrees control which files it is working on. A worktree is file isolation, not process isolation. You can use any sandbox mode with or without worktrees.
 
 ---
 
