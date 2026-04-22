@@ -389,6 +389,30 @@ Worth trying once you are comfortable with the basics.
 
 ---
 
+## The three-layer context system
+
+Most developers drop everything into AGENTS.md and wonder why the output is inconsistent. The better approach is three separate layers, each with a different job:
+
+| Layer | File | Purpose | Changes how often |
+|-------|------|---------|-------------------|
+| Product spec | `docs/product-spec.md` | What you're building, scope, what success looks like | Rarely |
+| Current work | Linear tickets | Working spec for this task: outcome, constraints, acceptance criteria | Per task |
+| Operating rules | `AGENTS.md` | How to run tests, project layout, conventions, Linear workflow | Occasionally |
+
+**Keep them separate.** Product spec stays durable — it defines direction without being cluttered by implementation details. Tickets describe today's work — outcome-focused, not step-by-step instructions. AGENTS.md holds standing rules that apply to every task.
+
+When Codex has clear context at each layer, it produces controlled, reviewable changes rather than sprawling rewrites that are hard to evaluate.
+
+**Reference your spec from AGENTS.md:**
+```markdown
+Read `docs/product-spec.md` when a task touches product direction,
+scope, phases, or user workflow.
+```
+
+This keeps the spec out of every session but loads it when it matters.
+
+---
+
 ## AGENTS.md: the context layer most developers ignore
 
 Every task Codex runs reads `AGENTS.md` first. What belongs in it:
