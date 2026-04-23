@@ -1,473 +1,418 @@
-# OpenAI Codex for Developers: The Practical Complete Guide
+# OpenAI Codex For Developers
 
-Companion repo for the YouTube video. Everything shown in the video is here.
+Companion repo for the YouTube guide.
 
----
+This file is the short version. It is meant to be read while you watch.
 
-## What is Codex
+If you only read one thing, read this:
 
-Codex is OpenAI's AI coding agent. It is not a code completion tool — it is an agent. You give it a task, it reads your codebase, writes code, runs commands, and gives you a diff to review. You decide whether to accept it.
-
-The key difference from tools like Copilot or Cursor's inline completion: Codex works on tasks, not keystrokes. You describe what you want done. It does the work. You review.
-
-**This guide covers two surfaces: the Desktop App and the CLI.**
-
-I have been using Claude Code daily for over a year and still do. But recently I have been spending more time with Codex on real client projects — specifically the desktop app. Working across multiple projects at once, each with its own session and context, is where it has clicked for me.
-
-I do not use the VS Code extension in my daily workflow. I run the Codex app alongside VS Code rather than inside it. So I am not covering it here.
-
-| Surface | What it is |
-|---------|------------|
-| **Desktop App** | Local supervised work, parallel tasks, multi-project sessions, diff review |
-| **CLI** | Terminal workflow, interactive sessions, scriptable automation, justfile integration |
+1. Write a better task brief.
+2. Use `workspace-write` + `on-request`.
+3. Review every diff like a PR.
+4. Use Worktrees for isolated parallel work.
 
 ---
 
-## Mental model: how Codex actually works
+## Start Here
 
-Before touching the product, get this model clear. It will make every other decision obvious.
+### 1. Install Codex
 
-**The core loop is always the same:**
-
-```
-Write a task brief → Run the agent → Review the diff → Accept, iterate, or discard
-```
-
-**The practical decision table:**
-
-```
-Working in your current checkout, want to supervise closely?   → Local (Desktop App)
-Want parallel tasks that don't touch your working branch?      → Worktree (Desktop App)
-In the terminal, want something scriptable?                    → CLI
-Already in VS Code and want a quick edit?                      → VS Code extension
-```
-
-**Local** means Codex works directly in your current project directory. Use this for supervised, focused work — explain this code, make a small edit, add one test.
-
-**Worktree** means Codex creates a separate Git worktree: same repository, separate directory on disk, separate branch. Multiple worktrees can run simultaneously without conflicting. This is the mechanism behind parallel local work.
-
-**The async model:** Codex is built for delegation. You write the task, fire it, and move on. There is no back-and-forth mid-task. If the brief was vague, the result will be vague. This is different from Claude Code, which is conversational. Both are useful — they are for different kinds of work.
-
----
-
-## Setup
-
-**Desktop App:** Download from the official Codex page. Sign in with your OpenAI account.
-
-**CLI:**
 ```bash
 npm install -g @openai/codex
 # or
 brew install codex
-```
 
-Verify:
-```bash
 codex --version
 ```
 
-**VS Code:** Install the OpenAI Codex extension from the Extensions panel.
+### 2. Create `AGENTS.md` in a real repo
 
-**First thing to do in any new project:**
+Open Codex in your project:
+
 ```bash
-# Generate your AGENTS.md
+codex
+```
+
+Then run:
+
+```text
 /init
 ```
 
-This creates the project instructions file Codex reads before every task. Edit it. The generated file is a starting point, not the finished thing. See [`01-setup/AGENTS.md`](01-setup/AGENTS.md) for a well-written example.
+Use [`01-setup/AGENTS.md`](01-setup/AGENTS.md) as a simple example.
 
-Copy [`01-setup/config.toml`](01-setup/config.toml) to `~/.codex/config.toml` to set your default reasoning level and approval mode.
+### 3. Set safe default permissions
+
+Copy [`config.toml.example`](config.toml.example) to `~/.codex/config.toml`.
+
+Recommended default:
+
+```toml
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+```
+
+### 4. Use the task brief template
+
+Start with [`02-task-briefs/template.md`](02-task-briefs/template.md).
 
 ---
 
-## The task brief
+## The Whole Workflow
 
-**This is the single most important thing in this guide.** Task description quality is the biggest variable in output quality. Not the model. Not the settings. The brief.
-
-Treat it like a ticket for a capable junior engineer. Give them context, scope, acceptance criteria, and what to avoid. Vague in, vague out.
-
-**Bad:**
-```
-"Improve the API"
+```mermaid
+flowchart LR
+    A["Write a task brief"] --> B["Run Codex"]
+    B --> C["Review the diff"]
+    C --> D["Accept, iterate, or discard"]
 ```
 
-**Good:**
+That is the product.
+
+Codex is not autocomplete. It is delegation.
+
+---
+
+## Pick The Right Surface
+
+| Need | Use |
+|---|---|
+| Small supervised work in your current checkout | Local |
+| Isolated parallel work | Worktree |
+| Terminal workflow or automation | CLI |
+| Quick editor convenience | VS Code extension |
+
+### Local
+
+Use Local when you want to stay close to the change.
+
+Examples:
+- explain this file
+- add one focused test
+- make one small fix
+
+### Worktree
+
+Use Worktree when you want isolation.
+
+Examples:
+- run 2-3 tasks in parallel
+- try a refactor without touching your current checkout
+- let Codex work in the background while you do something else
+
+### CLI
+
+Use the CLI when you want Codex in your shell or your tooling.
+
+Examples:
+- `codex exec "review this diff"`
+- `codex review --base main`
+- add Codex targets to your `justfile`
+
+---
+
+## Write Better Tasks
+
+This is the biggest quality lever.
+
+Bad:
+
+```text
+Improve the API.
 ```
-Goal: Add a /health endpoint that returns {"status": "ok"} with HTTP 200.
-Context: Entry point is src/api/main.py. Follow the router pattern in src/api/routers/users.py.
+
+Better:
+
+```text
+Goal: Add a /health endpoint that returns {"status":"ok"}.
+Context: Follow the router pattern in src/api/routers/users.py.
 Acceptance criteria:
-  - GET /health returns 200 with {"status": "ok"}
-  - Test exists at tests/api/test_health.py
+- GET /health returns 200
+- Test exists at tests/api/test_health.py
 Tests: pytest tests/api/test_health.py -x
-Constraints: Do not modify existing routers. No new dependencies.
-Non-goals: No auth, no DB check. Keep it simple.
+Constraints: No new dependencies. Do not refactor other routers.
+Non-goals: No auth. No DB check.
 ```
 
-The good version takes 3 minutes to write. It saves 20 minutes of correction.
+Use these files:
 
-See [`02-task-briefs/template.md`](02-task-briefs/template.md) for the full template.
-See [`02-task-briefs/good-example.md`](02-task-briefs/good-example.md) and [`02-task-briefs/bad-example.md`](02-task-briefs/bad-example.md) for concrete examples.
+- [`02-task-briefs/template.md`](02-task-briefs/template.md)
+- [`02-task-briefs/good-example.md`](02-task-briefs/good-example.md)
+- [`02-task-briefs/bad-example.md`](02-task-briefs/bad-example.md)
+
+Rule of thumb:
+
+> Vague in, vague out.
 
 ---
 
-## CLI tips
+## Permissions In Plain Language
 
-These are the things the docs mention but nobody shows you.
+Codex checks three things:
 
-### 1. Resume a session
+1. Is this inside the workspace?
+2. Does this need the internet?
+3. Should I ask first?
+
+That maps to three controls:
+
+- `sandbox_mode`
+- `network_access`
+- `approval_policy`
+
+### Safe default
+
+| Setting | Default to use |
+|---|---|
+| Sandbox | `workspace-write` |
+| Approval | `on-request` |
+| Network | On only if you need installs or API calls |
+
+### Sandbox modes
+
+| Mode | Use it when |
+|---|---|
+| `read-only` | Review, explain, analyze |
+| `workspace-write` | Normal day-to-day coding |
+| `danger-full-access` | Only in a trusted disposable environment |
+
+### One sentence to remember
+
+> Sandbox is the boundary. Network is internet access. Approval is whether Codex asks first.
+
+### If Codex needs another directory
+
+Do this:
+
+```bash
+codex --add-dir /path/to/other/folder
+```
+
+Not this:
+
+```bash
+codex --dangerously-bypass-approvals-and-sandbox
+```
+
+Read the full guide:
+
+- [`codex-permissions-guide.md`](codex-permissions-guide.md)
+
+---
+
+## Review The Diff Properly
+
+Do not ask:
+
+> "Did it run?"
+
+Ask:
+
+1. Did it do what the brief asked?
+2. Did it stay in scope?
+3. Did it add or run the right tests?
+4. Does it follow the repo's existing patterns?
+
+Use:
+
+- [`03-review/code_review.md`](03-review/code_review.md)
+- `/diff`
+- `/review`
+
+---
+
+## Setup That Actually Matters
+
+### `AGENTS.md`
+
+This is the standing context for the repo.
+
+Put these inline:
+
+- test commands
+- lint and typecheck commands
+- package manager
+- repo layout
+- coding conventions
+- review expectations
+
+You can also point Codex at longer docs when useful, but the must-follow rules should live inside `AGENTS.md`.
+
+Use:
+
+- [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
+
+### `config.toml`
+
+Your config file is for defaults, not for cleverness.
+
+Keep it simple:
+
+```toml
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+```
+
+Use:
+
+- [`config.toml.example`](config.toml.example)
+
+---
+
+## CLI Shortcuts Worth Knowing
+
+### Resume the last session
+
+```bash
+codex resume --last
+```
+
+### Resume with a picker
 
 ```bash
 codex resume
 ```
 
-Codex saves sessions. `codex resume` brings back the last one — full context intact. This is one of the most useful things in the product and most people never discover it.
-
-### 2. Non-interactive mode (exec)
+### Run Codex without the TUI
 
 ```bash
 codex exec "add input validation to src/api/users.py"
 ```
 
-Runs Codex without the interactive TUI. Scriptable, pipeable, works in CI. This is how Codex becomes part of your build tooling.
-
-Capture output to a file:
-```bash
-codex exec "explain the auth flow in this codebase" > docs/auth-flow.md
-```
-
-### 3. Pipe stdin
+### Pipe something in
 
 ```bash
-cat error.log | codex "explain this error and suggest a fix"
+cat error.log | codex exec "Explain this error and suggest a fix"
 ```
 
-You can pipe anything into Codex. Error logs, API responses, stack traces — give it the raw context and ask your question.
+### Compact a long session
 
-### 4. Wire into your justfile
-
-See [`06-automation/justfile`](06-automation/justfile) for ready-to-use targets including:
-
-```makefile
-codex-review:
-    codex exec "Review the current git diff. Flag anything wrong, missing tests, or inconsistent with the codebase."
-
-codex-commit-msg:
-    codex exec "Write a conventional commit message for the current diff. Output only the message."
-```
-
-### 5. One thread per task
-
-This is a rule from the official best practices and it matters: use one thread per task, not one thread per project. When a thread accumulates too much context from multiple tasks, output quality degrades. Start fresh for each task.
-
-### 6. Compact long sessions
-
-```bash
+```text
 /compact
 ```
 
-When a session has been running for a while and the context is getting full, `/compact` summarizes the earlier conversation. Run it before starting a new subtask in the same session.
+### Fork before risky work
 
-### 7. Fork before risky changes
-
-```bash
+```text
 /fork
 ```
 
-Creates a new thread preserving the current transcript. Use this before attempting something that might not work — you keep your current state and can explore the alternative without losing context.
+### Plan before code
 
-### 8. Model and reasoning
-
-**Always use GPT-5.4 Codex** — it is the best available model and the one worth using for real work. Switch with `/model` inside a session.
-
-**Reasoning effort** — default to Medium or High for most tasks. Use Extra High when the task is genuinely complex: multi-file refactors, security analysis, debugging something non-obvious.
-
-| Level | When to use |
-|-------|-------------|
-| `medium` | Default. Most everyday work |
-| `high` | Complex changes, refactors, multi-step debugging |
-| `extra-high` | Long agentic tasks, architecture, security analysis |
-
-**Fast mode** is separate from reasoning level. `/fast` toggles a faster execution mode — useful for quick edits and low-stakes tasks, burns more credits. Use it when speed matters and getting it slightly wrong is cheap to fix.
-
-### 9. Fast mode
-
-```bash
-/fast
-```
-
-Toggles fast mode on or off. When on, tasks run quicker but cost more credits. Use it for low-risk bounded work: formatting, docstrings, small edits. Turn it off for anything complex where getting it wrong is expensive. Check current state with `/fast status`.
-
-### 10. Plan before you build
-
-```bash
+```text
 /plan
 ```
 
-Or `Shift+Tab` to enter plan mode. Codex gathers context and writes a plan before touching any code. Review and approve the plan. For anything non-trivial, catching a wrong direction at the plan stage is much cheaper than catching it after 200 lines of code.
-
----
-
-## Desktop App tips
-
-### 1. Local vs Worktree: know when to use each
-
-**Local:** You are supervising. Codex works in your current checkout. You see changes as they happen. Use this for focused, small tasks where you want to stay close.
-
-**Worktree:** You want isolation. Codex creates a separate directory with its own branch. Your current checkout is untouched. Use this when:
-- You want to try something without disturbing active work
-- You want multiple tasks running in parallel
-
-### 2. Parallel tasks with worktrees
-
-Fire three tasks simultaneously. Each gets its own worktree on disk — its own directory, its own branch. They do not share files. When one finishes, review its diff, accept or discard, move on. The others are still running.
-
-The professional rhythm: start of a session, write task briefs for everything well-scoped on your list, fire them all, go do the work that needs your brain, come back and review.
-
-**Verify it yourself:** While tasks are running, check:
-```bash
-git worktree list
-```
-You will see the active worktree entries.
-
-### 3. Handoff
-
-You start something locally and decide you want to step away and let it run in the background. Handoff moves the work from a local session into a background worktree. You come back when it finishes.
-
-### 4. Use /plan for complex tasks
-
-Same as CLI: for anything where the scope is large or the direction is uncertain, use `/plan` first. Let Codex build a plan, review it, then execute.
-
-### 5. The app has more in it than you think
-
-Most people only ever use the task input box. Here is what else is in there.
-
-**Open in VS Code.** When Codex is working in a worktree, click to open that worktree directly in VS Code. This is how to browse what Codex is actually doing — full editor view, separate window, the separation is intentional.
-
-**Integrated terminal.** Every session has a built-in terminal scoped to the worktree directory. Run the test suite, check Git state, inspect a file — without leaving the app.
-
-**Git workflow.** Staged changes, diff review, and commit — all from inside the app. You do not need to switch to the terminal for basic Git operations.
-
-**Comment on diff lines.** When Codex produces a diff, you can leave comments on specific lines — exactly like a PR review. This changes review from binary (accept/reject) to conversational. You can say "this line is wrong, here is why" and iterate on just that part.
-
-**Keyboard shortcuts worth knowing:**
-
-| Shortcut | What it does |
-|----------|-------------|
-| `Cmd + Enter` | Submit the task |
-| `Cmd + K` | Open command palette |
-| `Cmd + /` | Toggle sidebar |
-| `Escape` | Stop the current task |
-
-### 6. Plugins
-
-Plugins connect Codex to external tools. Instead of context-switching to a browser, you describe the task in natural language and Codex handles the tool interaction.
-
-**The Linear plugin** is the one I use most. It gives Codex direct access to your Linear issues.
-
-Install: Settings > Plugins > search "Linear" > Install. Authenticate when prompted.
-
-What it enables:
-- "Show me all open bugs assigned to me"
-- "Create an issue for the pagination bug we just found"
-- "Mark ENG-142 as in progress"
-- Start a task brief directly from an issue: fetch the issue, use its description and acceptance criteria as your brief, mark it done with a comment when the diff is merged
-
-This removes the copy-paste loop between your issue tracker and your coding session entirely.
-
-See [`05-plugins/README.md`](05-plugins/README.md) for the full walkthrough and a list of other useful plugins.
-
-### 7. Review the diff properly
-
-When a task completes, you get a diff. Do not just scan it. Read it like a code review:
-
-- Does it do what the task brief asked?
-- Are the tests real or just asserting the happy path?
-- Does it follow your project conventions?
-- Did it touch anything outside the stated scope?
-
-See [`03-review/code_review.md`](03-review/code_review.md) for the full review checklist. Reference it from your `AGENTS.md` so Codex applies it automatically with `/review`.
-
----
-
-## Permissions and sandboxing
-
-Codex runs commands on your machine — your test suite, your linter, your build scripts. Two dials control what it is allowed to do:
-
-**Dial 1: Sandbox** — what parts of your system can Codex touch?
-**Dial 2: Approval policy** — when does Codex stop and ask you before doing something?
-
-These are independent. You set both.
-
-### Dial 1: Sandbox mode
-
-| Mode | What it means | Use when |
-|------|--------------|----------|
-| `read-only` | Codex can look at files but cannot edit or run anything | You just want Codex to explain or analyse, not change anything |
-| `workspace-write` | Codex can edit files and run commands inside your project, but cannot touch the rest of your machine | **This is the default. Use this almost always.** |
-| `danger-full-access` | No restrictions. Codex can do anything your user account can do. | CI environments, Docker, tasks that need broader system access. Only when you know you need it. |
-
-### Dial 2: Approval policy
-
-| Policy | What it means | Use when |
-|--------|--------------|----------|
-| `untrusted` | Codex asks for approval before every action | You are cautious about a new or risky task |
-| `on-request` | Codex runs freely, asks only when it needs to escalate | **Good default for most work.** |
-| `never` | Codex never asks. Fully autonomous. | You trust the task completely and do not want interruptions |
-
-### Common setups
-
-| What you want | Sandbox | Approval | CLI shortcut |
-|---------------|---------|----------|-------------|
-| Normal supervised work | `workspace-write` | `on-request` | `--full-auto` |
-| Fully hands-off, no interruptions | `workspace-write` | `never` | — |
-| Just read and explain, no edits | `read-only` | `untrusted` | — |
-| CI / fully automated pipeline | `danger-full-access` | `never` | `--dangerously-bypass-approvals-and-sandbox` |
-
-**The one you want most of the time: `--full-auto`**
+### Review from the CLI
 
 ```bash
-codex --full-auto
+codex review --base main
 ```
 
-Sets `workspace-write` + `on-request`. Codex works freely inside your project, does not interrupt you unless it hits something it needs to escalate, and the sandbox still protects the rest of your machine.
+---
 
-**If Codex needs access outside your project:** use `--add-dir` to grant a specific directory rather than jumping to `danger-full-access`.
+## Worktrees Matter
 
-```bash
-codex --add-dir /path/to/other/directory
+Worktrees are the reason the desktop app is interesting.
+
+Without worktrees:
+
+- one checkout
+- one branch
+- one active task
+
+With worktrees:
+
+- separate directories
+- separate working state
+- multiple tasks at once
+
+Quick mental model:
+
+```mermaid
+flowchart TD
+    A["Main repo"] --> B["Worktree A: bug fix"]
+    A --> C["Worktree B: refactor"]
+    A --> D["Worktree C: tests"]
 ```
 
-**The nuclear option: `--dangerously-bypass-approvals-and-sandbox`**
+Worktrees are file isolation.
 
-No approvals, no sandbox. The name is intentionally scary. Only use this in CI pipelines or environments that are already sandboxed externally.
+They are not sandboxing.
 
-### How to set defaults
+---
 
-**Desktop App:** Settings panel — Approval policy and Sandbox are separate dropdowns.
+## Skills, Plugins, Automation
 
-**config.toml (permanent default):**
-```toml
-approval_policy = "on-request"   # untrusted | on-request | never
-sandbox_mode = "workspace-write" # read-only | workspace-write | danger-full-access
+You do not need these on day one.
+
+They become useful once the basics are working.
+
+### Skills
+
+Reusable workflows in `SKILL.md`.
+
+Useful demo shortcut:
+
+```text
+$
 ```
 
-### Worktrees are not sandboxing
+Type `$` in Codex to view your available skills, then pick one or describe a task that matches it.
 
-These often get confused. Sandboxing controls what processes Codex can run on your system. Worktrees control which files it is working on. A worktree is file isolation, not process isolation. You can use any sandbox mode with or without worktrees.
+Use:
 
----
+- [`04-skills/example-skill/SKILL.md`](04-skills/example-skill/SKILL.md)
 
-## Subagents
+### Plugins
 
-Codex can spawn parallel agents to handle specific subtasks, but only if you ask explicitly. Say "use parallel agents" or "delegate these in parallel" — it does not happen automatically.
+Best example: Linear.
 
-Good use case:
+Use:
 
-> "Spawn one agent to look for security issues, one to find test gaps, and one for anything that looks fragile. Summarise the findings."
+- [`05-plugins/README.md`](05-plugins/README.md)
 
-The subagents return summaries to the main thread. This keeps your main conversation clean and avoids context rot from verbose intermediate output (logs, stack traces, test results piling up).
+### Automation
 
-Worth trying once you are comfortable with the basics.
+Best entry point: `codex exec` in your `justfile`.
 
----
+Use:
 
-## The three-layer context system
-
-Most developers drop everything into AGENTS.md and wonder why the output is inconsistent. The better approach is three separate layers, each with a different job:
-
-| Layer | File | Purpose | Changes how often |
-|-------|------|---------|-------------------|
-| Product spec | `docs/product-spec.md` | What you're building, scope, what success looks like | Rarely |
-| Current work | Linear tickets | Working spec for this task: outcome, constraints, acceptance criteria | Per task |
-| Operating rules | `AGENTS.md` | How to run tests, project layout, conventions, Linear workflow | Occasionally |
-
-**Keep them separate.** Product spec stays durable — it defines direction without being cluttered by implementation details. Tickets describe today's work — outcome-focused, not step-by-step instructions. AGENTS.md holds standing rules that apply to every task.
-
-When Codex has clear context at each layer, it produces controlled, reviewable changes rather than sprawling rewrites that are hard to evaluate.
-
-**Reference your spec from AGENTS.md:**
-```markdown
-Read `docs/product-spec.md` when a task touches product direction,
-scope, phases, or user workflow.
-```
-
-This keeps the spec out of every session but loads it when it matters.
+- [`06-automation/justfile`](06-automation/justfile)
 
 ---
 
-## AGENTS.md: the context layer most developers ignore
+## Codex Vs Claude Code
 
-Every task Codex runs reads `AGENTS.md` first. What belongs in it:
+Use both.
 
-- How to run tests (`just test`, `pytest -x`, etc.)
-- How to run the linter and type checker
-- Project layout — where things live
-- Conventions — naming, patterns to follow, what to avoid
-- A reference to `code_review.md`
+| Codex | Claude Code |
+|---|---|
+| Delegation | Conversation |
+| Parallel tasks | Interactive debugging |
+| Ticket-shaped work | Exploratory work |
+| Reviewable diffs | Back-and-forth reasoning |
 
-The quality difference between a blank `AGENTS.md` and a well-written one is real. Same task, same model, different context — noticeably different output.
+Simple rule:
 
-Max 32KB. Does not support imports or references to other files. Everything that matters has to be inline.
+If you can write a clear brief, reach for Codex.
 
-See [`01-setup/AGENTS.md`](01-setup/AGENTS.md) for a well-structured example to copy and edit.
-
----
-
-## Skills
-
-Skills extend Codex with reusable workflows. A Skill is a `SKILL.md` file: frontmatter with `name` and `description`, full instructions in the body.
-
-Store them at:
-- `~/.agents/skills/` — personal, available in all projects
-- `.agents/skills/` — repo-local, shared with your team
-
-**Demo these through the CLI.** It is the clearest way to see what is happening — you can watch Codex load the skill instructions and apply them. Start the CLI in a project that has a skill installed, describe a task matching the skill, and Codex picks it up automatically.
-
-```bash
-# Add a skill globally
-mkdir -p ~/.agents/skills/commit
-# copy 04-skills/example-skill/SKILL.md there
-
-# Start Codex in any project — the skill is now available everywhere
-codex
-```
-
-See [`04-skills/example-skill/SKILL.md`](04-skills/example-skill/SKILL.md) for a working example (the `commit` skill).
-
-Good first skills to write: commit (shown), code review, generate changelog, write tests for a file.
+If you are still figuring the problem out, reach for Claude Code.
 
 ---
 
-## Honest take: Codex vs Claude Code
+## Resources
 
-Use both. They are not competing for the same use case.
+Downloadable resources live here:
 
-**Codex wins on:**
-- Parallel local work (worktrees)
-- Well-scoped tasks with clear acceptance criteria
-- Scriptable automation via `codex exec`
-- Anything you would write a ticket for
+- [`resources/README.md`](resources/README.md)
 
-**Claude Code wins on:**
-- Interactive debugging where you are discovering the problem as you go
-- Complex architectural decisions that require back-and-forth
-- Long exploratory sessions where the acceptance criteria do not exist yet
-- Anything where you need to redirect mid-task
+Most useful files:
 
-The rule: if you can write a good task brief, reach for Codex. If you cannot, reach for Claude Code.
-
----
-
-## Files in this repo
-
-| File | What it is |
-|------|-----------|
-| [`01-setup/AGENTS.md`](01-setup/AGENTS.md) | Well-written AGENTS.md example to copy and edit |
-| [`01-setup/config.toml`](01-setup/config.toml) | Default `~/.codex/config.toml` |
-| [`02-task-briefs/template.md`](02-task-briefs/template.md) | Task brief template |
-| [`02-task-briefs/good-example.md`](02-task-briefs/good-example.md) | Concrete good task brief |
-| [`02-task-briefs/bad-example.md`](02-task-briefs/bad-example.md) | What not to do and why |
-| [`03-review/code_review.md`](03-review/code_review.md) | Review checklist for diffs |
-| [`04-skills/example-skill/SKILL.md`](04-skills/example-skill/SKILL.md) | Example skill (commit) |
-| [`05-plugins/README.md`](05-plugins/README.md) | Plugin setup, Linear walkthrough |
-| [`06-automation/justfile`](06-automation/justfile) | `codex exec` targets for your justfile |
+- [`config.toml.example`](config.toml.example)
+- [`codex-permissions-guide.md`](codex-permissions-guide.md)
+- [`02-task-briefs/template.md`](02-task-briefs/template.md)
+- [`resources/plan-template.md`](resources/plan-template.md)
+- [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
+- [`03-review/code_review.md`](03-review/code_review.md)
+- [`06-automation/justfile`](06-automation/justfile)

@@ -7,11 +7,6 @@ you describe the task in natural language and Codex handles the tool interaction
 
 In the Codex desktop app: Settings > Plugins > Browse.
 
-From the CLI:
-```bash
-codex plugins add <plugin-name>
-```
-
 ## The Linear plugin
 
 Linear is a project management tool. The Linear plugin lets Codex read and update issues

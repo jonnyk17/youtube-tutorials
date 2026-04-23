@@ -1,20 +1,18 @@
-# ~/.codex/config.toml
-# Copy this to your home directory and adjust to your preferences.
+# Minimal Codex config for normal development work.
+#
+# Copy this to ~/.codex/config.toml if you want:
+# - edits inside the current project
+# - approval prompts only when crossing boundaries
+# - internet access for installs and API calls
 
-# Default model. codex-1 is tuned for agentic coding tasks.
-# model = "codex-1"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
 
-# Reasoning effort. Options: "low", "medium", "high", "extra-high"
-# Use "high" or "extra-high" for complex multi-step tasks.
-# Use "low" for fast, well-scoped tasks.
-reasoning_effort = "medium"
+[sandbox_workspace_write]
+network_access = true
 
-# Approval mode. Controls what Codex can do without asking.
-# Options: "suggest" (default), "auto-edit", "full-auto"
-# Start with "suggest" until you understand the workflow.
-approval_mode = "suggest"
-
-# MCP servers (add when you have specific tools to connect)
-# [[mcp_servers]]
-# name = "linear"
-# ...
+# Optional review-only profile.
+#
+# [profiles.review]
+# sandbox_mode = "read-only"
+# approval_policy = "on-request"

@@ -1,0 +1,33 @@
+# Codex config that works for most developers.
+#
+# Use this when you want:
+# - normal edits inside the current project
+# - approval prompts only when crossing boundaries
+# - internet access for package installs, curl, and API calls
+
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+
+[sandbox_workspace_write]
+network_access = true
+
+# Optional: deny access to especially sensitive files.
+#
+# [permissions.workspace.filesystem]
+# ":project_roots" = { "." = "write", "**/*.env" = "none" }
+# glob_scan_max_depth = 3
+
+# Optional: a quieter profile for review-only work.
+#
+# [profiles.review]
+# sandbox_mode = "read-only"
+# approval_policy = "on-request"
+
+# Optional: a more autonomous profile for trusted repos.
+#
+# [profiles.fast]
+# sandbox_mode = "workspace-write"
+# approval_policy = "never"
+#
+# [profiles.fast.sandbox_workspace_write]
+# network_access = true
