@@ -358,16 +358,29 @@ Now that the tooling is explained, this is where you show the actual workflow.
 
 ### The workflow to show
 
-1. Start from the product context
-2. Pull the ticket from Linear
-3. Create a branch from the ticket ID
-4. Restate the goal in plain English
-5. Write a short plan if needed
-6. Implement the change
-7. Run tests
-8. Run a review pass
-9. Commit with the ticket ID
-10. Push or open a PR if needed
+#### Step 1: plan
+
+Pull `GRA-141` from Linear and use the work-plan skill to create a lightweight implementation plan.
+
+Restate the ticket in plain English, identify scope and non-goals, and produce a short plan for one focused implementation session.
+
+Do not code yet.
+
+Review the plan on screen and tweak it if needed.
+
+#### Step 2: execute
+
+Now implement `GRA-141` against the approved plan.
+
+Create or switch to a Git branch for `GRA-141` if needed, make the code changes, run the relevant tests, run the review skill, and summarize the result.
+
+Keep scope tight:
+
+- minimal Postgres persistence for scraped jobs
+- jobs table only
+- upsert/dedupe behavior
+- CSV export still works
+- no API/UI/enrichment work
 
 Good way to explain it on camera:
 

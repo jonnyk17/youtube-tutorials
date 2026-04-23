@@ -4,16 +4,29 @@ Use this when you want to show Codex in a real engineering workflow.
 
 ## The demo shape
 
-1. Open the product context
-2. Pull the ticket from Linear
-3. Create a branch from the ticket ID
-4. Restate the goal in plain English
-5. Write a short plan
-6. Implement the change
-7. Run tests
-8. Run a review pass
-9. Commit with the ticket ID
-10. Push or open a PR
+### Step 1: plan
+
+Pull `GRA-141` from Linear and use the work-plan skill to create a lightweight implementation plan.
+
+Restate the ticket in plain English, identify scope and non-goals, and produce a short plan that is appropriate for one focused implementation session.
+
+Do not code yet.
+
+Then review the plan on screen and tweak it if needed.
+
+### Step 2: execute
+
+Now implement `GRA-141` against the approved plan.
+
+Create or switch to a Git branch for `GRA-141` if needed, make the code changes, run the relevant tests, run the review skill, and summarize the result.
+
+Keep scope tight:
+
+- minimal Postgres persistence for scraped jobs
+- jobs table only
+- upsert/dedupe behavior
+- CSV export still works
+- no API/UI/enrichment work
 
 ## The key line to say
 
@@ -23,8 +36,9 @@ Use this when you want to show Codex in a real engineering workflow.
 
 - the product spec
 - the Linear ticket
-- the branch name
 - the short plan
+- the plan review and tweaks
+- the branch name
 - the implementation diff
 - the test run
 - the review pass
@@ -78,8 +92,9 @@ Steps:
 ## Suggested narration
 
 - "We start from the ticket because the ticket is the scope."
-- "We open a branch so the work is isolated."
 - "We make a short plan so implementation is deliberate."
+- "We review the plan before we write code."
+- "Then we open a branch so the work is isolated."
 - "Then we let Codex implement against that plan."
 - "Then we verify with tests and a review pass."
 - "Only then do we commit."
