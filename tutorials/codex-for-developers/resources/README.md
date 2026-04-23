@@ -8,7 +8,7 @@ These are the copy, paste, and adapt files from the video.
 - [`../config.toml.example`](../config.toml.example)
 - [`../codex-permissions-guide.md`](../codex-permissions-guide.md)
 
-## Tasking
+## Plans And Specs
 
 - [`../02-task-briefs/template.md`](../02-task-briefs/template.md)
 - [`../02-task-briefs/good-example.md`](../02-task-briefs/good-example.md)
@@ -22,7 +22,7 @@ These are the copy, paste, and adapt files from the video.
 
 ## Skills And Plugins
 
-- [`../04-skills/example-skill/SKILL.md`](../04-skills/example-skill/SKILL.md)
+- [`../04-skills/plan-skill/SKILL.md`](../04-skills/plan-skill/SKILL.md)
 - [`../05-plugins/README.md`](../05-plugins/README.md)
 
 ## Automation

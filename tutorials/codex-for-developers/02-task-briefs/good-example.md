@@ -1,4 +1,4 @@
-# Good Task Brief Example
+# Good Lightweight Spec Example
 
 ---
 

@@ -4,7 +4,7 @@ When reviewing changes, check the following.
 
 ## Correctness
 
-- Does the code do what the task brief asked for?
+- Does the code do what the ticket, plan, or spec asked for?
 - Does it handle edge cases (empty input, null values, missing keys)?
 - Are there any obvious bugs or off-by-one errors?
 
@@ -29,7 +29,7 @@ When reviewing changes, check the following.
 
 - Style differences that do not affect readability
 - Micro-optimizations that do not matter at this scale
-- Anything outside the scope of the task brief
+- Anything outside the scope of the ticket, plan, or spec
 
 ## How to use this file
 

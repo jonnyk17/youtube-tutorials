@@ -1,10 +1,10 @@
-# Bad Task Brief Example
+# Bad Lightweight Spec Example
 
 This is what most people write. The result is unpredictable output that wastes your review time.
 
 ---
 
-**The bad brief:**
+**The bad spec:**
 
 > "Add a health check endpoint"
 

@@ -154,7 +154,7 @@ It is delegation:
 
 ```mermaid
 flowchart LR
-    A["Write a task brief"] --> B["Run Codex"]
+    A["Write a plan or spec"] --> B["Run Codex"]
     B --> C["Review the diff"]
     C --> D["Accept, iterate, or discard"]
 ```
@@ -340,11 +340,15 @@ Then either pick one or describe a task that matches it.
 
 Use:
 
-- [`04-skills/example-skill/SKILL.md`](04-skills/example-skill/SKILL.md)
+- [`04-skills/plan-skill/SKILL.md`](04-skills/plan-skill/SKILL.md)
 
 Good way to explain it:
 
 > A skill is just a reusable playbook for a kind of task you do often.
+
+Good example for this repo:
+
+> A planning skill that turns a ticket or feature request into a short implementation plan before coding.
 
 ---
 
@@ -424,6 +428,16 @@ Do not turn a small engineering task into a big spec document.
 
 If the ticket is already descriptive, the plan can stay very short.
 
+Good rule of thumb:
+
+- small task: the ticket may be enough
+- medium task: write a short working plan
+- long multi-hour task: use plan mode or a real `PLANS.md` workflow
+
+Useful reference:
+
+- [OpenAI cookbook: Using PLANS.md for multi-hour problem solving](https://developers.openai.com/cookbook/articles/codex_exec_plans)
+
 Example:
 
 ```md
@@ -452,7 +466,7 @@ The goal is not "let the agent cook forever."
 
 The goal is a clean diff that is easy to review.
 
-### Step 7: write a better task brief
+### Step 7: write a clearer spec
 
 Bad:
 
@@ -499,7 +513,7 @@ Do not ask:
 
 Ask:
 
-1. Did it do what the brief asked?
+1. Did it do what the ticket or plan asked?
 2. Did it stay in scope?
 3. Did it add or run the right tests?
 4. Does it follow the repo's patterns?
@@ -548,7 +562,7 @@ Use both.
 
 Simple rule:
 
-If you can write a clear brief, reach for Codex.
+If you can write a clear plan or spec, reach for Codex.
 
 If you are still figuring the problem out, reach for Claude Code.
 

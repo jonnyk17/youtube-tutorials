@@ -18,7 +18,7 @@ directly from a Codex session. No browser tab required.
 - "Create an issue for the auth bug we just found"
 - "Mark issue ENG-142 as in progress"
 - "What issues are assigned to me?"
-- Start a task brief directly from a Linear issue: "Fix the bug in ENG-142"
+- Start a plan or spec directly from a Linear issue: "Fix the bug in ENG-142"
 
 ### Installing the Linear plugin
 
@@ -26,11 +26,11 @@ In the desktop app: Settings > Plugins > search "Linear" > Install.
 
 Authenticate with your Linear account when prompted.
 
-### Workflow: issue to task brief
+### Workflow: issue to plan
 
 1. Ask Codex to fetch the issue: "Show me ENG-142"
 2. Codex returns the issue title, description, and acceptance criteria from Linear
-3. Use that as the foundation for your task brief
+3. Use that as the foundation for your plan or lightweight spec
 4. When done: "Mark ENG-142 as done and leave a comment with a summary of the changes"
 
 This replaces the manual copy-paste loop between your issue tracker and your coding session.

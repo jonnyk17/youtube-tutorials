@@ -1,6 +1,10 @@
-# Codex Task Brief
+# Lightweight Implementation Spec
 
-Use this template every time. The more specific the brief, the more useful the diff.
+Use this when you want a short spec for Codex to implement against.
+
+This is not meant to be a long design document.
+
+It is just enough structure to make the change reviewable.
 
 ---
 
