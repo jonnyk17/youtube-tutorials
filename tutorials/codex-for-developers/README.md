@@ -77,11 +77,19 @@ Keep it short and practical.
 Good sections:
 
 - what the product does
-- where code lives
-- commands to run
 - ticket workflow
 - git workflow
 - links to longer product docs when they matter
+
+Important rule:
+
+> Do not put things in `AGENTS.md` that Codex can easily inspect for itself. That kind of detail goes stale fast and just creates noise.
+
+Good examples of things to leave out unless they are genuinely non-obvious:
+
+- basic repository shape
+- obvious file locations
+- commands you do not actually use
 
 ---
 

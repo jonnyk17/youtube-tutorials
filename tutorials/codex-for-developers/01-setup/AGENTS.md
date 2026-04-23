@@ -9,18 +9,6 @@ Read `docs/product-spec.md` when a task touches product direction, scope, phases
 - Prefer a short summary plus commands/files changed over long explanations.
 - Ask questions instead of guessing.
 
-## Repository Shape
-- `backend/` contains all Python code.
-- `frontend/` Bun/TypeScript UI.
-- `docs/` contains product and phase planning docs.
-
-## Commands
-```bash
-just dev        # start development server
-just test       # run tests
-just check      # lint + typecheck + test
-```
-
 ## Linear Workflow
 
 Linear project: `Recruiter Intelligence`.
