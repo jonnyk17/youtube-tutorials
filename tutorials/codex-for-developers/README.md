@@ -459,6 +459,7 @@ Use:
 
 - [`resources/live-demo-workflow.md`](resources/live-demo-workflow.md)
 - [`resources/plan-template.md`](resources/plan-template.md)
+- [`resources/execplan-template.md`](resources/execplan-template.md)
 
 ### Step 6: implement in small reviewable steps
 
@@ -489,9 +490,9 @@ Non-goals: No auth. No DB check.
 
 Use:
 
-- [`02-task-briefs/template.md`](02-task-briefs/template.md)
-- [`02-task-briefs/good-example.md`](02-task-briefs/good-example.md)
-- [`02-task-briefs/bad-example.md`](02-task-briefs/bad-example.md)
+- [`02-plans-and-specs/template.md`](02-plans-and-specs/template.md)
+- [`02-plans-and-specs/good-example.md`](02-plans-and-specs/good-example.md)
+- [`02-plans-and-specs/bad-example.md`](02-plans-and-specs/bad-example.md)
 
 Rule of thumb:
 
@@ -545,6 +546,7 @@ Good files to mention at the end of the demo:
 - [`codex-permissions-guide.md`](codex-permissions-guide.md)
 - [`resources/live-demo-workflow.md`](resources/live-demo-workflow.md)
 - [`resources/plan-template.md`](resources/plan-template.md)
+- [`resources/execplan-template.md`](resources/execplan-template.md)
 - [`06-automation/justfile`](06-automation/justfile)
 
 ---

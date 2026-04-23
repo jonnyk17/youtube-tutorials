@@ -1,6 +1,6 @@
-# Codex Plan Template
+# Lightweight Plan Template
 
-Use this when the task is large enough that you want a plan before code.
+Use this when the task is small or medium and you want a short plan before code.
 
 ---
 
