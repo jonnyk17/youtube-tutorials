@@ -13,6 +13,7 @@ These are the copy, paste, and adapt files from the video.
 - [`../02-task-briefs/template.md`](../02-task-briefs/template.md)
 - [`../02-task-briefs/good-example.md`](../02-task-briefs/good-example.md)
 - [`../02-task-briefs/bad-example.md`](../02-task-briefs/bad-example.md)
+- [`live-demo-workflow.md`](live-demo-workflow.md)
 - [`plan-template.md`](plan-template.md)
 
 ## Review
