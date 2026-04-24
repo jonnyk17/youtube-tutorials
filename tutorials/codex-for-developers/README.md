@@ -129,7 +129,9 @@ This is the workflow I use on real client projects. Before touching Codex, two t
 
 `AGENTS.md` lives in the root of the repo. Codex reads it before every task. Think of it as the briefing you would give a new engineer joining the team — what the product does, how the workflow runs, what conventions to follow.
 
-The key principle: **only write down what the agent cannot discover itself.**
+Two principles to keep in mind when writing AGENTS.md:
+
+**Reference, don't repeat.** Only write down what the agent cannot discover itself.
 
 | Put this in AGENTS.md | Defer to the source |
 |---|---|
@@ -138,6 +140,8 @@ The key principle: **only write down what the agent cannot discover itself.**
 | Product context, non-obvious constraints | Dependencies → `pyproject.toml` / `package.json` |
 
 If your commands are already in a `justfile`, point there. The moment you copy a command into AGENTS.md you have two sources of truth and one will go stale.
+
+**Context compression.** Every word you give an agent costs attention. Write instructions in as few words as possible, with maximum clarity and no overlapping or conflicting rules. A bloated AGENTS.md is not just wasteful — vague or contradictory instructions actively degrade output quality. Say one thing clearly rather than three things loosely.
 
 A good AGENTS.md for most projects is short:
 
