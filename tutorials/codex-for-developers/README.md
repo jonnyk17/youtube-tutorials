@@ -1,590 +1,339 @@
-# OpenAI Codex For Developers
+# OpenAI Codex For Developers — Recording Guide
 
-Companion repo for the YouTube guide.
-
-This README is written in the same order you would usually teach the video.
-
-```mermaid
-flowchart LR
-    A["Setup"] --> B["CLI"]
-    B --> C["Desktop App"]
-    C --> D["Permissions"]
-    D --> E["Plugins and Skills"]
-    E --> F["Live Demo"]
-```
+This README is the on-camera reference. Each section is one edit cut. Key line is what to anchor on. Demo steps are what to show.
 
 ---
 
-## 1. Setup
+## Section order
 
-### Install Codex
+```
+Hook → Three Ways → CLI → VS Code → Desktop App → Live Demo (Linear) → Automations → Pricing → System Layer + Tips → Outro
+```
+
+Boring stuff (pricing, setup) comes AFTER the demos. People care about cost once they've seen the value.
+
+---
+
+## SECTION 1 — Hook (talking head, ~1.5 min)
+
+**Key line:** "This is the complete guide to OpenAI Codex."
+
+- By the end you will know how to use it like a professional developer
+- We will cover the CLI, the desktop app, and a full live demo where I build real features on a client project using Linear
+- All files and resources are linked in the description
+
+**Credibility (brief):** 20 years as a software engineer. Principal engineer, engineering manager, director of engineering. Currently building AI systems freelance and running an AI community.
+
+**Honest framing:** I am not going to hype this. There are many good AI coding agents. Codex is worth your attention in 2026 because OpenAI models are genuinely top tier for coding.
+
+---
+
+## SECTION 2 — Three Ways to Use Codex (~30 sec, transition to screen share)
+
+**Key line:** "There are three different ways to use Codex."
+
+1. **The CLI** — if you like working in the terminal
+2. **The desktop app** — the one I reach for most, designed for parallel work
+3. **The VS Code extension** — if you want to stay inside your editor
+
+> I use the desktop app and CLI most. That is what this video covers.
+
+---
+
+## SECTION 3 — CLI (screen share, ~3 min)
+
+**Key line:** "Let's get straight into it. Here's how to install and use the CLI."
+
+### Install
 
 ```bash
 npm install -g @openai/codex
 # or
 brew install codex
-
-codex --version
 ```
 
-### Create `AGENTS.md`
+Worth knowing: it is a Rust binary under the hood. npm is just the installer.
 
-Open Codex in a real project:
+### Open it
 
 ```bash
 codex
 ```
 
-Then run:
+Clean, minimal TUI. Type `/` to see built-in slash commands.
 
-```text
-/init
-```
+### Four things to show
 
-`AGENTS.md` is the standing context for the repo.
+| Command | What it does |
+|---|---|
+| `/init` | Generate an AGENTS.md for this project — do this first in any new repo |
+| `/diff` | See what changed during a task |
+| `/fork` | Copy the session before trying something risky |
+| `/compact` | Summarise earlier context when the session gets long |
 
-This is where you put the rules Codex should follow every time:
-
-- how to run tests
-- repo layout
-- ticket workflow
-- commit conventions
-- any project-specific rules that should stay stable
-
-Good way to explain it on camera:
-
-> `AGENTS.md` is the file that tells Codex how this repo works.
-
-Use [`01-setup/AGENTS.md`](01-setup/AGENTS.md) as a real example.
-
-### Set safe defaults
-
-Copy [`config.toml.example`](config.toml.example) to `~/.codex/config.toml`.
-
-Recommended default:
-
-```toml
-sandbox_mode = "workspace-write"
-approval_policy = "on-request"
-```
-
-That is enough for most developers.
-
-### What belongs in `AGENTS.md`
-
-Keep it short and practical.
-
-Good sections:
-
-- what the product does
-- ticket workflow
-- git workflow
-- links to longer product docs when they matter
-
-Important rule:
-
-> Do not put things in `AGENTS.md` that Codex can easily inspect for itself. That kind of detail goes stale fast and just creates noise.
-
-Good examples of things to leave out unless they are genuinely non-obvious:
-
-- basic repository shape
-- obvious file locations
-- commands you do not actually use
-
----
-
-## 2. CLI
-
-The CLI is the easiest place to start because you can see exactly what Codex is doing.
-
-### Start Codex
-
-```bash
-codex
-```
-
-### Useful commands to demo
-
-Resume the last session:
-
-```bash
-codex resume --last
-```
-
-Resume with a picker:
-
-```bash
-codex resume
-```
-
-Run Codex without the TUI:
+### Non-interactive mode
 
 ```bash
 codex exec "add input validation to src/api/users.py"
 ```
 
-Pipe something in:
+No TUI, just output. This is where Codex becomes developer tooling, not just an app. Composes with the shell, justfiles, Git, CI.
+
+### Sessions persist
 
 ```bash
-cat error.log | codex exec "Explain this error and suggest a fix"
+codex resume       # opens a picker
+codex resume --last
 ```
 
-Review from the CLI:
+Your sessions are saved. You can always come back to where you left off.
 
-```bash
-codex review --base main
-```
+### Demo steps
 
-Useful slash commands:
-
-```text
-/init
-/diff
-/review
-/plan
-/fork
-/compact
-```
-
-### Core idea
-
-Codex is not autocomplete.
-
-It is delegation:
-
-```mermaid
-flowchart LR
-    A["Write a plan or spec"] --> B["Run Codex"]
-    B --> C["Review the diff"]
-    C --> D["Accept, iterate, or discard"]
-```
+1. Run the install command
+2. Open `codex`, type `/` to show the command list
+3. Run `/init` in a real project, show the generated AGENTS.md
+4. Run one `codex exec` task
+5. Show `codex resume` opening the session picker
 
 ---
 
-## 3. Desktop App
+## SECTION 4 — VS Code Extension (~20 sec)
 
-Once the CLI makes sense, the desktop app makes more sense too.
+**Key line:** "There is also a VS Code extension if you prefer to stay inside your editor."
 
-### The two modes that matter
+- Extensions panel, search Codex, install
+- I keep Codex outside VS Code as a separate window. That is a preference, not a rule.
+
+> Move on. The desktop app is where the video lives.
+
+---
+
+## SECTION 5 — Desktop App (screen share, ~7 min)
+
+### 5a. Two modes that matter
+
+**Key line:** "Two modes. Local for supervised work. Worktree for parallel isolated work."
 
 | Mode | Use it for |
 |---|---|
-| Local | Small supervised work in your current checkout |
-| Worktree | Isolated parallel work |
+| Local | Small supervised tasks in your current checkout |
+| Worktree | Isolated parallel work without touching your main branch |
 
-### Local
+---
 
-Use Local when you want to stay close to the change.
+### 5b. Local mode
 
-Examples:
-- explain a file
-- add one test
-- make one small fix
+**Key line:** "Local is supervised edits plus diff review. Nothing more."
 
-### Worktree
+- Works directly in the project directory you have open
+- Use for small focused tasks: explain this module, add one test, one small fix
+- Start from a clean Git state, write the task, let Codex work, check `/diff`
 
-Use Worktree when you want isolation.
+**Demo:** Give Codex one small task. Show it running. Show `/diff`.
 
-Examples:
-- run 2-3 tasks in parallel
-- try a refactor without touching your main checkout
-- let Codex work in the background
+---
 
-Worktrees are the big idea behind the app:
+### 5c. Worktree mode
 
-```mermaid
-flowchart TD
-    A["Main repo"] --> B["Worktree A"]
-    A --> C["Worktree B"]
-    A --> D["Worktree C"]
-```
+**Key line:** "Worktrees let you run multiple Codex tasks without touching your current branch."
 
-Worktrees are file isolation.
+- Git worktrees give you multiple checkouts of the same repo on disk at the same time
+- Each task gets its own directory and working state. Tasks do not block each other.
+- Fire two or three tasks in parallel. Go do something else. Come back and review the diffs.
 
-They are not sandboxing.
+**Demo:** Fire two prepared tasks in Worktree. Show both running. Open a terminal in one worktree and run `git status`. Switch back to main checkout and show it is clean.
 
-### What to show in the app UI
+**Key moment:** Multiple tasks running, your current branch untouched.
 
-- model picker
-- reasoning level
-- task input
-- diff view
-- integrated terminal
-- open in VS Code
-- line comments on diffs
-- automations
+---
 
-### Keyboard shortcuts worth showing
+### 5d. UI tour
 
-| Shortcut | What it does |
+**Key line:** "Most people never go past the task input box. Here is what is actually in the app."
+
+Walk through in this order:
+
+1. **Open in VS Code** — click to open the worktree directly in VS Code. I keep both windows side by side.
+2. **Integrated terminal** — run commands in the worktree without switching windows
+3. **Git diff view** — staged changes, commit from inside the app
+4. **Line comments on diffs** — leave a comment on a specific line. Review is conversational, not binary accept/reject.
+5. **Keyboard shortcuts** — `Cmd+Enter` submit, `Cmd+K` command palette, `Escape` stop
+
+**Key moment:** Line commenting on diffs. Most viewers will not know this exists.
+
+---
+
+## SECTION 6 — Live Demo: Linear Workflow (screen share, ~5 min)
+
+**Key line:** "Let me show you how I actually work on a real client project."
+
+This is the peak value section. Show the Linear plugin in action. The point is: no context switching, no copy-paste, the whole loop stays inside Codex.
+
+### Before you record
+
+- Clean Git state
+- AGENTS.md already set up (show it briefly, explain what it does)
+- Linear plugin installed and authenticated
+- One real ticket picked in advance — know the ID and the acceptance criteria
+- A second smaller ticket ready to fire in Worktree
+
+### Setup: install the Linear plugin
+
+Before starting the workflow, show this once:
+
+Settings > Plugins > Browse > Linear > Install
+
+> Plugins give Codex access to external tools without you leaving the session. Linear is the one I use every day.
+
+See: [`05-plugins/README.md`](05-plugins/README.md)
+
+### The three context layers
+
+Show these briefly before starting the task:
+
+1. `AGENTS.md` — standing rules. How tests run, project layout, the Linear workflow.
+2. Linear ticket — today's task. Outcome, acceptance criteria, constraints. Not implementation steps.
+3. `docs/product-spec.md` (if relevant) — what the product is, what is out of scope.
+
+> AGENTS.md is the standing rules. The ticket is today's work. Together, that is everything Codex needs.
+
+### The workflow
+
+**Step 1 — Pull the ticket from Linear**
+
+Ask Codex to fetch the ticket:
+
+> "Show me the details for [ticket ID]"
+
+Codex reads the title, description, and acceptance criteria directly from Linear.
+
+> "I do not need to copy-paste anything. Codex has the ticket. It knows the AGENTS.md. That is everything it needs."
+
+**Step 2 — Fire the task**
+
+Run it. While it is working, fire a second smaller ticket in Worktree.
+
+> "I am not sitting here watching. I am getting on with something else while Codex works."
+
+**Step 3 — Review the diff**
+
+Walk through the diff. Accept what looks right. Flag one thing to tweak if there is one.
+
+> "Codex produced a diff. My job is to review it like a PR from a junior engineer."
+
+**Step 4 — Close the loop in Linear**
+
+> "Mark that ticket as done and add a comment summarising what was built."
+
+> Full loop. Ticket in Linear, built with Codex, diff reviewed, ticket closed. No context switching, no manual status updates.
+
+---
+
+## SECTION 7 — Automations (screen share, ~1.5 min)
+
+**Key line:** "One more feature worth showing: automations."
+
+Automations let you set up recurring tasks that run on a schedule, without you having to remember them.
+
+### Good example: check for stale dependencies
+
+In the desktop app, create a new automation:
+
+> "Check this project for stale or outdated dependencies. List anything that is significantly behind with a short note on whether it is worth updating."
+
+Set it to run weekly.
+
+> "Now I get a dependency health check every week without thinking about it. This is the kind of maintenance work that always slips if you have to do it manually."
+
+Other examples worth mentioning:
+- Weekly standup summary: "Summarise what changed in this repo this week"
+- Branch check-in: "Check if there are any open branches older than two weeks"
+
+> Automations are for repeated jobs you would otherwise forget to do.
+
+---
+
+## SECTION 8 — Pricing (talking head, ~45 sec)
+
+**Key line:** "Everything I just showed you is available on the $20 a month ChatGPT Plus plan."
+
+- Standard $20 plan. Not pro, not API-only. Full access to the desktop app, CLI, and the full model.
+- Rate limits are better than I expected. I have not hit a wall in normal use on real client work.
+- If you are on the fence, the $20 plan is a reasonable place to start.
+
+> This section comes AFTER the demo because now they understand what $20 buys.
+
+---
+
+## SECTION 9 — System Layer + Tips (screen share, ~3 min)
+
+**Key line:** "A few things that will make you significantly better at using this."
+
+### AGENTS.md
+
+The operating manual for Codex on a project. Test commands, project layout, commit conventions, and the Linear workflow. Keep it short.
+
+> Do not put things in AGENTS.md that Codex can figure out itself. That gets stale fast and creates noise.
+
+Run `/init` to generate a starting point.
+
+See: [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
+
+### Skills
+
+Reusable workflows stored as a `SKILL.md` file. Use when you repeat the same kind of task across projects.
+
+Type `$` in Codex to see your available skills.
+
+Store personal skills in `~/.agents/skills/` and they are available everywhere.
+
+> A skill is a reusable playbook for a task you do often. Write it once, use it everywhere.
+
+See: [`04-skills/plan-skill/SKILL.md`](04-skills/plan-skill/SKILL.md)
+
+### Quick tips
+
+- **Fork** — `/fork` copies the current session before trying something risky. You keep your progress and can explore a different direction.
+- **Fast mode** — `/fast` runs tasks quicker but costs more credits. Use for low-stakes work like formatting or docstrings.
+- **Mention files** — `/mention path/to/file` when you want Codex to look at a specific file instead of guessing.
+- **Subagents** — ask explicitly: "Spawn one agent to check for security issues, one for test gaps, one for anything brittle. Summarise the findings."
+
+---
+
+## SECTION 10 — Honest Take + Outro (talking head, ~1 min)
+
+**Key line:** "I really like Codex. The desktop app has become a genuine part of my daily workflow."
+
+- Multiple sessions, multiple projects, clean diff review. It feels like a proper developer tool.
+- I still use Claude Code every day. They are not competing for the same thing.
+  - Codex is for delegation: well-scoped tasks, parallel work, things you can hand off and review
+  - Claude Code is for interactive reasoning: debugging, architecture, figuring things out as you go
+- Use both.
+
+**CTA:**
+
+Companion repo is linked in the description. Everything I showed today is in there.
+
+AI Engineer on Skool — $79 a month, built for engineers doing real work with these tools. Link in the description.
+
+If you are a company building AI systems and want someone to do it for you, my agency Gradient Work handles that.
+
+Subscribe if this was useful. One video a week.
+
+---
+
+## Resources in this repo
+
+| File | What it is |
 |---|---|
-| `Cmd + Enter` | Submit task |
-| `Cmd + K` | Open command palette |
-| `Cmd + /` | Toggle sidebar |
-| `Escape` | Stop current task |
-
-### Simple model guidance
-
-- Start with the default recommended model in Codex
-- Use Medium or High reasoning for most work
-- Increase reasoning only when the task is genuinely complex
-
-Keep this part simple in the video. The workflow matters more than micro-optimizing model settings.
-
-### Automations
-
-You do not need to go deep on this.
-
-Just mention that the desktop app can run recurring automation-style tasks.
-
-Simple example to show:
-
-- a standup summary
-- a recurring check-in on a project
-- a scheduled reminder to review a branch or task
-
-Good one-liner for the video:
-
-> Automations are useful when you want Codex to do a repeated job without you having to remember it.
-
----
-
-## 4. Permissions And Sandboxing
-
-This is the part that sounds complicated but is actually simple once you explain the mental model.
-
-Codex checks three things:
-
-1. Is this inside the workspace?
-2. Does this need the internet?
-3. Should I ask first?
-
-That maps to:
-
-- `sandbox_mode`
-- `network_access`
-- `approval_policy`
-
-### Safe default
-
-| Setting | Use this |
-|---|---|
-| Sandbox | `workspace-write` |
-| Approval | `on-request` |
-| Network | Only on when you need installs or API calls |
-
-### Sandbox modes
-
-| Mode | Use it when |
-|---|---|
-| `read-only` | Review, explain, analyze |
-| `workspace-write` | Normal coding |
-| `danger-full-access` | Only in a trusted disposable environment |
-
-### One sentence to say on camera
-
-> Sandbox is the boundary. Network is internet access. Approval is whether Codex asks first.
-
-### If Codex needs another directory
-
-Do this:
-
-```bash
-codex --add-dir /path/to/other/folder
-```
-
-Not this:
-
-```bash
-codex --dangerously-bypass-approvals-and-sandbox
-```
-
-Use the fuller reference here:
-
-- [`codex-permissions-guide.md`](codex-permissions-guide.md)
-
----
-
-## 5. Plugins
-
-Plugins are easiest to explain after permissions because now the viewer understands that Codex can work with tools too.
-
-Best example: Linear.
-
-Use:
-
-- [`05-plugins/README.md`](05-plugins/README.md)
-
-Simple flow to demo:
-
-1. Install the Linear plugin in the app
-2. Ask Codex to show a ticket
-3. Use that ticket as the basis for a task
-4. Mark the ticket done when the work is finished
-
----
-
-## 6. Skills
-
-Skills are reusable workflows in `SKILL.md`.
-
-Useful demo shortcut:
-
-```text
-$
-```
-
-Type `$` in Codex to view your available skills.
-
-Then either pick one or describe a task that matches it.
-
-Use:
-
-- [`04-skills/plan-skill/SKILL.md`](04-skills/plan-skill/SKILL.md)
-
-Good way to explain it:
-
-> A skill is just a reusable playbook for a kind of task you do often.
-
-Good example for this repo:
-
-> A planning skill that turns a ticket or feature request into a short implementation plan before coding.
-
----
-
-## 7. Live Demo
-
-Now that the tooling is explained, this is where you show the actual workflow.
-
-### The workflow to show
-
-#### Step 1: plan
-
-Pull `GRA-141` from Linear and use the work-plan skill to create a lightweight implementation plan.
-
-Restate the ticket in plain English, identify scope and non-goals, and produce a short plan for one focused implementation session.
-
-Do not code yet.
-
-Review the plan on screen and tweak it if needed.
-
-#### Step 2: execute
-
-Now implement `GRA-141` against the approved plan.
-
-Create or switch to a Git branch for `GRA-141` if needed, make the code changes, run the relevant tests, run the review skill, and summarize the result.
-
-Keep scope tight:
-
-- minimal Postgres persistence for scraped jobs
-- jobs table only
-- upsert/dedupe behavior
-- CSV export still works
-- no API/UI/enrichment work
-
-Good way to explain it on camera:
-
-> Linear is the source of truth for the work. The branch is the scope. The plan is the intent. Tests and review are the quality gate.
-
-### Step 1: start from product context
-
-In this workflow there are three layers of context:
-
-- the product spec tells Codex what the product is
-- the Linear ticket tells Codex what this task is
-- `AGENTS.md` tells Codex how the repo works
-
-That is enough context for a strong implementation pass without dumping the whole project into the prompt.
-
-### Step 2: pull the ticket from Linear
-
-This is where the work starts.
-
-The ticket is the execution scope.
-
-The best ticket shape for AI-assisted implementation is:
-
-- Goal
-- Context
-- Proposed shape or scope
-- Acceptance criteria
-- Constraints
-- Out of scope
-
-Small but useful addition:
-
-```text
-Constraints
-- Keep this minimal.
-- Preserve the existing CLI workflow.
-- Do not add UI or API work outside this ticket.
-- Prefer boring local patterns over abstractions.
-```
-
-### Step 3: create a branch
-
-The branch keeps the task isolated.
-
-Good rule:
-
-> One ticket, one branch.
-
-### Step 4: restate the goal
-
-Before writing code, say the task back in simple English.
-
-This makes sure the human, the ticket, and the agent are aligned.
-
-### Step 5: make a short plan
-
-Do not turn a small engineering task into a big spec document.
-
-If the ticket is already descriptive, the plan can stay very short.
-
-Good rule of thumb:
-
-- small task: the ticket may be enough
-- medium task: write a short working plan
-- long multi-hour task: use plan mode or a real `PLANS.md` workflow
-
-Useful reference:
-
-- [OpenAI cookbook: Using PLANS.md for multi-hour problem solving](https://developers.openai.com/cookbook/articles/codex_exec_plans)
-
-Example:
-
-```md
-# GRA-141 Plan
-
-Goal: persist scraped jobs into Postgres while keeping CSV export.
-
-Steps:
-1. Add DB configuration and connection setup.
-2. Define minimal `jobs` table.
-3. Implement job upsert logic.
-4. Wire scraper CLI to persist jobs.
-5. Keep CSV export optional.
-6. Add tests for upsert and rerun behavior.
-7. Run review and cleanup.
-```
-
-Use:
-
-- [`resources/live-demo-workflow.md`](resources/live-demo-workflow.md)
-- [`resources/plan-template.md`](resources/plan-template.md)
-- [`resources/execplan-template.md`](resources/execplan-template.md)
-
-### Step 6: implement in small reviewable steps
-
-The goal is not "let the agent cook forever."
-
-The goal is a clean diff that is easy to review.
-
-### Step 7: write a clearer spec
-
-Bad:
-
-```text
-Improve the API.
-```
-
-Better:
-
-```text
-Goal: Add a /health endpoint that returns {"status":"ok"}.
-Context: Follow the router pattern in src/api/routers/users.py.
-Acceptance criteria:
-- GET /health returns 200
-- Test exists at tests/api/test_health.py
-Tests: pytest tests/api/test_health.py -x
-Constraints: No new dependencies. Do not refactor other routers.
-Non-goals: No auth. No DB check.
-```
-
-Use:
-
-- [`02-plans-and-specs/template.md`](02-plans-and-specs/template.md)
-- [`02-plans-and-specs/good-example.md`](02-plans-and-specs/good-example.md)
-- [`02-plans-and-specs/bad-example.md`](02-plans-and-specs/bad-example.md)
-
-Rule of thumb:
-
-> Vague in, vague out.
-
-### Step 8: run tests
-
-Do not skip verification in the demo.
-
-Say this clearly:
-
-> The agent is not done when it writes code. It is done when the change passes verification.
-
-### Step 9: review the diff properly
-
-Do not ask:
-
-> Did it run?
-
-Ask:
-
-1. Did it do what the ticket or plan asked?
-2. Did it stay in scope?
-3. Did it add or run the right tests?
-4. Does it follow the repo's patterns?
-
-Use:
-
-- [`03-review/code_review.md`](03-review/code_review.md)
-- `/diff`
-- `/review`
-
-### Step 10: commit like a professional
-
-If the work maps to a Linear ticket, include the ticket ID in the commit message.
-
-Good example:
-
-```text
-GRA-141 Add minimal Postgres persistence
-```
-
-That keeps the ticket, branch, commit history, and implementation aligned.
-
-### Reusable resources for this demo
-
-Good files to mention at the end of the demo:
-
-- [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
-- [`config.toml.example`](config.toml.example)
-- [`codex-permissions-guide.md`](codex-permissions-guide.md)
-- [`resources/live-demo-workflow.md`](resources/live-demo-workflow.md)
-- [`resources/plan-template.md`](resources/plan-template.md)
-- [`resources/execplan-template.md`](resources/execplan-template.md)
-- [`06-automation/justfile`](06-automation/justfile)
-
----
-
-## 8. Codex Vs Claude Code
-
-Use both.
-
-| Codex | Claude Code |
-|---|---|
-| Delegation | Conversation |
-| Parallel tasks | Interactive debugging |
-| Ticket-shaped work | Exploratory work |
-| Reviewable diffs | Back-and-forth reasoning |
-
-Simple rule:
-
-If you can write a clear plan or spec, reach for Codex.
-
-If you are still figuring the problem out, reach for Claude Code.
-
----
-
-## Resources
-
-Downloadable resources live here:
-
-- [`resources/README.md`](resources/README.md)
+| [`01-setup/AGENTS.md`](01-setup/AGENTS.md) | Real AGENTS.md example |
+| [`config.toml.example`](config.toml.example) | Safe default config |
+| [`codex-permissions-guide.md`](codex-permissions-guide.md) | Permissions reference |
+| [`02-plans-and-specs/template.md`](02-plans-and-specs/template.md) | Task brief template |
+| [`02-plans-and-specs/good-example.md`](02-plans-and-specs/good-example.md) | Good task brief example |
+| [`04-skills/plan-skill/SKILL.md`](04-skills/plan-skill/SKILL.md) | Example skill file |
+| [`05-plugins/README.md`](05-plugins/README.md) | Plugins guide |
+| [`06-automation/justfile`](06-automation/justfile) | justfile targets |
+| [`resources/live-demo-workflow.md`](resources/live-demo-workflow.md) | Live demo workflow |
+| [`resources/plan-template.md`](resources/plan-template.md) | Short plan template |
