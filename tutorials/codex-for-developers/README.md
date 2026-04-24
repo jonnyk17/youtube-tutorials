@@ -146,21 +146,19 @@ A good AGENTS.md for most projects is short:
 
 One sentence on what this product does and who it is for.
 
-Read `docs/product-spec.md` when a task touches product direction or scope.
+See `docs/product-spec.md` for product direction, scope, phases, or workflow.
 
 ## Commands
 
 See `justfile` for all available commands. Run `just` to list them.
 
-## Commit conventions
+## Workflow
 
-Include the Linear ticket ID: `GRA-141 Add minimal Postgres persistence`
+Linear project `Project Name` is the source of truth for current work. Agents have Linear MCP access.
 
-## Linear workflow
-
-- Pick up tickets from the backlog
-- Move to In Progress when starting work
-- Close when the work is implemented and verified
+- Pick up tickets from Linear. Move to `In Progress` on start, `Done` when verified.
+- Keep work scoped to the active ticket unless asked otherwise.
+- Commit messages include the Linear ID when the work maps to a ticket (e.g. `GRA-141 Add minimal Postgres persistence`).
 ```
 
 Run `/init` to generate a starting point, then trim aggressively.

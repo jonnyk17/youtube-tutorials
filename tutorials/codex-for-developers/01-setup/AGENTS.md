@@ -1,34 +1,18 @@
-# Project Name
+# Recruiter Intelligence
 
-One sentence on what this product does and who it is for.
+Recruiter Intelligence helps recruitment agencies find leads by identifying businesses actively hiring in their area.
 
-Read `docs/product-spec.md` when a task touches product direction, scope, or user workflow.
+See `docs/product-spec.md` for product direction, scope, phases, or workflow.
 
 ## Commands
 
 See `justfile` for all available commands. Run `just` to list them.
 
-## Commit conventions
+## Workflow
 
-Include the Linear ticket identifier when work maps to a ticket:
+Linear project `Recruiter Intelligence` is the source of truth for current work. Agents have Linear MCP access.
 
-```
-GRA-141 Add minimal Postgres persistence
-```
-
-Use a plain message for housekeeping work not tied to a ticket.
-
-## Linear workflow
-
-Linear project: `[Project Name]`.
-
-- Pick up tickets from the backlog
-- Move a ticket to `In Progress` when starting work
-- Keep implementation scoped to that ticket unless asked otherwise
-- Move the ticket to `Done` once the work is implemented and verified
-
-## Rules
-
-- Keep responses concise. Short summary plus files changed, not long explanations.
-- Ask rather than guess when requirements are unclear.
-- Prefer boring, obvious patterns over abstractions.
+- Pick up tickets from Linear. Move to `In Progress` on start, `Done` when verified.
+- Keep work scoped to the active ticket unless asked otherwise.
+- Prefer high-level tickets over many tiny ones while product direction is evolving.
+- Commit messages include the Linear ID when the work maps to a ticket (e.g. `GRA-141 Add minimal Postgres persistence`).
