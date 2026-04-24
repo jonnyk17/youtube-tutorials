@@ -356,4 +356,4 @@ For a full breakdown of how Codex permissions map to Claude's dangerous mode, se
 
 ---
 
-If you want to go deeper on building with AI tools professionally, I run [AI Engineer](https://skool.com/ai-engineer) — a community for engineers doing serious work with these tools.
+If you want to go deeper on building with AI tools professionally, I run [AI Engineer](https://aiengineer.co) — a community for engineers doing serious work with these tools.
