@@ -8,7 +8,6 @@ A practical guide to using OpenAI Codex as a professional developer. Covers the 
 
 - [Three Ways to Use Codex](#three-ways-to-use-codex)
 - [CLI](#cli)
-- [AGENTS.md](#agentsmd)
 - [VS Code Extension](#vs-code-extension)
 - [Desktop App](#desktop-app)
 - [Live Demo: Linear Workflow](#live-demo-linear-workflow)
@@ -83,65 +82,6 @@ Sessions are saved. You can always come back to where you left off.
 
 ---
 
-## AGENTS.md
-
-### What it is
-
-`AGENTS.md` is the operating manual for Codex on a project. It lives in the root of the repo. Every time Codex starts a task, it reads this file first.
-
-Think of it as the briefing document you would give a new engineer joining the team. What the product does, how the workflow runs, what conventions to follow.
-
-Run `/init` in any project to generate a starting point, then trim it down.
-
-### The principle: reference, don't repeat
-
-Only write down what cannot be discovered.
-
-| Put this in AGENTS.md | Defer to the source |
-|---|---|
-| Commit conventions | Commands → `justfile` or `Makefile` |
-| Linear / Git workflow | Project layout → agent reads the tree |
-| Product context and non-obvious constraints | Dependencies → `pyproject.toml` / `package.json` |
-
-If commands are already in a `justfile`, point there. The moment you copy a command into AGENTS.md you have two sources of truth and one will go stale. The agent can read the justfile directly — there is no reason to duplicate it.
-
-### What a good AGENTS.md looks like
-
-```md
-# Project Name
-
-One sentence on what this product does and who it is for.
-
-Read `docs/product-spec.md` when a task touches product direction or scope.
-
-## Commands
-
-See `justfile` for all available commands. Run `just` to list them.
-
-## Commit conventions
-
-Include the Linear ticket ID: `GRA-141 Add minimal Postgres persistence`
-
-## Linear workflow
-
-- Pick up tickets from the backlog
-- Move to In Progress when starting work
-- Close when the work is implemented and verified
-```
-
-That is usually enough. Resist the urge to add more.
-
-### Best practices
-
-- Keep it short. A long AGENTS.md is a sign you are duplicating things that already live elsewhere.
-- Update it when conventions change — it is only useful if it is accurate.
-- Do not add obvious things. If the agent can figure it out from the repo, leave it out.
-- Add product context that is genuinely non-obvious — the kind of thing you would tell a new engineer on their first day.
-
-See: [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
-
----
-
 ## VS Code Extension
 
 Available from the VS Code extensions panel — search for Codex and install. Useful if you prefer to stay inside your editor. The desktop app and CLI cover everything in this guide.
@@ -183,33 +123,71 @@ Beyond the task input box:
 
 ## Live Demo: Linear Workflow
 
-This is the workflow I use on real client projects. The Linear plugin keeps the full loop inside Codex — no context switching, no copy-pasting between tools.
+This is the workflow I use on real client projects. Before touching Codex, two things need to be in place: `AGENTS.md` and the Linear plugin. Together they are what make this feel like a professional workflow rather than a chat session.
 
-### The three context layers
+### Step 1 — AGENTS.md: the project briefing
 
-Before starting any task, Codex needs three things:
+`AGENTS.md` lives in the root of the repo. Codex reads it before every task. Think of it as the briefing you would give a new engineer joining the team — what the product does, how the workflow runs, what conventions to follow.
 
-1. `AGENTS.md` — standing rules. Workflow, conventions, where everything lives.
-2. A Linear ticket — today's task. Outcome, acceptance criteria, constraints. Not implementation steps.
-3. `docs/product-spec.md` (if relevant) — what the product is, what is out of scope.
+The key principle: **only write down what the agent cannot discover itself.**
 
-AGENTS.md holds the standing rules. The ticket holds today's work. Together, that is enough context for a strong implementation pass.
+| Put this in AGENTS.md | Defer to the source |
+|---|---|
+| Commit conventions | Commands → `justfile` or `Makefile` |
+| Linear / Git workflow | Project layout → agent reads the tree |
+| Product context, non-obvious constraints | Dependencies → `pyproject.toml` / `package.json` |
 
-### The workflow
+If your commands are already in a `justfile`, point there. The moment you copy a command into AGENTS.md you have two sources of truth and one will go stale.
 
-**Step 1 — Pull the ticket from Linear**
+A good AGENTS.md for most projects is short:
+
+```md
+# Project Name
+
+One sentence on what this product does and who it is for.
+
+Read `docs/product-spec.md` when a task touches product direction or scope.
+
+## Commands
+
+See `justfile` for all available commands. Run `just` to list them.
+
+## Commit conventions
+
+Include the Linear ticket ID: `GRA-141 Add minimal Postgres persistence`
+
+## Linear workflow
+
+- Pick up tickets from the backlog
+- Move to In Progress when starting work
+- Close when the work is implemented and verified
+```
+
+Run `/init` to generate a starting point, then trim aggressively.
+
+See: [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
+
+### Step 2 — Linear plugin: no context switching
+
+Install from the desktop app: Settings > Plugins > Browse > Linear > Install.
+
+Without the plugin, working from a ticket means: open Linear, read the ticket, copy the description, paste it into Codex, do the work, go back to Linear, update the status manually. Every step is a context switch.
+
+With the plugin, the full loop stays in one place. Codex reads the ticket, implements the work, and closes the ticket — all from a single session.
+
+### Step 3 — Pull the ticket
 
 ```
 Show me the details for [ticket ID]
 ```
 
-Codex reads the title, description, and acceptance criteria directly from Linear. No copy-paste needed.
+Codex reads the title, description, and acceptance criteria directly from Linear. It already has the project context from AGENTS.md. That is everything it needs.
 
-**Step 2 — Run the task**
+### Step 4 — Run the task
 
 Fire the task. While it is running, fire a second smaller ticket in Worktree. You do not need to sit and watch — that is the point of the parallel workflow.
 
-**Step 3 — Review the diff**
+### Step 5 — Review the diff
 
 When the task completes, review the diff the same way you would review a PR from a junior engineer:
 
@@ -220,7 +198,7 @@ When the task completes, review the diff the same way you would review a PR from
 
 Accept what looks right. Flag anything that needs a tweak. Iterate on specific lines, not the whole diff.
 
-**Step 4 — Close the loop in Linear**
+### Step 6 — Close the loop in Linear
 
 ```
 Mark [ticket ID] as done and add a comment summarising what was built
