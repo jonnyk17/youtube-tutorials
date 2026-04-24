@@ -130,6 +130,43 @@ codex --dangerously-bypass-approvals-and-sandbox
 
 ---
 
+## Matching Claude Code's "Dangerously Skip Permissions"
+
+If you already use Claude Code, you may know the `--dangerously-skip-permissions` flag. It bypasses safety confirmations so the agent proceeds with all actions without asking. Here is the Codex equivalent.
+
+| | Claude Code | Codex |
+|---|---|---|
+| One-off flag | `claude --dangerously-skip-permissions` | `codex --dangerously-bypass-approvals-and-sandbox` |
+| Config equivalent | Flag only, not configurable | `sandbox_mode = "danger-full-access"` + `approval_policy = "never"` |
+| Scope | Full system access as current user | Full system access as current user |
+
+The config equivalent in Codex:
+
+```toml
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
+```
+
+Or as a named profile you can switch to without changing the default:
+
+```toml
+[profiles.yolo]
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
+```
+
+Activate with:
+
+```bash
+codex --profile yolo
+```
+
+**Key difference.** Claude's mode is a flag you type each time and cannot be set as a default in config. Codex lets you bake it into a named profile, which is more convenient for scripts and automation but also means it is easier to leave on by accident. Both give the same net result: the agent acts without asking.
+
+Use either only in a trusted, disposable environment — a Docker container, a CI sandbox, a VM you can discard. Not on your main machine where the agent can touch anything your user account can touch.
+
+---
+
 ## 20-Second Explanation
 
 If you need a quick way to say it in the video:

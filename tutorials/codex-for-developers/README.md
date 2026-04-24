@@ -331,8 +331,11 @@ They are not competing for the same use case.
 | Parallel tasks | Interactive debugging |
 | Ticket-shaped work | Exploratory work |
 | Reviewable diffs | Back-and-forth reasoning |
+| Full autonomy via `danger-full-access` + `approval_policy = "never"` (configurable, nameable profile) | Full autonomy via `--dangerously-skip-permissions` (flag only, not configurable) |
 
 If you can write a clear plan or spec, reach for Codex. If you are still figuring out the problem, reach for Claude Code.
+
+For a full breakdown of how Codex permissions map to Claude's dangerous mode, see [`codex-permissions-guide.md`](codex-permissions-guide.md).
 
 ---
 
