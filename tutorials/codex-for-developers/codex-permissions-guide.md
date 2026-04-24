@@ -50,15 +50,18 @@ approval_policy = "on-request"
 
 ## What Approval Actually Means
 
-| Policy | Plain English | Use it when |
+| Codex approval policy | Behavior | Claude equivalent |
 |---|---|---|
-| `untrusted` | Ask more often | You want extra caution |
-| `on-request` | Ask only when needed | Best default for most people |
-| `never` | Do not interrupt | Only when you trust the task and environment |
+| `untrusted` | Always ask before actions | Normal safe mode |
+| `on-request` | Ask only when escalation is needed | Partial guardrails (default) |
+| `on-failure` | Ask only if something breaks | No direct equivalent |
+| `never` | Never ask, just execute | `--dangerously-skip-permissions` |
 
 Important:
 
 > Approval does not create permission. It only decides whether Codex asks before trying.
+
+Setting `approval_policy = "never"` is YOLO mode. Commands run immediately, file edits happen without confirmation, no "are you sure?" checkpoints. The agent decides and executes in one loop.
 
 ---
 
@@ -161,7 +164,11 @@ Activate with:
 codex --profile yolo
 ```
 
-**Key difference.** Claude's mode is a flag you type each time and cannot be set as a default in config. Codex lets you bake it into a named profile, which is more convenient for scripts and automation but also means it is easier to leave on by accident. Both give the same net result: the agent acts without asking.
+**Key differences.**
+
+- Claude's mode is a flag you type each time and cannot be set as a default in config. Codex lets you bake it into a named profile — more convenient for scripts and automation, but easier to leave on by accident.
+- Codex with `never` is still constrained by sandbox mode and environment permissions. Claude's `--dangerously-skip-permissions` more explicitly disables all permission prompts with fewer guardrails underneath.
+- For day-to-day use they are functionally equivalent: the agent decides and executes without asking.
 
 Use either only in a trusted, disposable environment — a Docker container, a CI sandbox, a VM you can discard. Not on your main machine where the agent can touch anything your user account can touch.
 
