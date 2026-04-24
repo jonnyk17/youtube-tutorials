@@ -210,11 +210,30 @@ Rate limits are better than most people expect. For focused supervised work, the
 
 ### AGENTS.md
 
-The operating manual for Codex on a project. Include: what the product does, how to run tests, commit conventions, and the Linear workflow if you use it.
+The operating manual for Codex on a project. The principle: only write down what cannot be discovered.
 
-Keep it short. Do not put things in AGENTS.md that Codex can figure out from the repo itself — that kind of detail gets stale fast.
+| Put this in AGENTS.md | Defer to the source |
+|---|---|
+| Commit conventions | Commands → `justfile` |
+| Linear / Git workflow | Project layout → agent reads the tree |
+| Product context | Dependencies → `pyproject.toml` / `package.json` |
+| Non-obvious constraints | — |
 
-Run `/init` in any project to generate a starting point.
+If commands are already in a `justfile` or `Makefile`, point there rather than duplicating them. The moment you copy a command into AGENTS.md you have two sources of truth and one will go stale.
+
+A short AGENTS.md for most projects looks like:
+
+```md
+See `justfile` for all commands.
+
+## Commit conventions
+Include the Linear ticket ID: `GRA-141 Add minimal Postgres persistence`
+
+## Linear workflow
+Pick up tickets, move to In Progress, close when done.
+```
+
+Run `/init` in any project to generate a starting point, then trim aggressively.
 
 See: [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
 

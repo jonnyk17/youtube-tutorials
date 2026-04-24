@@ -1,29 +1,34 @@
-# Recruiter Intelligence
+# Project Name
 
-Recruiter Intelligence helps recruitment agencies find leads by identifying businesses actively hiring in their area worth contacting.
+One sentence on what this product does and who it is for.
 
-Read `docs/product-spec.md` when a task touches product direction, scope, phases, or user workflow.
+Read `docs/product-spec.md` when a task touches product direction, scope, or user workflow.
 
-## Communication
-- Keep responses concise and practical.
-- Prefer a short summary plus commands/files changed over long explanations.
-- Ask questions instead of guessing.
+## Commands
 
-## Linear Workflow
+See `justfile` for all available commands. Run `just` to list them.
 
-Linear project: `Recruiter Intelligence`.
+## Commit conventions
 
-Agents have access to Linear MCP for viewing project status and tickets.
+Include the Linear ticket identifier when work maps to a ticket:
 
-Use Linear as the source of truth for current work:
-- Pick up tickets from Linear.
-- Move a ticket to `In Progress` when starting work.
-- Keep implementation scoped to that ticket unless the user asks otherwise.
-- Move the ticket to `Done` once the work is implemented and verified.
-- Prefer high-level tickets over many tiny tasks while the product direction is still evolving.
+```
+GRA-141 Add minimal Postgres persistence
+```
 
-## Git Workflow
+Use a plain message for housekeeping work not tied to a ticket.
 
-- Include the Linear ticket identifier in commit messages when work maps to a ticket, for example `GRA-141 Add minimal Postgres persistence`.
-- Keep commits scoped to the active Linear ticket where practical.
-- If a change is project housekeeping rather than ticket work, use a clear non-ticket commit message.
+## Linear workflow
+
+Linear project: `[Project Name]`.
+
+- Pick up tickets from the backlog
+- Move a ticket to `In Progress` when starting work
+- Keep implementation scoped to that ticket unless asked otherwise
+- Move the ticket to `Done` once the work is implemented and verified
+
+## Rules
+
+- Keep responses concise. Short summary plus files changed, not long explanations.
+- Ask rather than guess when requirements are unclear.
+- Prefer boring, obvious patterns over abstractions.
