@@ -8,12 +8,14 @@ A practical guide to using OpenAI Codex as a professional developer. Covers the 
 
 - [Three Ways to Use Codex](#three-ways-to-use-codex)
 - [CLI](#cli)
+- [AGENTS.md](#agentsmd)
 - [VS Code Extension](#vs-code-extension)
 - [Desktop App](#desktop-app)
 - [Live Demo: Linear Workflow](#live-demo-linear-workflow)
 - [Automations](#automations)
+- [Plugins](#plugins)
+- [Skills](#skills)
 - [Pricing](#pricing)
-- [System Layer](#system-layer)
 - [Quick Tips](#quick-tips)
 - [Codex vs Claude Code](#codex-vs-claude-code)
 
@@ -81,6 +83,65 @@ Sessions are saved. You can always come back to where you left off.
 
 ---
 
+## AGENTS.md
+
+### What it is
+
+`AGENTS.md` is the operating manual for Codex on a project. It lives in the root of the repo. Every time Codex starts a task, it reads this file first.
+
+Think of it as the briefing document you would give a new engineer joining the team. What the product does, how the workflow runs, what conventions to follow.
+
+Run `/init` in any project to generate a starting point, then trim it down.
+
+### The principle: reference, don't repeat
+
+Only write down what cannot be discovered.
+
+| Put this in AGENTS.md | Defer to the source |
+|---|---|
+| Commit conventions | Commands → `justfile` or `Makefile` |
+| Linear / Git workflow | Project layout → agent reads the tree |
+| Product context and non-obvious constraints | Dependencies → `pyproject.toml` / `package.json` |
+
+If commands are already in a `justfile`, point there. The moment you copy a command into AGENTS.md you have two sources of truth and one will go stale. The agent can read the justfile directly — there is no reason to duplicate it.
+
+### What a good AGENTS.md looks like
+
+```md
+# Project Name
+
+One sentence on what this product does and who it is for.
+
+Read `docs/product-spec.md` when a task touches product direction or scope.
+
+## Commands
+
+See `justfile` for all available commands. Run `just` to list them.
+
+## Commit conventions
+
+Include the Linear ticket ID: `GRA-141 Add minimal Postgres persistence`
+
+## Linear workflow
+
+- Pick up tickets from the backlog
+- Move to In Progress when starting work
+- Close when the work is implemented and verified
+```
+
+That is usually enough. Resist the urge to add more.
+
+### Best practices
+
+- Keep it short. A long AGENTS.md is a sign you are duplicating things that already live elsewhere.
+- Update it when conventions change — it is only useful if it is accurate.
+- Do not add obvious things. If the agent can figure it out from the repo, leave it out.
+- Add product context that is genuinely non-obvious — the kind of thing you would tell a new engineer on their first day.
+
+See: [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
+
+---
+
 ## VS Code Extension
 
 Available from the VS Code extensions panel — search for Codex and install. Useful if you prefer to stay inside your editor. The desktop app and CLI cover everything in this guide.
@@ -124,19 +185,11 @@ Beyond the task input box:
 
 This is the workflow I use on real client projects. The Linear plugin keeps the full loop inside Codex — no context switching, no copy-pasting between tools.
 
-### Install the Linear plugin
-
-Settings > Plugins > Browse > Linear > Install
-
-Plugins give Codex access to external tools from within the session. Install only what you actually use — each plugin adds context overhead.
-
-See: [`05-plugins/README.md`](05-plugins/README.md)
-
 ### The three context layers
 
-Before starting any task, make sure Codex has three things:
+Before starting any task, Codex needs three things:
 
-1. `AGENTS.md` — standing rules. How tests run, project layout, commit conventions, the Linear workflow.
+1. `AGENTS.md` — standing rules. Workflow, conventions, where everything lives.
 2. A Linear ticket — today's task. Outcome, acceptance criteria, constraints. Not implementation steps.
 3. `docs/product-spec.md` (if relevant) — what the product is, what is out of scope.
 
@@ -165,7 +218,7 @@ When the task completes, review the diff the same way you would review a PR from
 - Are the tests meaningful?
 - Did it touch anything it should not have?
 
-Accept what looks right. Flag anything that needs a tweak. Iterate on the specific lines, not the whole diff.
+Accept what looks right. Flag anything that needs a tweak. Iterate on specific lines, not the whole diff.
 
 **Step 4 — Close the loop in Linear**
 
@@ -198,52 +251,84 @@ Other useful examples:
 
 ---
 
+## Plugins
+
+### What they are
+
+Plugins connect Codex to external tools — issue trackers, error monitoring, documentation platforms. Instead of switching between apps and copy-pasting context, you describe what you want in natural language and Codex handles the interaction.
+
+Install from the desktop app: Settings > Plugins > Browse.
+
+### Why use them
+
+Without plugins, working from a Linear ticket means: open Linear, read the ticket, copy the description, paste it into Codex, do the work, go back to Linear, update the status manually. Every step is a context switch.
+
+With the Linear plugin, the full loop stays in one place. Codex reads the ticket, implements the work, and closes the ticket — all from a single session.
+
+### Examples
+
+| Plugin | What it does |
+|---|---|
+| **Linear** | Read, create, and update tickets. Pull acceptance criteria directly into a task. Close tickets when work is done. |
+| **GitHub** | Read PRs, issues, and comments without leaving the session |
+| **Sentry** | Fetch error details and stack traces by ID. Feed them directly into a debugging task. |
+| **Notion** | Read and write documentation from inside a Codex session |
+
+### Best practices
+
+- Install only what you actually use. Every plugin adds context overhead to every session.
+- The Linear plugin is the most useful one for day-to-day development work. Start there.
+- Plugins work best when combined with a good AGENTS.md — the plugin provides the ticket, AGENTS.md provides the standing rules.
+
+See: [`05-plugins/README.md`](05-plugins/README.md)
+
+---
+
+## Skills
+
+### What they are
+
+A skill is a reusable workflow stored as a `SKILL.md` file. When you invoke a skill by name, Codex reads the file and follows the instructions inside it.
+
+Type `$` in Codex to see available skills, or reference one directly:
+
+```
+Use the $plan skill to write an implementation plan for this ticket
+```
+
+Store personal skills in `~/.agents/skills/` and they are available across every project.
+
+### Why use them
+
+Without skills, you re-explain the same task type every session. Code review: "Review this for correctness, check the tests are meaningful, flag anything risky." Planning: "Turn this ticket into a short implementation plan with goal, scope, steps, and verification." You write that prompt from scratch every time.
+
+A skill writes it once. The instructions live in a file, they are version-controlled, and they get better over time as you refine them.
+
+### Examples
+
+| Skill | What it does |
+|---|---|
+| `$plan` | Turns a ticket or feature request into a short implementation plan before coding |
+| `$review` | Reviews a diff for correctness, test quality, scope creep, and anything risky |
+| `$commit` | Writes a well-structured commit message based on the current diff |
+| `$release-notes` | Summarises changes since the last tag into a readable release note |
+
+### Best practices
+
+- Keep each skill focused on one kind of task. A skill that tries to do everything will do nothing well.
+- Write skills in plain English. They are instructions for the agent, not code.
+- Refine them over time. A skill is a living document — update it when you find a better way to do the task.
+- The `$plan` skill is a good first one to write. Planning is the highest-leverage thing to get right before coding.
+
+See: [`04-skills/plan-skill/SKILL.md`](04-skills/plan-skill/SKILL.md)
+
+---
+
 ## Pricing
 
 Everything covered in this guide is available on the standard $20 a month ChatGPT Plus plan. Not a pro plan, not an API-only setup — full access to the desktop app, the CLI, and the full model.
 
 Rate limits are better than most people expect. For focused supervised work, the $20 plan goes a long way. Heavy parallel worktree use will burn through it faster.
-
----
-
-## System Layer
-
-### AGENTS.md
-
-The operating manual for Codex on a project. The principle: only write down what cannot be discovered.
-
-| Put this in AGENTS.md | Defer to the source |
-|---|---|
-| Commit conventions | Commands → `justfile` |
-| Linear / Git workflow | Project layout → agent reads the tree |
-| Product context | Dependencies → `pyproject.toml` / `package.json` |
-| Non-obvious constraints | — |
-
-If commands are already in a `justfile` or `Makefile`, point there rather than duplicating them. The moment you copy a command into AGENTS.md you have two sources of truth and one will go stale.
-
-A short AGENTS.md for most projects looks like:
-
-```md
-See `justfile` for all commands.
-
-## Commit conventions
-Include the Linear ticket ID: `GRA-141 Add minimal Postgres persistence`
-
-## Linear workflow
-Pick up tickets, move to In Progress, close when done.
-```
-
-Run `/init` in any project to generate a starting point, then trim aggressively.
-
-See: [`01-setup/AGENTS.md`](01-setup/AGENTS.md)
-
-### Skills
-
-Reusable workflows stored as a `SKILL.md` file. Use them when you repeat the same kind of task across projects: code review, release notes, planning, security checks.
-
-Type `$` in Codex to see available skills. Store personal skills in `~/.agents/skills/` and they are available in every project.
-
-See: [`04-skills/plan-skill/SKILL.md`](04-skills/plan-skill/SKILL.md)
 
 ---
 
@@ -275,7 +360,7 @@ If you can write a clear plan or spec, reach for Codex. If you are still figurin
 
 | File | What it is |
 |---|---|
-| [`01-setup/AGENTS.md`](01-setup/AGENTS.md) | Real AGENTS.md example |
+| [`01-setup/AGENTS.md`](01-setup/AGENTS.md) | AGENTS.md example |
 | [`config.toml.example`](config.toml.example) | Safe default config |
 | [`codex-permissions-guide.md`](codex-permissions-guide.md) | Permissions reference |
 | [`02-plans-and-specs/template.md`](02-plans-and-specs/template.md) | Task brief template |
