@@ -170,13 +170,23 @@ This is one of the parts of the workflow that genuinely changed how I work. A cu
 
 Don't call Anthropic or OpenAI APIs directly from production. Use Vertex AI.
 
-Why:
+The strongest argument is the SLA. Going direct to Anthropic or OpenAI as a standard API customer, you get no contractual uptime commitment. Both have status pages and best-effort uptime, but when they go down, you have no recourse. Vertex AI carries a published SLA tied to your GCP agreement, with service credits if Google misses it. Claude on Vertex sits under that same SLA — Google takes responsibility for the serving infrastructure even though the model weights come from Anthropic.
 
-- **SLAs.** Vertex has a real uptime SLA tied to your GCP contract. Direct SDKs are best-effort.
-- **Unified billing.** Inference cost shows up on your GCP invoice. One bill, not three.
-- **IAM and VPC.** Inference traffic stays inside your GCP project. Same auth surface as the rest of your stack.
-- **Observability.** Vertex calls show up in Cloud Logging and Cloud Monitoring like any other GCP service.
+The reliability picture is real too. Both Anthropic and OpenAI have had outages and capacity exhaustion incidents during peak load. Vertex has issues sometimes, but the failure modes are different: when Vertex breaks, it's usually a regional GCP problem that affects a lot of services and you can route around it. When the direct APIs break, your specific inference path fails, often without ETA, and your only option is to wait.
+
+Other reasons:
+
+- **Unified billing.** Inference cost shows up on your GCP invoice. One bill, not three. Easier for clients, easier for accounting.
+- **IAM and VPC.** Inference traffic stays inside your GCP project. Same auth surface as the rest of your stack. No separate API keys floating around in Secret Manager.
+- **Observability.** Vertex calls show up in Cloud Logging and Cloud Monitoring like any other GCP service. One pane of glass.
 - **Multi-model.** Gemini, Claude on Vertex, Llama, all under one auth model. Swap a string when models change.
+
+**When direct APIs make sense:**
+
+- You need day-zero access to a new model. Vertex usually trails Anthropic and OpenAI's direct APIs by days to weeks. If your business depends on the latest release, you go direct.
+- You're not on GCP. The same argument transfers to Bedrock on AWS or Azure OpenAI Service.
+
+For production systems on GCP with paying customers, Vertex is the default. Direct APIs are the exception.
 
 ---
 

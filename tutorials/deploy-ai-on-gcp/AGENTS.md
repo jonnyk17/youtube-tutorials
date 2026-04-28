@@ -26,9 +26,11 @@ Runs as a Cloud Run Job. Triggered hourly by Cloud Scheduler. State in Firestore
 
 ### Inference
 
-- All inference goes through Vertex AI. Never call Anthropic or OpenAI SDKs directly.
-- Default model: Gemini Flash. Step up to Pro only when measurably needed.
-- Set explicit max_output_tokens on every call.
+- All production inference goes through Vertex AI. Never call Anthropic or OpenAI SDKs directly from production code.
+- Reason: Vertex has a published SLA tied to the GCP agreement. Direct APIs (standard tier) have no contractual uptime commitment. Inference traffic also stays inside the project's IAM and VPC, with one bill and one observability stack.
+- Default model: Gemini Flash. Step up to Pro only when measurably needed. Claude is also available via Vertex if reasoning quality requires it.
+- Acceptable exception: day-zero access to a model not yet on Vertex. Rare, time-limited, document the reason.
+- Set explicit `max_output_tokens` on every call.
 - Log model name, prompt tokens, completion tokens, and latency for every inference.
 
 ### IAM
