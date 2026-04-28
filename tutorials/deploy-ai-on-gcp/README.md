@@ -130,6 +130,8 @@ Same logging, monitoring, alerting, secrets
 
 You don't change tools when your project grows. You add more of them.
 
+> For a deeper architecture overview — including request flow, background job flow, the permissions model, and a mental model you can hand to any coding agent — see [`architecture.md`](architecture.md).
+
 ---
 
 ## The Five Things You Have to Think About in Production
@@ -383,6 +385,7 @@ The agent is a partner. You're still the engineer.
 ```
 deploy-ai-on-gcp/
 ├── README.md                  # this file
+├── architecture.md            # full GCP architecture overview for AI apps
 ├── AGENTS.md                  # reference AGENTS.md for Claude Code
 ├── spec.md                    # the spec used to brief Claude Code on this build
 ├── checklist.md               # 10-step opinionated GCP project setup
