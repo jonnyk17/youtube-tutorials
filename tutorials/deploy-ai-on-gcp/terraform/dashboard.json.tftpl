@@ -1,0 +1,129 @@
+{
+  "displayName": "${service_name}",
+  "mosaicLayout": {
+    "columns": 12,
+    "tiles": [
+      {
+        "xPos": 0,
+        "yPos": 0,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "Job executions (last 24h)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"${service_name}\" AND metric.type=\"run.googleapis.com/job/completed_execution_count\"",
+                    "aggregation": {
+                      "alignmentPeriod": "3600s",
+                      "perSeriesAligner": "ALIGN_SUM",
+                      "groupByFields": ["metric.label.result"]
+                    }
+                  }
+                },
+                "plotType": "STACKED_BAR"
+              }
+            ],
+            "yAxis": {
+              "label": "Executions",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 6,
+        "yPos": 0,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "Error log entries (5 min buckets)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"${service_name}\" AND metric.type=\"logging.googleapis.com/user/${service_name}-failures\"",
+                    "aggregation": {
+                      "alignmentPeriod": "300s",
+                      "perSeriesAligner": "ALIGN_SUM"
+                    }
+                  }
+                },
+                "plotType": "LINE"
+              }
+            ],
+            "yAxis": {
+              "label": "Errors",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 0,
+        "yPos": 4,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "Total executions today",
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesFilter": {
+                "filter": "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"${service_name}\" AND metric.type=\"run.googleapis.com/job/completed_execution_count\"",
+                "aggregation": {
+                  "alignmentPeriod": "86400s",
+                  "perSeriesAligner": "ALIGN_SUM",
+                  "crossSeriesReducer": "REDUCE_SUM"
+                }
+              }
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 4,
+        "yPos": 4,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "Average execution duration",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"${service_name}\" AND metric.type=\"run.googleapis.com/job/execution_count\"",
+                    "aggregation": {
+                      "alignmentPeriod": "3600s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "xPos": 8,
+        "yPos": 4,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "Recent log entries",
+          "logsPanel": {
+            "filter": "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"${service_name}\"",
+            "resourceNames": []
+          }
+        }
+      }
+    ]
+  }
+}

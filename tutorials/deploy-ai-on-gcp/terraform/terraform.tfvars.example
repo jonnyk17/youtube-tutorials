@@ -1,0 +1,20 @@
+# Copy to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored.
+
+project_id   = "your-project-id"
+service_name = "email-classifier"
+image        = "europe-west1-docker.pkg.dev/your-project-id/email-classifier/email-classifier:latest"
+schedule     = "0 * * * *"  # hourly
+
+environment_variables = {
+  GCP_PROJECT        = "your-project-id"
+  GCP_REGION         = "europe-west1"
+  GMAIL_OAUTH_SECRET = "gmail-oauth-token"
+  GEMINI_MODEL       = "gemini-2.0-flash-001"
+  LIMIT              = "50"
+}
+
+accessible_secrets = ["gmail-oauth-token"]
+
+failure_threshold        = 0
+notification_channel_ids = ["projects/your-project-id/notificationChannels/REPLACE_ME"]
