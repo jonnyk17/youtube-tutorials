@@ -29,7 +29,7 @@ Real deployment means you can:
 - Get paged when it breaks, before your customer notices
 - Trust it enough to put a client's name on it
 
-The reason almost no AI content covers deployment is that it's hard. Cloud documentation is dense. Pricing is opaque. Permissions are a nightmare. Setting up monitoring takes hours. Error messages assume you already understand the system.
+The reason almost no AI content covers deployment is that it's hard. Cloud documentation is dense. Pricing is opaque. Permissions are a nightmare. Setting up monitoring takes hours. Error messages assume you already understand the system. It can genuinely feel like you need a PhD to operate these platforms — and I say that as someone who's been doing it for 20 years.
 
 This tutorial closes that gap.
 
@@ -394,6 +394,26 @@ This used to be a junior engineer's full week. The `terraform/dashboard.json.tft
 ### 6. Cost-aware decisions
 
 When you ask Claude Code "should I use Cloud SQL or Firestore here?" it actually reasons about workload. For this project, Firestore made sense (key-value lookups, low write rate). Claude Code recommended it and explained why. That's architectural thinking, not just code generation.
+
+---
+
+## Is It Safe to Let AI Agents Touch Production Infrastructure?
+
+The honest answer: use them for everything except the production button.
+
+When you're prototyping, building out a new system, or doing the grunt work of provisioning, AI agents are extraordinarily useful. They handle the parts that used to take days. There's no real risk because nothing is in production yet.
+
+Once you're shipping to real users, the discipline changes. The agent should still help you, but the agent shouldn't be the thing pushing the deploy button.
+
+The pattern I use on client work:
+
+1. **Agents write code, automation runs it.** Claude Code drafts Terraform modules, GitHub Actions workflows, deploy scripts, and runbooks. I review them. Then automation executes them.
+2. **Production changes go through Terraform.** Once a system is live, infrastructure changes happen via reviewed Terraform PRs, not `gcloud` commands typed into a terminal by an agent.
+3. **Deploys go through GitHub Actions.** The agent writes the workflow once. From then on, deploys are repeatable, version-controlled, and identical every time.
+4. **Runbooks for the things automation doesn't cover.** Have the agent draft the runbook for incident response, recovery, or rare operations. Test the runbook. Use it.
+5. **Keep humans out of the runtime loop where possible.** Manual deploys are one of the most common failure modes in software. Tired engineer, mistyped flag, wrong region, wrong project. Automation eliminates that. The agent is the perfect partner for designing the automation, not for being the automation.
+
+This is the same engineering discipline that has always applied to production systems. AI agents don't change the discipline. They make it faster to set up.
 
 ---
 
