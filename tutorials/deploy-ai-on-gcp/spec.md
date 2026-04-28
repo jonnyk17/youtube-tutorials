@@ -254,6 +254,10 @@ Return full record
 
 The example file is the single source of voice control. To change how proposals sound across the firm, edit this file.
 
+**The repo ships with a fictional voice example.** The shipped file is for a made-up client (Nightingale Software) at a placeholder firm. It demonstrates the structure and tone but is intentionally generic. Replace it locally with one of your own real (or anonymised) past proposals before any production use. Real client work belongs in your own deployment, not in a public repo.
+
+To keep your real example out of git, add `voice_example.local.md` to `.gitignore` and load that file instead in your private deployment, or just edit `voice_example.md` and don't push the change.
+
 ## Render targets
 
 **Web view (`/proposals/:id`):**

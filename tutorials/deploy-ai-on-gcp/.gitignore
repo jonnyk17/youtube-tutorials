@@ -39,3 +39,6 @@ service-account-*.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Local voice example overrides (keep your real proposals out of git)
+proposal-generator/**/voice_example.local.md
