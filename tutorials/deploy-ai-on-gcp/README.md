@@ -94,6 +94,43 @@ If your automation will never grow, sure, use n8n. But mine always do.
 
 ---
 
+## "Why Not Just Use a VPS?"
+
+A lot of developers run production apps on a $10/month VPS. The reasoning is reasonable: VPSes are cheap, you control the box, no vendor lock-in.
+
+But "running your own server" isn't really $10/month. It's:
+
+- The $10 box, plus
+- Your time provisioning, patching, configuring nginx, fighting SSL, debugging firewall rules
+- Backups you'll write yourself or forget
+- Monitoring you'll set up yourself or skip
+- The 3am incident when something OOMs and your customer notices first
+- The migration when you outgrow the box
+
+In 2026, you don't want to be managing your own infrastructure. You want to be shipping software that makes money. Self-managing servers is a tax you pay in evenings, weekends, and reliability.
+
+Cloud is more expensive at scale. You're paying for Google to handle the infrastructure so you don't have to. For most production AI work, that's the right trade. You will rarely be at "scale" anyway, and Cloud Run scales to zero, so for small workloads the bill is genuinely cents.
+
+### "But Google Cloud Looks Too Complicated"
+
+This is the most common pushback I hear. GCP has hundreds of services, the console is dense, the documentation reads like it was written for SREs, and IAM is genuinely a maze.
+
+The unlock: **you don't need 100 services. You need 5.**
+
+1. **Cloud Run** (or Cloud Run Jobs) — runs your code
+2. **Cloud SQL or Firestore** — stores your data
+3. **Secret Manager** — stores your secrets
+4. **Vertex AI** — runs your model calls
+5. **Cloud Logging and Cloud Monitoring** — tells you what's happening (free, automatic)
+
+That's the entire stack for almost every production AI app. The other services in GCP don't exist for you until you have a specific reason to add one. Pub/Sub, BigQuery, VPC Service Controls, GKE, App Engine, Dataflow — ignore them. They're solving problems you don't have yet.
+
+The other unlock: **coding agents handle the parts that used to be hard.** IAM bindings, Terraform, cryptic permission errors, monitoring setup — these used to gate production deployment for everyone except dedicated DevOps engineers. With Claude Code, you describe what you want, the agent generates the configuration, you review and ship. The complexity hasn't gone away, but it's no longer your problem to type out by hand.
+
+If GCP scared you a year ago, that fear is now out of date. The console is still busy, but you don't need to learn it. You need to learn five services and let an agent handle the rest.
+
+---
+
 ## The Stack
 
 Two stacks. One philosophy. Same primitives.
