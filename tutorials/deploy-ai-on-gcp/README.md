@@ -8,11 +8,19 @@ The video walks through deploying a customer-support RAG application live, end t
 
 ---
 
-## Why This Changes Everything
+## Why This Exists
 
-The reason almost no AI content covers deployment is that it's hard. Cloud documentation is dense. Pricing is opaque. Permissions are a nightmare. Setting up monitoring takes hours. Error messages assume you already understand the system. It can genuinely feel like you need a PhD to operate these platforms. And I say that as someone who's been doing it for 20 years.
+When I started my freelance business, this was the problem that almost broke me.
 
-That difficulty is exactly why AI coding agents are a game changer for cloud work.
+I could build AI applications. That part was easy. AI coding tools made building software faster than ever. What I couldn't figure out was how to deploy them properly. How to put them in front of real customers, behind a real URL, on infrastructure that wouldn't fall over. How to manage multiple client projects, billing, costs, scaling, and production inference. All as a solo developer. It felt overwhelming.
+
+I tried every option I could find:
+
+- **Self-managed VPS.** Renting a Linux box for ten dollars a month and doing everything myself. Configuring nginx, fighting SSL, writing my own backups, setting up monitoring I'd skip half the time. I became a part-time DevOps operator instead of a developer.
+- **Managed PaaS.** Vercel, Render, Railway. Fantastic for small projects. The moment a client wanted a real database, scheduled jobs, or production-grade AI inference, the platforms hit a ceiling. As soon as my projects got real, I outgrew them.
+- **Cloud providers.** Google Cloud, AWS, Azure. The right answer technically. Compute that scales, managed databases, secrets, observability, model inference. The same stack from a tiny automation to a system serving thousands of customers. But the cost was real. Permissions are a nightmare, documentation is dense, pricing is opaque, enterprise terminology everywhere. It can genuinely feel like you need a PhD to operate these platforms. And I say that as someone who's been doing it for 20 years.
+
+That tension (cloud is the right answer, cloud is genuinely hard) is exactly the gap AI coding agents close.
 
 The kind of work in this tutorial (provisioning a GCP project from scratch, wiring minimum-scope IAM, deploying a containerised service, setting up structured logging, building a monitoring dashboard, shipping alerting, and bolting on continuous deployment) used to take a team of engineers two to three weeks to do correctly. With Codex as a deployment partner, I do it in an afternoon.
 
