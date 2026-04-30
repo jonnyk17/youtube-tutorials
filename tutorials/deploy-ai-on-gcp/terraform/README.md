@@ -10,7 +10,7 @@ A drop-in module for any scheduled AI automation on GCP.
 - Required APIs enabled
 - Log-based metric counting ERROR-severity logs from the job
 - Alerting policy that fires on the metric
-- Cloud Monitoring dashboard (executions, errors, duration, recent logs) — toggle with `enable_dashboard`
+- Cloud Monitoring dashboard (executions, errors, duration, recent logs), toggle with `enable_dashboard`
 
 ## Use
 

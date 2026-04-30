@@ -1,21 +1,24 @@
 # AGENTS.md
 
-Reference for Claude Code working in this repo.
+Reference for Codex working in this repo.
 
-## Project
+## Repo
 
-Email triage classifier. Reads new Gmail messages, classifies each into one of `needs-reply / fyi / newsletter / receipt` using Vertex AI Gemini, applies a Gmail label.
+This repo is the engineering reference behind the [How I Deploy Real AI Systems With OpenAI Codex](#) video. It contains the architecture I use for production AI work on Google Cloud, plus two standalone example apps (email-classifier, proposal-generator) and a reference Terraform module.
 
-Runs as a Cloud Run Job. Triggered hourly by Cloud Scheduler. State in Firestore. Secrets in Secret Manager.
+The video's primary demo (a customer-support RAG application) lives in a separate repo, linked in the video description.
 
-## Stack
+## Default stack for AI apps on GCP
 
-- Runtime: Python 3.12 on Cloud Run Jobs
-- Inference: Vertex AI Gemini Flash
-- Storage: Firestore (state only)
+- Runtime: Python 3.12 or Node 20 on Cloud Run / Cloud Run Jobs
+- Inference: Vertex AI (Gemini Flash by default, Claude on Vertex when reasoning quality matters)
+- Relational data: Cloud SQL Postgres
+- Key-value / state: Firestore
+- Blob storage: Cloud Storage
 - Secrets: Secret Manager
 - Scheduling: Cloud Scheduler
 - Observability: Cloud Logging + log-based metrics + Cloud Monitoring alerting
+- CI/CD: Cloud Build (single-environment), Cloud Deploy (multi-environment)
 - IaC: Terraform, modules in `terraform/`
 
 ## Region

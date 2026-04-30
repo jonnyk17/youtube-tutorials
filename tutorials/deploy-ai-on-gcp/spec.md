@@ -273,9 +273,9 @@ To keep your real example out of git, add `voice_example.local.md` to `.gitignor
 
 ## Frontend pages
 
-- `/` — main form + result view (post-generation)
-- `/proposals/:id` — load and render any past proposal
-- `/config` — edit firm config
+- `/`: main form + result view (post-generation)
+- `/proposals/:id`: load and render any past proposal
+- `/config`: edit firm config
 
 Sidebar (visible on `/` and `/proposals/:id`): list of recent proposals (last 20), status pill, click to load.
 

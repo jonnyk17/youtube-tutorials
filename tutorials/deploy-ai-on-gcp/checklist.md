@@ -108,7 +108,7 @@ Project is ready to ship into. Now:
 
 1. Drop the `AGENTS.md` template into the repo
 2. Write the spec for the system you're building (`spec.md`)
-3. Start working with Claude Code
+3. Start working with Codex
 
 ## What I do not do at this stage
 
