@@ -34,7 +34,7 @@ Renting a Linux box from Digital Ocean or Hetzner and managing it yourself. Chea
 
 ### Managed PaaS
 
-Vercel, Railway, Render, Fly. Push code, they run it. Fantastic for small projects. The moment a client wants a real database, scheduled jobs, or production-grade AI inference, the platforms hit a ceiling. As soon as your projects get real, you outgrow them.
+Vercel, Railway, Render, Fly. Push code, they run it. Fantastic for small projects, and most of them now offer decent managed databases and scheduled jobs. The catch for AI work is that production-grade inference still lives on the cloud providers (Vertex AI on GCP, Bedrock on AWS, Azure OpenAI). Once you're already on a cloud provider for inference, fragmenting the rest of your stack across two platforms gets painful fast.
 
 ### Cloud providers
 
@@ -45,6 +45,8 @@ This repo lives on Google Cloud. Reasons: tight integration of compute, database
 ---
 
 ## Why AI Agents Change the Game
+
+> **A note on safety.** This guide is about using AI agents to bootstrap and ship the initial version of a system. Once you're shipping to real users, the operating model changes and you put guardrails in place (covered in the Summary). The horror stories you've heard about AI agents wiping customer databases? That isn't an AI problem. It's a process issue. Common sense applies.
 
 The real value of an AI coding agent on cloud work is that it unblocks you the moment you get stuck.
 

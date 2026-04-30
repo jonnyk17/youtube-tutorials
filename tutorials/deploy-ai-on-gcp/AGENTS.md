@@ -19,7 +19,7 @@ The video's primary demo (a customer-support RAG application) lives in a separat
 - Scheduling: Cloud Scheduler
 - Observability: Cloud Logging + log-based metrics + Cloud Monitoring alerting
 - CI/CD: Cloud Build (single-environment), Cloud Deploy (multi-environment)
-- IaC: Terraform, modules in `terraform/`
+- Deployment config: Cloud Build YAML by default. Terraform is used in the email-classifier example as a reference.
 
 ## Region
 
@@ -41,7 +41,7 @@ The video's primary demo (a customer-support RAG application) lives in a separat
 - Minimal scope, every time. No `roles/owner`, no `roles/editor`.
 - Per-service service accounts. Naming: `<service>-sa`.
 - Grant roles at the resource level when possible (specific secret, specific job), not project level.
-- All IAM lives in Terraform, not console clicks.
+- All IAM lives in declarative configuration (Cloud Build YAML or Terraform), not console clicks.
 
 ### Secrets
 
@@ -63,8 +63,8 @@ The video's primary demo (a customer-support RAG application) lives in a separat
   - A log-based metric for ERROR-severity entries
   - An alerting policy on that metric
   - A notification channel
-  - A Cloud Monitoring dashboard (JSON, checked into Terraform)
-- Set monitoring up in the same Terraform apply as the job. Not after.
+  - A Cloud Monitoring dashboard (JSON, checked into version control)
+- Set monitoring up at the same time as the job, not after.
 - Dashboards are JSON. Generate them from a description of what should be visible, then review and check in.
 
 ### Cost
@@ -77,7 +77,7 @@ The video's primary demo (a customer-support RAG application) lives in a separat
 
 - Build with Cloud Build, not local Docker.
 - Tag images with git SHA, not `latest` (in production).
-- Use Terraform to deploy production. `gcloud run jobs deploy` is fine for development iteration.
+- Use Cloud Build for production deploys. `gcloud run jobs deploy` is fine for development iteration.
 
 ### Testing
 
@@ -95,8 +95,8 @@ The video's primary demo (a customer-support RAG application) lives in a separat
 ## Starting a new feature
 
 1. Read this file in full.
-2. Read the relevant Terraform under `terraform/`.
+2. Read the relevant deployment config (Cloud Build YAML or, for the email-classifier example, Terraform under `terraform/`).
 3. Ask clarifying questions about scope before writing code.
 4. Write a spec under `docs/<feature>/spec.md` if the technical approach isn't obvious.
-5. Implement, then update Terraform.
+5. Implement, then update the deployment config.
 6. Add or update monitoring before declaring done.
