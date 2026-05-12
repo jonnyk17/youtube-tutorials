@@ -12,7 +12,7 @@ Grouped by phase of work. Three of these aren't for the agent at all — they're
 
 | # | Skill | For | What it does |
 |---|---|---|---|
-| 1 | [Design Doc](./resources/skills/design-doc) | Human | Think through architecture and tradeoffs before handing off to an agent. The kind of doc a working engineer at Google or Amazon would write. |
+| 1 | [Design Doc](./resources/skills/design-doc) | Human | Write a lightweight design doc for architecture decisions that deserve thinking before code — goals, non-goals, alternatives, tradeoffs. |
 | 2 | [Spec](./resources/skills/spec) | Agent | Turn a feature or concept into an agent-ready brief — requirements, approach, constraints. Aligns the agent before any code is written. |
 | 3 | [Plan](./resources/skills/plan) | Agent | Break a spec into discrete tasks an agent can execute one by one, and push them to GitHub Issues or Linear. |
 | 4 | [Excalidraw Diagram](./resources/skills/excalidraw-diagram) | Human | Generate clean technical diagrams from a prompt. |
@@ -22,13 +22,13 @@ Grouped by phase of work. Three of these aren't for the agent at all — they're
 
 | # | Skill | For | What it does |
 |---|---|---|---|
-| 6 | [Refactor](./resources/skills/refactor) | Code | Improve code quality without changing behavior. Adapted from the Claude Code simplify pattern. |
+| 6 | [Refactor](./resources/skills/refactor) | Code | Improve the shape of existing code without changing behavior — deduplicate, clarify, simplify. |
 
 ### Review
 
 | # | Skill | For | What it does |
 |---|---|---|---|
-| 7 | [Address PR Feedback](./resources/skills/address-pr-feedback) | Agent | Read review comments on a GitHub PR, apply the fixes, reply to each thread. Automates the post-review loop. |
+| 7 | [Address PR Feedback](./resources/skills/address-pr-feedback) | Agent | Fetch GitHub PR review feedback, triage each comment, implement valid fixes, verify, and optionally reply. |
 
 ## Install
 
