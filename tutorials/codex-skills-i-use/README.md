@@ -13,7 +13,7 @@ The demo uses **Dispatch**, a local task execution app, as the running example. 
 | 1 | Spec | `$spec` | Write a spec for portable Dispatch task execution. |
 | 2 | Plan | `$plan` | Break the spec into concrete implementation tasks, then push them to GitHub Issues. |
 | 3 | Explain Visually | `$explain-visually` | Explain the new worker/task model in a browser-friendly visual artifact. |
-| 4 | Humanizer | `$humanizer` | Remove AI tells from agent-written notes, issues, PR replies, and tutorial copy. |
+| 4 | Clarify | `$clarify` | Take a vague task from the plan, grill yourself on the unknowns one question at a time, then build the right thing. |
 | 5 | PR Feedback | `$address-pr-feedback` | Walk through an open PR, triage comments, fix valid issues, and prepare replies. |
 | 6 | Refactor | `$refactor` | Clean up implementation code without changing behavior. |
 | 7 | Design Doc | `$design-doc` | Discuss when a spec is not enough and the design needs tradeoff analysis. |
@@ -70,31 +70,33 @@ For the Dispatch feature, the visual explanation should make the portability shi
 - after: a worker claims an eligible task, creates a fresh workspace, and runs checkout/setup steps inside that workspace
 - routing: labels and optional host/worker pins decide which workers may claim the task
 
-### 4. Humanizer
+### 4. Clarify
 
-Use humanizer when the agent has produced technically correct text that still sounds too stiff, generic, or AI-written. The skill source is here: [humanizer/SKILL.md](https://github.com/owainlewis/agent-skills/blob/main/skills/humanizer/SKILL.md).
+Use clarify when the ask is vague, voice-dictated, or a plan you want stress-tested before you start writing code. Most failed agent work comes from acting on an unclear brief. The skill source is here: [clarify/SKILL.md](https://github.com/owainlewis/agent-skills/blob/main/skills/clarify/SKILL.md).
 
 ```text
-$humanizer
+$clarify
 
-Rewrite these GitHub issue descriptions so they sound like a person wrote them, not an LLM. Preserve all technical details, acceptance criteria, commands, file paths, and links.
+I want a script in this repo that takes any MP3 and runs it through the Auphonic API to enhance the audio. API key is in .env already.
 ```
+
+What the skill does:
+
+1. Rewrites the ask into a clean spec (if it's noisy).
+2. Reads the codebase first — never asks a question the project conventions already answer.
+3. Interviews you one question at a time, recommending an answer with reasoning for each.
+4. Walks down the decision tree — each answer reshapes the next question.
+5. Restates the final spec, then executes.
 
 Good demo targets:
 
-- GitHub issue bodies generated from the plan
-- PR descriptions and review replies
-- tutorial notes, README sections, or release notes
-- user-facing copy created during implementation
+- A voice-dictated feature request with hidden decisions (file location, output naming, failure behavior).
+- A pull from the plan in step 2 that's underspecified at the edges.
+- "Grill me on this design before I start coding" — the stress-test mode.
 
-The point is not to make technical writing vague or cute. It is to keep the substance intact while removing obvious AI tells: inflated significance, rule-of-three phrasing, em dash overuse, chatbot openers, vague "best practice" authority, title-case headings, signposting, and brochure words.
+The point to show is the contrast: ask the agent the same vague question with and without `$clarify`. Without it, the agent picks defaults and ships the wrong thing. With it, the agent surfaces every hidden decision upfront — one question, one recommended answer at a time — so what gets built matches what you actually wanted.
 
-The useful part to show is the audit loop:
-
-1. Draft rewrite.
-2. Short audit: what still sounds AI generated?
-3. Final rewrite that fixes those tells.
-4. Optional notes on what changed.
+The most important rule in the skill: **always recommend an answer.** A neutral menu of options dumps the work back on you. A recommendation with reasoning lets you accept and move on, or push back if the agent missed something.
 
 ### 5. PR Feedback
 
@@ -135,7 +137,7 @@ Write a lightweight design doc for Dispatch portable task execution. Focus on th
 | Spec | You know the feature direction, but the agent needs a precise implementation brief before coding. |
 | Plan | You have a spec and want executable tasks for GitHub Issues, Linear, or delegated agents. |
 | Explain Visually | You need to teach a system, concept, PR, or architecture in a visual HTML artifact. |
-| Humanizer | The content is correct, but it still has AI tells and needs a draft, audit, and final human rewrite. |
+| Clarify | The ask is vague, dictated, or multi-part, and you want every hidden decision surfaced before code gets written. |
 | PR Feedback | You have an open PR with review comments and need to separate real fixes from noise. |
 | Refactor | The behavior works, but the implementation needs to become simpler and easier to maintain. |
 | Design Doc | The design is ambiguous enough that tradeoffs and consensus matter before implementation. |
