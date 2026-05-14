@@ -19,7 +19,7 @@ const DANGEROUS_PATTERNS = [
 
 export default function (pi: ExtensionAPI) {
   pi.on("tool_call", async (event, ctx) => {
-    if (event.tool !== "bash") return;
+    if (event.toolName !== "bash") return;
 
     const command = event.input.command as string;
 
