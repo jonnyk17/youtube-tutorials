@@ -350,12 +350,22 @@
 
     .reason-row {
       display: grid;
-      grid-template-columns: 230px 36px 1fr;
+      grid-template-columns: 180px 30px 1.15fr 1fr;
       align-items: center;
       background: var(--glass-bg);
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: 16px 24px;
+      gap: 12px;
+    }
+
+    .reason-example {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.62em;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      padding-left: 8px;
+      border-left: 1px solid var(--line);
     }
 
     .reason-row.muted {
@@ -410,6 +420,59 @@
       font-size: 1em;
       margin-top: 0.8em;
     }
+
+    .reveal .title-formula {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.42em;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      margin-top: 3em;
+    }
+
+    .reveal .title-formula .accent-token {
+      color: var(--accent);
+    }
+
+    /* Slide 1 — examples under cards + "without harness" callout */
+    .split-card .examples {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.55em;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      margin-top: 6px;
+      display: block;
+    }
+
+    .without-callout {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 0.7em;
+      color: var(--text-muted);
+      margin: 1.2em auto 0;
+      text-align: center;
+      line-height: 1.55;
+      max-width: 88%;
+    }
+
+    /* Slide 3 — inline examples in responsibility lists */
+    .tri-card li .example {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.78em;
+      color: var(--text-muted);
+      margin-left: 6px;
+      letter-spacing: 0.01em;
+    }
+
+    /* Slide 6 — example under each spectrum step */
+    .spectrum-step .step-example {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.55em;
+      color: var(--accent);
+      margin-top: 10px;
+      display: block;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+    }
   </style>
 </head>
 <body>
@@ -420,7 +483,7 @@
       <section class="center-slide">
         <div class="title-mark">Section 2</div>
         <h1>What is harness engineering?</h1>
-        <p class="title-subtitle">A short primer before the build</p>
+        <p class="title-formula"><span class="accent-token">agent</span> = model + harness</p>
       </section>
 
       <!-- SLIDE 1 — Two parts of an agent -->
@@ -431,15 +494,18 @@
           <div class="split-card">
             <span class="label">Model</span>
             <span class="role">Decides</span>
-            <p class="desc">The reasoning engine. Probabilistic. Decides what should happen next, given the context.</p>
+            <p class="desc">The reasoning engine. Probabilistic. Decides what should happen next.</p>
+            <span class="examples">Claude · GPT · Gemini · Llama</span>
           </div>
           <div class="split-card accent">
             <span class="label">Harness</span>
             <span class="role">Does</span>
-            <p class="desc">The software around the model that lets it act on the world. Gathers context. Executes tool calls. Manages state. Decides what's possible.</p>
+            <p class="desc">The software around the model that lets it act on the world. Executes tools, manages state, controls the loop.</p>
+            <span class="examples">Claude Code · Codex · Cursor · Pi</span>
           </div>
         </div>
         <div class="formula-line"><span class="agent">agent</span> = model + harness</div>
+        <p class="without-callout">Without a harness, the model can't read a file, run a command, edit code, browse the web, or remember anything between calls.</p>
       </section>
 
       <!-- SLIDE 2 — The loop -->
@@ -501,25 +567,25 @@
           <div class="tri-card">
             <span class="group">Context</span>
             <ul>
-              <li>Gathers what the model sees</li>
-              <li>Manages the context window</li>
-              <li>Compacts and summarizes</li>
+              <li>Gathers what the model sees <span class="example">prompt + tools + history</span></li>
+              <li>Manages the context window <span class="example">compact, drop, keep</span></li>
+              <li>Compacts and summarizes <span class="example">near token limit</span></li>
             </ul>
           </div>
           <div class="tri-card">
             <span class="group">Action</span>
             <ul>
-              <li>Exposes tools to the model</li>
-              <li>Executes tool calls</li>
-              <li>Manages permissions</li>
+              <li>Exposes tools <span class="example">read_file, run_shell</span></li>
+              <li>Executes tool calls <span class="example">runs in your shell</span></li>
+              <li>Manages permissions <span class="example">blocks rm -rf, asks before push</span></li>
             </ul>
           </div>
           <div class="tri-card">
             <span class="group">Lifecycle</span>
             <ul>
-              <li>Runs hooks at key events</li>
-              <li>Enforces guardrails</li>
-              <li>Decides when to stop</li>
+              <li>Runs hooks at key events <span class="example">on edit, before commit</span></li>
+              <li>Enforces guardrails <span class="example">max rounds, no force-push</span></li>
+              <li>Decides when to stop <span class="example">end_turn or limit hit</span></li>
             </ul>
           </div>
         </div>
@@ -535,26 +601,31 @@
             <div class="reason-piece">Tools</div>
             <div class="reason-arrow">←</div>
             <div class="reason-because">Model can't act on the world</div>
+            <div class="reason-example">read_file, run_shell</div>
           </div>
           <div class="reason-row">
             <div class="reason-piece">Permissions</div>
             <div class="reason-arrow">←</div>
             <div class="reason-because">Model can ask for destructive things</div>
+            <div class="reason-example">blocks rm -rf, force-push</div>
           </div>
           <div class="reason-row">
             <div class="reason-piece">Retries</div>
             <div class="reason-arrow">←</div>
             <div class="reason-because">Model produces broken work sometimes</div>
+            <div class="reason-example">eval gate + retry loop</div>
           </div>
           <div class="reason-row">
             <div class="reason-piece">Evaluators</div>
             <div class="reason-arrow">←</div>
             <div class="reason-because">Models skew positive on their own work</div>
+            <div class="reason-example">separate reviewer agent</div>
           </div>
           <div class="reason-row">
             <div class="reason-piece">Context mgmt</div>
             <div class="reason-arrow">←</div>
             <div class="reason-because">Conversations overflow the window</div>
+            <div class="reason-example">compaction, summarization</div>
           </div>
         </div>
 
@@ -565,7 +636,7 @@
       <section>
         <span class="eyebrow">Evidence</span>
         <h2>Same model. Different harness.</h2>
-        <p class="lead">Claude Opus 4.6 on Terminal Bench 2.0 — same benchmark, only the harness changes.</p>
+        <p class="lead">Claude Opus 4.6 on Terminal Bench 2.0 — a software engineering benchmark for coding agents. Same model weights. Only the harness around it changes.</p>
 
         <div class="compare">
           <div class="compare-cell">
@@ -579,6 +650,8 @@
           </div>
         </div>
 
+        <p class="caption">Different tool design. Different prompts. Different scaffolding. Same intelligence underneath.</p>
+
         <p class="source">Source: Viv Trivedy via HumanLayer — Terminal Bench 2.0</p>
       </section>
 
@@ -591,21 +664,25 @@
           <div class="spectrum-step">
             <span class="step-label">Prompt</span>
             <span class="step-desc">Change the instruction</span>
+            <span class="step-example">"Refactor this function"</span>
           </div>
           <div class="spectrum-arrow">→</div>
           <div class="spectrum-step">
             <span class="step-label">Configure</span>
             <span class="step-desc">AGENTS.md, skills, MCP, hooks</span>
+            <span class="step-example">Add a lint hook</span>
           </div>
           <div class="spectrum-arrow">→</div>
           <div class="spectrum-step">
             <span class="step-label">Extend</span>
             <span class="step-desc">Custom tools, plugins, sub-agents</span>
+            <span class="step-example">Write a slash command</span>
           </div>
           <div class="spectrum-arrow">→</div>
           <div class="spectrum-step highlight">
             <span class="step-label">Build</span>
             <span class="step-desc">Custom workflow on top of an SDK</span>
+            <span class="step-example">The Pi workflow we just saw</span>
           </div>
         </div>
 
