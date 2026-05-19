@@ -34,12 +34,12 @@
       font-family: 'DM Sans', sans-serif;
       font-weight: 400;
       color: var(--text);
-      font-size: 32px;
+      font-size: 26px;
     }
 
     .reveal .slides section {
       text-align: left;
-      padding: 80px 100px;
+      padding: 50px 70px;
       background: radial-gradient(ellipse at 50% -20%, var(--accent-glow) 0%, transparent 55%);
       height: 100%;
       box-sizing: border-box;
@@ -69,20 +69,22 @@
       font-family: 'Bricolage Grotesque', sans-serif;
       font-weight: 700;
       color: var(--text);
-      font-size: 2.6em;
+      font-size: 2.2em;
       letter-spacing: -0.025em;
       line-height: 1.1;
       margin: 0 0 0.4em;
+      text-transform: none;
     }
 
     .reveal h2 {
       font-family: 'Bricolage Grotesque', sans-serif;
       font-weight: 600;
       color: var(--text);
-      font-size: 1.8em;
+      font-size: 1.5em;
       letter-spacing: -0.02em;
       line-height: 1.15;
-      margin: 0 0 0.7em;
+      margin: 0 0 0.6em;
+      text-transform: none;
     }
 
     .reveal h3 {
@@ -91,6 +93,7 @@
       color: var(--text);
       font-size: 1.1em;
       margin: 0 0 0.5em;
+      text-transform: none;
     }
 
     .reveal p {
@@ -143,7 +146,7 @@
       background: var(--glass-bg);
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 32px 32px 34px;
+      padding: 26px 28px 28px;
     }
 
     .split-card.accent {
@@ -167,16 +170,16 @@
     .split-card .role {
       font-family: 'Bricolage Grotesque', sans-serif;
       font-weight: 600;
-      font-size: 1.3em;
+      font-size: 1.15em;
       color: var(--text);
-      margin-bottom: 18px;
+      margin-bottom: 14px;
       letter-spacing: -0.01em;
     }
 
     .split-card .desc {
-      font-size: 0.75em;
+      font-size: 0.78em;
       color: var(--text-muted);
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
     .formula-line {
@@ -202,17 +205,17 @@
       background: var(--glass-bg);
       border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 28px 26px;
+      padding: 22px 22px;
     }
 
     .tri-card .group {
       font-family: 'Geist Mono', monospace;
-      font-size: 0.46em;
+      font-size: 0.5em;
       font-weight: 500;
       letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: block;
     }
 
@@ -223,13 +226,15 @@
     }
 
     .tri-card li {
-      font-size: 0.7em;
+      font-size: 0.72em;
       color: var(--text);
-      padding-left: 16px;
+      padding-left: 14px;
       position: relative;
-      margin-bottom: 9px;
-      line-height: 1.4;
+      margin-bottom: 12px;
+      line-height: 1.35;
     }
+
+    .tri-card li:last-child { margin-bottom: 0; }
 
     .tri-card li::before {
       content: '';
@@ -454,13 +459,16 @@
       max-width: 88%;
     }
 
-    /* Slide 3 — inline examples in responsibility lists */
+    /* Slide 3 — examples below each responsibility */
     .tri-card li .example {
+      display: block;
       font-family: 'Geist Mono', monospace;
       font-size: 0.78em;
       color: var(--text-muted);
-      margin-left: 6px;
+      margin-top: 3px;
+      margin-left: 0;
       letter-spacing: 0.01em;
+      line-height: 1.35;
     }
 
     /* Slide 6 — example under each spectrum step */
