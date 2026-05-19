@@ -30,7 +30,7 @@ An **agent** is what you get when you wrap that model in software that keeps sta
 
 Put more precisely:
 
-> A harness is the deterministic software around the model that gathers context, calls the model, exposes tools, executes tool calls, returns observations, manages permissions, runs hooks, enforces guardrails, stores state, and decides when to stop.
+> A harness is the software around the model that lets it act on the world. It gathers context, calls the model, exposes tools, executes tool calls, returns observations, manages permissions, runs hooks, enforces guardrails, stores state, and decides when to stop. It is deterministic code — the layer of an agent that actually does things rather than just reasons about them.
 
 The formula:
 
@@ -77,7 +77,7 @@ A harness is what you sit *in front of* and use. A framework is what you sit *be
 
 **Harness engineering is the practice of designing the system around a model so that an agent reliably finishes useful work.**
 
-Crucially, it is a *practice* — not a framework, not a single tool, not a configuration file. It is the discipline of shaping the deterministic software that surrounds the model: the prompts, tools, context policies, hooks, sandboxes, permissions, sub-agents, feedback loops, and recovery paths.
+Crucially, it is a *practice* — not a framework, not a single tool, not a configuration file. It is the discipline of shaping the software that surrounds the model so the agent can do useful work: the prompts, tools, context policies, hooks, sandboxes, permissions, sub-agents, feedback loops, and recovery paths.
 
 Mitchell Hashimoto's working definition is the simplest:
 
@@ -635,7 +635,7 @@ A skill learned with Claude Code transfers to Pi and Codex. A pattern that works
 | **Context engineering** | Designing what information is in the model's context at any moment |
 | **Context firewall** | A sub-agent that isolates its own context from the parent's |
 | **Hook** | A script the harness runs at a lifecycle event |
-| **Harness** | The deterministic software around the model |
+| **Harness** | The software around the model that lets it act on the world |
 | **Harness engineering** | The practice of designing that software |
 | **HaaS** | Harness-as-a-service; treating harness primitives as APIs |
 | **MCP** | Model Context Protocol; a standard for exposing external tools to harnesses |

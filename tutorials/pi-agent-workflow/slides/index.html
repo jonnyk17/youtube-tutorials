@@ -339,6 +339,50 @@
       font-size: 1.8em;
     }
 
+    /* Reason table (slide 4) */
+    .reason-table {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      margin: 0.4em 0 0.6em;
+    }
+
+    .reason-row {
+      display: grid;
+      grid-template-columns: 230px 36px 1fr;
+      align-items: center;
+      background: var(--glass-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 24px;
+    }
+
+    .reason-row.muted {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .reason-piece {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-weight: 600;
+      font-size: 0.9em;
+      color: var(--accent-strong);
+      letter-spacing: -0.01em;
+    }
+
+    .reason-arrow {
+      text-align: center;
+      color: var(--text-dim);
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.7em;
+    }
+
+    .reason-because {
+      font-size: 0.72em;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
     /* SVG containers */
     .diagram {
       width: 100%;
@@ -392,7 +436,7 @@
           <div class="split-card accent">
             <span class="label">Harness</span>
             <span class="role">Does</span>
-            <p class="desc">The deterministic software around the model. Gathers context. Executes tool calls. Manages state. Decides what's possible.</p>
+            <p class="desc">The software around the model that lets it act on the world. Gathers context. Executes tool calls. Manages state. Decides what's possible.</p>
           </div>
         </div>
         <div class="formula-line"><span class="agent">agent</span> = model + harness</div>
@@ -481,59 +525,40 @@
         </div>
       </section>
 
-      <!-- SLIDE 4 — Probabilistic vs deterministic -->
+      <!-- SLIDE 4 — Every harness piece exists for a reason -->
       <section>
         <span class="eyebrow">Why harnesses exist</span>
-        <h2>Models are probabilistic. Harnesses are deterministic.</h2>
+        <h2>Every harness piece exists for a reason</h2>
 
-        <svg class="diagram" viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg">
-          <!-- Left: chaos (model) -->
-          <g transform="translate(60, 30)">
-            <rect width="480" height="220" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
-            <text x="240" y="34" text-anchor="middle" font-family="Geist Mono, monospace" font-size="16" fill="#A1A1AA" letter-spacing="0.15em">MODEL OUTPUT</text>
-            <!-- scattered dots -->
-            <g fill="#C8A876">
-              <circle cx="80" cy="90" r="8"/>
-              <circle cx="150" cy="160" r="7"/>
-              <circle cx="220" cy="110" r="9"/>
-              <circle cx="300" cy="180" r="6"/>
-              <circle cx="380" cy="100" r="8"/>
-              <circle cx="120" cy="180" r="7"/>
-              <circle cx="260" cy="80" r="6"/>
-              <circle cx="340" cy="150" r="9"/>
-              <circle cx="420" cy="170" r="7"/>
-              <circle cx="180" cy="120" r="6"/>
-              <circle cx="60" cy="140" r="7"/>
-              <circle cx="380" cy="190" r="6"/>
-            </g>
-          </g>
+        <div class="reason-table">
+          <div class="reason-row">
+            <div class="reason-piece">Tools</div>
+            <div class="reason-arrow">←</div>
+            <div class="reason-because">Model can't act on the world</div>
+          </div>
+          <div class="reason-row">
+            <div class="reason-piece">Permissions</div>
+            <div class="reason-arrow">←</div>
+            <div class="reason-because">Model can ask for destructive things</div>
+          </div>
+          <div class="reason-row">
+            <div class="reason-piece">Retries</div>
+            <div class="reason-arrow">←</div>
+            <div class="reason-because">Model produces broken work sometimes</div>
+          </div>
+          <div class="reason-row">
+            <div class="reason-piece">Evaluators</div>
+            <div class="reason-arrow">←</div>
+            <div class="reason-because">Models skew positive on their own work</div>
+          </div>
+          <div class="reason-row">
+            <div class="reason-piece">Context mgmt</div>
+            <div class="reason-arrow">←</div>
+            <div class="reason-because">Conversations overflow the window</div>
+          </div>
+        </div>
 
-          <!-- Right: order (harness) -->
-          <g transform="translate(660, 30)">
-            <rect width="480" height="220" rx="14" fill="rgba(200, 168, 118, 0.06)" stroke="rgba(200, 168, 118, 0.4)"/>
-            <text x="240" y="34" text-anchor="middle" font-family="Geist Mono, monospace" font-size="16" fill="#C8A876" letter-spacing="0.15em">HARNESS BEHAVIOR</text>
-            <!-- aligned grid of dots -->
-            <g fill="#C8A876">
-              <circle cx="80" cy="90" r="7"/>
-              <circle cx="160" cy="90" r="7"/>
-              <circle cx="240" cy="90" r="7"/>
-              <circle cx="320" cy="90" r="7"/>
-              <circle cx="400" cy="90" r="7"/>
-              <circle cx="80" cy="140" r="7"/>
-              <circle cx="160" cy="140" r="7"/>
-              <circle cx="240" cy="140" r="7"/>
-              <circle cx="320" cy="140" r="7"/>
-              <circle cx="400" cy="140" r="7"/>
-              <circle cx="80" cy="190" r="7"/>
-              <circle cx="160" cy="190" r="7"/>
-              <circle cx="240" cy="190" r="7"/>
-              <circle cx="320" cy="190" r="7"/>
-              <circle cx="400" cy="190" r="7"/>
-            </g>
-          </g>
-        </svg>
-
-        <p class="caption">The harness exists to add determinism around a non-deterministic core. Retries, evaluations, permissions, hooks — every component compensates for something the model can't guarantee on its own.</p>
+        <p class="caption">As models improve, some pieces stop being load-bearing — others have to be added to reach the new ceiling. Harnesses don't shrink as models get better. They move.</p>
       </section>
 
       <!-- SLIDE 5 — Same model, different harness -->
